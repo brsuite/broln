@@ -25,8 +25,8 @@ import (
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/psbt"
-	"github.com/btcsuite/btcwallet/waddrmgr"
-	"github.com/btcsuite/btcwallet/wallet/txauthor"
+	"github.com/brsuite/bronwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/wallet/txauthor"
 	"github.com/davecgh/go-spew/spew"
 	proxy "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/brsuite/broln/autopilot"
@@ -55,7 +55,7 @@ import (
 	"github.com/brsuite/broln/lnrpc/walletrpc"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwallet"
-	"github.com/brsuite/broln/lnwallet/btcwallet"
+	"github.com/brsuite/broln/lnwallet/bronwallet"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwallet/chancloser"
 	"github.com/brsuite/broln/lnwallet/chanfunding"
@@ -5450,7 +5450,7 @@ func (r *rpcServer) GetTransactions(ctx context.Context,
 	// To remain backwards compatible with the old api, default to the
 	// special case end height which will return transactions from the start
 	// height until the chain tip, including unconfirmed transactions.
-	var endHeight = btcwallet.UnconfirmedHeight
+	var endHeight = bronwallet.UnconfirmedHeight
 
 	// If the user has provided an end height, we overwrite our default.
 	if req.EndHeight != 0 {

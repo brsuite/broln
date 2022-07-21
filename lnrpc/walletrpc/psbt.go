@@ -10,7 +10,7 @@ import (
 
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil/psbt"
-	"github.com/btcsuite/btcwallet/wtxmgr"
+	"github.com/brsuite/bronwallet/wtxmgr"
 	"github.com/brsuite/broln/lnwallet"
 )
 

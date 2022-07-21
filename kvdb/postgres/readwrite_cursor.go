@@ -6,7 +6,7 @@ package postgres
 import (
 	"database/sql"
 
-	"github.com/btcsuite/btcwallet/walletdb"
+	"github.com/brsuite/bronwallet/walletdb"
 )
 
 // readWriteCursor holds a reference to the cursors bucket, the value

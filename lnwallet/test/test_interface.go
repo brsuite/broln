@@ -27,14 +27,14 @@ import (
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/btcsuite/btcwallet/chain"
-	"github.com/btcsuite/btcwallet/walletdb"
-	_ "github.com/btcsuite/btcwallet/walletdb/bdb"
+	"github.com/brsuite/bronwallet/chain"
+	"github.com/brsuite/bronwallet/walletdb"
+	_ "github.com/brsuite/bronwallet/walletdb/bdb"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/neutrino"
 	"github.com/brsuite/broln/blockcache"
 	"github.com/brsuite/broln/chainntnfs"
-	"github.com/brsuite/broln/chainntnfs/btcdnotify"
+	"github.com/brsuite/broln/chainntnfs/brondnotify"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
@@ -42,7 +42,7 @@ import (
 	"github.com/brsuite/broln/labels"
 	"github.com/brsuite/broln/lntest/wait"
 	"github.com/brsuite/broln/lnwallet"
-	"github.com/brsuite/broln/lnwallet/btcwallet"
+	"github.com/brsuite/broln/lnwallet/bronwallet"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwallet/chanfunding"
 	"github.com/brsuite/broln/lnwire"
@@ -209,7 +209,7 @@ func assertTxInWallet(t *testing.T, w *lnwallet.LightningWallet,
 	// We'll fetch all of our transaction and go through each one until
 	// finding the expected transaction with its expected confirmation
 	// status.
-	txs, err := w.ListTransactionDetails(0, btcwallet.UnconfirmedHeight, "")
+	txs, err := w.ListTransactionDetails(0, bronwallet.UnconfirmedHeight, "")
 	if err != nil {
 		t.Fatalf("unable to retrieve transactions: %v", err)
 	}
@@ -1306,7 +1306,7 @@ func testListTransactionDetails(miner *rpctest.Harness,
 	// with a confirmation height of 0, indicating that it has not been
 	// mined yet.
 	txDetails, err = alice.ListTransactionDetails(
-		chainTip, btcwallet.UnconfirmedHeight, "",
+		chainTip, bronwallet.UnconfirmedHeight, "",
 	)
 	if err != nil {
 		t.Fatalf("unable to fetch tx details: %v", err)
@@ -3206,7 +3206,7 @@ func TestLightningWallet(t *testing.T, targetBackEnd string) {
 		t.Fatalf("unable to create height hint cache: %v", err)
 	}
 	blockCache := blockcache.NewBlockCache(10000)
-	chainNotifier, err := btcdnotify.New(
+	chainNotifier, err := brondnotify.New(
 		&rpcConfig, netParams, hintCache, hintCache, blockCache,
 	)
 	if err != nil {
@@ -3268,7 +3268,7 @@ func runTests(t *testing.T, walletDriver *lnwallet.WalletDriver,
 
 	walletType := walletDriver.WalletType
 	switch walletType {
-	case "btcwallet":
+	case "bronwallet":
 		var aliceClient, bobClient chain.Interface
 		switch backEnd {
 		case "brond":
@@ -3293,7 +3293,7 @@ func runTests(t *testing.T, walletDriver *lnwallet.WalletDriver,
 			neutrino.QueryNumRetries = 1
 
 			// Start Alice - open a database, start a neutrino
-			// instance, and initialize a btcwallet driver for it.
+			// instance, and initialize a bronwallet driver for it.
 			aliceDB, err := walletdb.Create(
 				"bdb", tempTestDirAlice+"/neutrino.db", true,
 				kvdb.DefaultDBTimeout,
@@ -3322,7 +3322,7 @@ func runTests(t *testing.T, walletDriver *lnwallet.WalletDriver,
 			)
 
 			// Start Bob - open a database, start a neutrino
-			// instance, and initialize a btcwallet driver for it.
+			// instance, and initialize a bronwallet driver for it.
 			bobDB, err := walletdb.Create(
 				"bdb", tempTestDirBob+"/neutrino.db", true,
 				kvdb.DefaultDBTimeout,
@@ -3411,7 +3411,7 @@ func runTests(t *testing.T, walletDriver *lnwallet.WalletDriver,
 			}
 			defer chainConn.Stop()
 
-			// Create a btcwallet brocoind client for both Alice and
+			// Create a bronwallet brocoind client for both Alice and
 			// Bob.
 			aliceClient = chainConn.NewBrocoindClient()
 			bobClient = chainConn.NewBrocoindClient()
@@ -3424,7 +3424,7 @@ func runTests(t *testing.T, walletDriver *lnwallet.WalletDriver,
 		aliceSeed.Write(aliceHDSeed[:])
 		aliceSeedBytes := aliceSeed.Sum(nil)
 
-		aliceWalletConfig := &btcwallet.Config{
+		aliceWalletConfig := &bronwallet.Config{
 			PrivatePass: []byte("alice-pass"),
 			HdSeed:      aliceSeedBytes,
 			NetParams:   netParams,
@@ -3432,8 +3432,8 @@ func runTests(t *testing.T, walletDriver *lnwallet.WalletDriver,
 			CoinType:    keychain.CoinTypeTestnet,
 			// wallet starts in recovery mode
 			RecoveryWindow: 2,
-			LoaderOptions: []btcwallet.LoaderOption{
-				btcwallet.LoaderWithLocalWalletDB(
+			LoaderOptions: []bronwallet.LoaderOption{
+				bronwallet.LoaderWithLocalWalletDB(
 					tempTestDirAlice, false, time.Minute,
 				),
 			},
@@ -3442,11 +3442,11 @@ func runTests(t *testing.T, walletDriver *lnwallet.WalletDriver,
 			aliceWalletConfig, blockCache,
 		)
 		if err != nil {
-			t.Fatalf("unable to create btcwallet: %v", err)
+			t.Fatalf("unable to create bronwallet: %v", err)
 		}
-		aliceSigner = aliceWalletController.(*btcwallet.BtcWallet)
-		aliceKeyRing = keychain.NewBtcWalletKeyRing(
-			aliceWalletController.(*btcwallet.BtcWallet).InternalWallet(),
+		aliceSigner = aliceWalletController.(*bronwallet.Bronwallet)
+		aliceKeyRing = keychain.NewBronwalletKeyRing(
+			aliceWalletController.(*bronwallet.Bronwallet).InternalWallet(),
 			keychain.CoinTypeTestnet,
 		)
 
@@ -3455,7 +3455,7 @@ func runTests(t *testing.T, walletDriver *lnwallet.WalletDriver,
 		bobSeed.Write(bobHDSeed[:])
 		bobSeedBytes := bobSeed.Sum(nil)
 
-		bobWalletConfig := &btcwallet.Config{
+		bobWalletConfig := &bronwallet.Config{
 			PrivatePass: []byte("bob-pass"),
 			HdSeed:      bobSeedBytes,
 			NetParams:   netParams,
@@ -3463,8 +3463,8 @@ func runTests(t *testing.T, walletDriver *lnwallet.WalletDriver,
 			CoinType:    keychain.CoinTypeTestnet,
 			// wallet starts without recovery mode
 			RecoveryWindow: 0,
-			LoaderOptions: []btcwallet.LoaderOption{
-				btcwallet.LoaderWithLocalWalletDB(
+			LoaderOptions: []bronwallet.LoaderOption{
+				bronwallet.LoaderWithLocalWalletDB(
 					tempTestDirBob, false, time.Minute,
 				),
 			},
@@ -3473,14 +3473,14 @@ func runTests(t *testing.T, walletDriver *lnwallet.WalletDriver,
 			bobWalletConfig, blockCache,
 		)
 		if err != nil {
-			t.Fatalf("unable to create btcwallet: %v", err)
+			t.Fatalf("unable to create bronwallet: %v", err)
 		}
-		bobSigner = bobWalletController.(*btcwallet.BtcWallet)
-		bobKeyRing = keychain.NewBtcWalletKeyRing(
-			bobWalletController.(*btcwallet.BtcWallet).InternalWallet(),
+		bobSigner = bobWalletController.(*bronwallet.Bronwallet)
+		bobKeyRing = keychain.NewBronwalletKeyRing(
+			bobWalletController.(*bronwallet.Bronwallet).InternalWallet(),
 			keychain.CoinTypeTestnet,
 		)
-		bio = bobWalletController.(*btcwallet.BtcWallet)
+		bio = bobWalletController.(*bronwallet.Bronwallet)
 	default:
 		t.Fatalf("unknown wallet driver: %v", walletType)
 	}

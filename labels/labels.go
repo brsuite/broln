@@ -17,7 +17,7 @@ package labels
 import (
 	"fmt"
 
-	"github.com/btcsuite/btcwallet/wtxmgr"
+	"github.com/brsuite/bronwallet/wtxmgr"
 	"github.com/brsuite/broln/lnwire"
 )
 

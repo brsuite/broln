@@ -11,15 +11,15 @@ import (
 	"time"
 
 	"github.com/brsuite/brond/chaincfg"
-	"github.com/btcsuite/btcwallet/snacl"
-	"github.com/btcsuite/btcwallet/waddrmgr"
-	"github.com/btcsuite/btcwallet/wallet"
+	"github.com/brsuite/bronwallet/snacl"
+	"github.com/brsuite/bronwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/wallet"
 	"github.com/brsuite/broln/aezeed"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnwallet"
-	"github.com/brsuite/broln/lnwallet/btcwallet"
+	"github.com/brsuite/broln/lnwallet/bronwallet"
 	"github.com/brsuite/broln/macaroons"
 	"github.com/brsuite/broln/walletunlocker"
 	"github.com/stretchr/testify/require"
@@ -48,10 +48,10 @@ var (
 	)
 )
 
-func testLoaderOpts(testDir string) []btcwallet.LoaderOption {
-	dbDir := btcwallet.NetworkDir(testDir, testNetParams)
-	return []btcwallet.LoaderOption{
-		btcwallet.LoaderWithLocalWalletDB(dbDir, true, time.Minute),
+func testLoaderOpts(testDir string) []bronwallet.LoaderOption {
+	dbDir := bronwallet.NetworkDir(testDir, testNetParams)
+	return []bronwallet.LoaderOption{
+		bronwallet.LoaderWithLocalWalletDB(dbDir, true, time.Minute),
 	}
 }
 
@@ -75,7 +75,7 @@ func createTestWalletWithPw(t *testing.T, pubPw, privPw []byte, dir string,
 	waddrmgr.SetSecretKeyGen(keyGen)
 
 	// Create a new test wallet that uses fast scrypt as KDF.
-	netDir := btcwallet.NetworkDir(dir, netParams)
+	netDir := bronwallet.NetworkDir(dir, netParams)
 	loader := wallet.NewLoader(
 		netParams, netDir, true, kvdb.DefaultDBTimeout, 0,
 	)
@@ -107,7 +107,7 @@ func createSeedAndMnemonic(t *testing.T,
 func openOrCreateTestMacStore(tempDir string, pw *[]byte,
 	netParams *chaincfg.Params) (*macaroons.RootKeyStorage, error) {
 
-	netDir := btcwallet.NetworkDir(tempDir, netParams)
+	netDir := bronwallet.NetworkDir(tempDir, netParams)
 	err := os.MkdirAll(netDir, 0700)
 	if err != nil {
 		return nil, err

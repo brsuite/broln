@@ -1,4 +1,4 @@
-package bitcoindnotify
+package brocoindnotify
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ import (
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/btcsuite/btcwallet/chain"
+	"github.com/brsuite/bronwallet/chain"
 	"github.com/brsuite/broln/blockcache"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/queue"

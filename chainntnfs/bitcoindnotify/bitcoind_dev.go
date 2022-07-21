@@ -1,14 +1,14 @@
 //go:build dev
 // +build dev
 
-package bitcoindnotify
+package brocoindnotify
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/btcsuite/btcwallet/chain"
+	"github.com/brsuite/bronwallet/chain"
 	"github.com/brsuite/broln/chainntnfs"
 )
 

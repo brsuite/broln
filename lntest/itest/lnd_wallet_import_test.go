@@ -14,7 +14,7 @@ import (
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/hdkeychain"
-	"github.com/btcsuite/btcwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/waddrmgr"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/funding"
 	"github.com/brsuite/broln/lnrpc"

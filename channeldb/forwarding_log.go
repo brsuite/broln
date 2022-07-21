@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/btcsuite/btcwallet/walletdb"
+	"github.com/brsuite/bronwallet/walletdb"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lnwire"
 )

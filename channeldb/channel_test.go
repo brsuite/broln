@@ -14,7 +14,7 @@ import (
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	_ "github.com/btcsuite/btcwallet/walletdb/bdb"
+	_ "github.com/brsuite/bronwallet/walletdb/bdb"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/clock"
 	"github.com/brsuite/broln/keychain"

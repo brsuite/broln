@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/btcsuite/btcwallet/walletdb"
+	"github.com/brsuite/bronwallet/walletdb"
 )
 
 // readWriteBucket stores the bucket id and the buckets transaction.

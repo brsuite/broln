@@ -21,9 +21,9 @@ import (
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/btcsuite/btcwallet/chain"
-	"github.com/btcsuite/btcwallet/walletdb"
-	_ "github.com/btcsuite/btcwallet/walletdb/bdb" // Required to register the boltdb walletdb implementation.
+	"github.com/brsuite/bronwallet/chain"
+	"github.com/brsuite/bronwallet/walletdb"
+	_ "github.com/brsuite/bronwallet/walletdb/bdb" // Required to register the boltdb walletdb implementation.
 
 	"github.com/brsuite/neutrino"
 	"github.com/brsuite/broln/blockcache"

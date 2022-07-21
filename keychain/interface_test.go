@@ -11,14 +11,14 @@ import (
 	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/btcsuite/btcwallet/snacl"
-	"github.com/btcsuite/btcwallet/waddrmgr"
-	"github.com/btcsuite/btcwallet/wallet"
-	"github.com/btcsuite/btcwallet/walletdb"
+	"github.com/brsuite/bronwallet/snacl"
+	"github.com/brsuite/bronwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/wallet"
+	"github.com/brsuite/bronwallet/walletdb"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
 
-	_ "github.com/btcsuite/btcwallet/walletdb/bdb" // Required in order to create the default database.
+	_ "github.com/brsuite/bronwallet/walletdb/bdb" // Required in order to create the default database.
 )
 
 var (
@@ -33,7 +33,7 @@ var (
 	testDBTimeout = time.Second * 10
 )
 
-func createTestBtcWallet(coinType uint32) (func(), *wallet.Wallet, error) {
+func createTestBronwallet(coinType uint32) (func(), *wallet.Wallet, error) {
 	// Instruct waddrmgr to use the cranked down scrypt parameters when
 	// creating new wallet encryption keys.
 	fastScrypt := waddrmgr.FastScryptOptions
@@ -122,32 +122,32 @@ func TestKeyRingDerivation(t *testing.T) {
 
 	keyRingImplementations := []keyRingConstructor{
 		func() (string, func(), KeyRing, error) {
-			cleanUp, wallet, err := createTestBtcWallet(
+			cleanUp, wallet, err := createTestBronwallet(
 				CoinTypeBrocoin,
 			)
 			require.NoError(t, err)
 
-			keyRing := NewBtcWalletKeyRing(wallet, CoinTypeBrocoin)
+			keyRing := NewBronwalletKeyRing(wallet, CoinTypeBrocoin)
 
-			return "btcwallet", cleanUp, keyRing, nil
+			return "bronwallet", cleanUp, keyRing, nil
 		},
 		func() (string, func(), KeyRing, error) {
-			cleanUp, wallet, err := createTestBtcWallet(
+			cleanUp, wallet, err := createTestBronwallet(
 				CoinTypeLitecoin,
 			)
 			require.NoError(t, err)
 
-			keyRing := NewBtcWalletKeyRing(wallet, CoinTypeLitecoin)
+			keyRing := NewBronwalletKeyRing(wallet, CoinTypeLitecoin)
 
 			return "ltcwallet", cleanUp, keyRing, nil
 		},
 		func() (string, func(), KeyRing, error) {
-			cleanUp, wallet, err := createTestBtcWallet(
+			cleanUp, wallet, err := createTestBronwallet(
 				CoinTypeTestnet,
 			)
 			require.NoError(t, err)
 
-			keyRing := NewBtcWalletKeyRing(wallet, CoinTypeTestnet)
+			keyRing := NewBronwalletKeyRing(wallet, CoinTypeTestnet)
 
 			return "testwallet", cleanUp, keyRing, nil
 		},
@@ -257,32 +257,32 @@ func TestSecretKeyRingDerivation(t *testing.T) {
 
 	secretKeyRingImplementations := []secretKeyRingConstructor{
 		func() (string, func(), SecretKeyRing, error) {
-			cleanUp, wallet, err := createTestBtcWallet(
+			cleanUp, wallet, err := createTestBronwallet(
 				CoinTypeBrocoin,
 			)
 			require.NoError(t, err)
 
-			keyRing := NewBtcWalletKeyRing(wallet, CoinTypeBrocoin)
+			keyRing := NewBronwalletKeyRing(wallet, CoinTypeBrocoin)
 
-			return "btcwallet", cleanUp, keyRing, nil
+			return "bronwallet", cleanUp, keyRing, nil
 		},
 		func() (string, func(), SecretKeyRing, error) {
-			cleanUp, wallet, err := createTestBtcWallet(
+			cleanUp, wallet, err := createTestBronwallet(
 				CoinTypeLitecoin,
 			)
 			require.NoError(t, err)
 
-			keyRing := NewBtcWalletKeyRing(wallet, CoinTypeLitecoin)
+			keyRing := NewBronwalletKeyRing(wallet, CoinTypeLitecoin)
 
 			return "ltcwallet", cleanUp, keyRing, nil
 		},
 		func() (string, func(), SecretKeyRing, error) {
-			cleanUp, wallet, err := createTestBtcWallet(
+			cleanUp, wallet, err := createTestBronwallet(
 				CoinTypeTestnet,
 			)
 			require.NoError(t, err)
 
-			keyRing := NewBtcWalletKeyRing(wallet, CoinTypeTestnet)
+			keyRing := NewBronwalletKeyRing(wallet, CoinTypeTestnet)
 
 			return "testwallet", cleanUp, keyRing, nil
 		},

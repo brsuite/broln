@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/brsuite/brond/btcec"
-	"github.com/btcsuite/btcwallet/walletdb"
+	"github.com/brsuite/bronwallet/walletdb"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lntypes"

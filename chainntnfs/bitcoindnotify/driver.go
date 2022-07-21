@@ -1,11 +1,11 @@
-package bitcoindnotify
+package brocoindnotify
 
 import (
 	"errors"
 	"fmt"
 
 	"github.com/brsuite/brond/chaincfg"
-	"github.com/btcsuite/btcwallet/chain"
+	"github.com/brsuite/bronwallet/chain"
 	"github.com/brsuite/broln/blockcache"
 	"github.com/brsuite/broln/chainntnfs"
 )
@@ -20,31 +20,31 @@ func createNewNotifier(args ...interface{}) (chainntnfs.ChainNotifier, error) {
 
 	chainConn, ok := args[0].(*chain.BrocoindConn)
 	if !ok {
-		return nil, errors.New("first argument to bitcoindnotify.New " +
+		return nil, errors.New("first argument to brocoindnotify.New " +
 			"is incorrect, expected a *chain.BrocoindConn")
 	}
 
 	chainParams, ok := args[1].(*chaincfg.Params)
 	if !ok {
-		return nil, errors.New("second argument to bitcoindnotify.New " +
+		return nil, errors.New("second argument to brocoindnotify.New " +
 			"is incorrect, expected a *chaincfg.Params")
 	}
 
 	spendHintCache, ok := args[2].(chainntnfs.SpendHintCache)
 	if !ok {
-		return nil, errors.New("third argument to bitcoindnotify.New " +
+		return nil, errors.New("third argument to brocoindnotify.New " +
 			"is incorrect, expected a chainntnfs.SpendHintCache")
 	}
 
 	confirmHintCache, ok := args[3].(chainntnfs.ConfirmHintCache)
 	if !ok {
-		return nil, errors.New("fourth argument to bitcoindnotify.New " +
+		return nil, errors.New("fourth argument to brocoindnotify.New " +
 			"is incorrect, expected a chainntnfs.ConfirmHintCache")
 	}
 
 	blockCache, ok := args[4].(*blockcache.BlockCache)
 	if !ok {
-		return nil, errors.New("fifth argument to bitcoindnotify.New " +
+		return nil, errors.New("fifth argument to brocoindnotify.New " +
 			"is incorrect, expected a *blockcache.BlockCache")
 	}
 

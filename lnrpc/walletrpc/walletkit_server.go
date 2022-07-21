@@ -21,8 +21,8 @@ import (
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/hdkeychain"
 	"github.com/brsuite/bronutil/psbt"
-	"github.com/btcsuite/btcwallet/waddrmgr"
-	"github.com/btcsuite/btcwallet/wtxmgr"
+	"github.com/brsuite/bronwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/wtxmgr"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
@@ -30,7 +30,7 @@ import (
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/signrpc"
 	"github.com/brsuite/broln/lnwallet"
-	"github.com/brsuite/broln/lnwallet/btcwallet"
+	"github.com/brsuite/broln/lnwallet/bronwallet"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/macaroons"
 	"github.com/brsuite/broln/sweep"
@@ -897,7 +897,7 @@ func (w *WalletKit) ListSweeps(ctx context.Context,
 	// the wallet is still tracking. Sweeps are currently always swept to
 	// the default wallet account.
 	transactions, err := w.cfg.Wallet.ListTransactionDetails(
-		0, btcwallet.UnconfirmedHeight, lnwallet.DefaultAccountName,
+		0, bronwallet.UnconfirmedHeight, lnwallet.DefaultAccountName,
 	)
 	if err != nil {
 		return nil, err

@@ -6,7 +6,7 @@ package etcd
 import (
 	"sync"
 
-	"github.com/btcsuite/btcwallet/walletdb"
+	"github.com/brsuite/bronwallet/walletdb"
 )
 
 // readWriteTx holds a reference to the STM transaction.

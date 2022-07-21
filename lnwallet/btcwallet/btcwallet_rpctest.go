@@ -1,11 +1,11 @@
 //go:build rpctest || lowscrypt
 // +build rpctest lowscrypt
 
-package btcwallet
+package bronwallet
 
 import (
-	"github.com/btcsuite/btcwallet/snacl"
-	"github.com/btcsuite/btcwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/snacl"
+	"github.com/brsuite/bronwallet/waddrmgr"
 )
 
 func init() {

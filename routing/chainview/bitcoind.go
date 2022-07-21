@@ -10,8 +10,8 @@ import (
 	"github.com/brsuite/brond/btcjson"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
-	"github.com/btcsuite/btcwallet/chain"
-	"github.com/btcsuite/btcwallet/wtxmgr"
+	"github.com/brsuite/bronwallet/chain"
+	"github.com/brsuite/bronwallet/wtxmgr"
 	"github.com/brsuite/broln/blockcache"
 	"github.com/brsuite/broln/channeldb"
 )

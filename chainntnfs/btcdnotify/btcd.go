@@ -1,4 +1,4 @@
-package btcdnotify
+package brondnotify
 
 import (
 	"errors"

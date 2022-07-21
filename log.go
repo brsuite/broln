@@ -29,7 +29,7 @@ import (
 	"github.com/brsuite/broln/lnrpc/verrpc"
 	"github.com/brsuite/broln/lnrpc/walletrpc"
 	"github.com/brsuite/broln/lnwallet"
-	"github.com/brsuite/broln/lnwallet/btcwallet"
+	"github.com/brsuite/broln/lnwallet/bronwallet"
 	"github.com/brsuite/broln/lnwallet/chancloser"
 	"github.com/brsuite/broln/lnwallet/chanfunding"
 	"github.com/brsuite/broln/lnwallet/rpcwallet"
@@ -165,7 +165,7 @@ func SetupLoggers(root *build.RotatingLogWriter, interceptor signal.Interceptor)
 	AddSubLogger(root, cluster.Subsystem, interceptor, cluster.UseLogger)
 	AddSubLogger(root, rpcperms.Subsystem, interceptor, rpcperms.UseLogger)
 	AddSubLogger(root, tor.Subsystem, interceptor, tor.UseLogger)
-	AddSubLogger(root, btcwallet.Subsystem, interceptor, btcwallet.UseLogger)
+	AddSubLogger(root, bronwallet.Subsystem, interceptor, bronwallet.UseLogger)
 	AddSubLogger(root, rpcwallet.Subsystem, interceptor, rpcwallet.UseLogger)
 }
 

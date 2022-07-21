@@ -10,7 +10,7 @@ import (
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	_ "github.com/btcsuite/btcwallet/walletdb/bdb"
+	_ "github.com/brsuite/bronwallet/walletdb/bdb"
 	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/shachain"

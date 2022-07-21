@@ -1,4 +1,4 @@
-package btcwallet
+package bronwallet
 
 import (
 	"bytes"
@@ -16,14 +16,14 @@ import (
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/hdkeychain"
-	"github.com/btcsuite/btcwallet/chain"
-	"github.com/btcsuite/btcwallet/waddrmgr"
-	"github.com/btcsuite/btcwallet/wallet"
-	base "github.com/btcsuite/btcwallet/wallet"
-	"github.com/btcsuite/btcwallet/wallet/txauthor"
-	"github.com/btcsuite/btcwallet/wallet/txrules"
-	"github.com/btcsuite/btcwallet/walletdb"
-	"github.com/btcsuite/btcwallet/wtxmgr"
+	"github.com/brsuite/bronwallet/chain"
+	"github.com/brsuite/bronwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/wallet"
+	base "github.com/brsuite/bronwallet/wallet"
+	"github.com/brsuite/bronwallet/wallet/txauthor"
+	"github.com/brsuite/bronwallet/wallet/txrules"
+	"github.com/brsuite/bronwallet/walletdb"
+	"github.com/brsuite/bronwallet/wtxmgr"
 	"github.com/brsuite/broln/blockcache"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/kvdb"
@@ -54,7 +54,7 @@ const (
 
 var (
 	// waddrmgrNamespaceKey is the namespace key that the waddrmgr state is
-	// stored within the top-level waleltdb buckets of btcwallet.
+	// stored within the top-level waleltdb buckets of bronwallet.
 	waddrmgrNamespaceKey = []byte("waddrmgr")
 
 	// lightningAddrSchema is the scope addr schema for all keys that we
@@ -76,12 +76,12 @@ var (
 		"for account")
 )
 
-// BtcWallet is an implementation of the lnwallet.WalletController interface
-// backed by an active instance of btcwallet. At the time of the writing of
+// Bronwallet is an implementation of the lnwallet.WalletController interface
+// backed by an active instance of bronwallet. At the time of the writing of
 // this documentation, this implementation requires a full brond node to
 // operate.
-type BtcWallet struct {
-	// wallet is an active instance of btcwallet.
+type Bronwallet struct {
+	// wallet is an active instance of bronwallet.
 	wallet *base.Wallet
 
 	chain chain.Interface
@@ -97,14 +97,14 @@ type BtcWallet struct {
 	blockCache *blockcache.BlockCache
 }
 
-// A compile time check to ensure that BtcWallet implements the
+// A compile time check to ensure that Bronwallet implements the
 // WalletController and BlockChainIO interfaces.
-var _ lnwallet.WalletController = (*BtcWallet)(nil)
-var _ lnwallet.BlockChainIO = (*BtcWallet)(nil)
+var _ lnwallet.WalletController = (*Bronwallet)(nil)
+var _ lnwallet.BlockChainIO = (*Bronwallet)(nil)
 
-// New returns a new fully initialized instance of BtcWallet given a valid
+// New returns a new fully initialized instance of Bronwallet given a valid
 // configuration struct.
-func New(cfg Config, blockCache *blockcache.BlockCache) (*BtcWallet, error) {
+func New(cfg Config, blockCache *blockcache.BlockCache) (*Bronwallet, error) {
 	// Create the key scope for the coin type being managed by this wallet.
 	chainKeyScope := waddrmgr.KeyScope{
 		Purpose: keychain.BIP0043Purpose,
@@ -156,7 +156,7 @@ func New(cfg Config, blockCache *blockcache.BlockCache) (*BtcWallet, error) {
 		}
 	}
 
-	return &BtcWallet{
+	return &Bronwallet{
 		cfg:           &cfg,
 		wallet:        wallet,
 		db:            wallet.Database(),
@@ -237,7 +237,7 @@ func NewWalletLoader(chainParams *chaincfg.Params, recoveryWindow uint32,
 	), nil
 }
 
-// externalWalletExists is a helper function that we use to template btcwallet's
+// externalWalletExists is a helper function that we use to template bronwallet's
 // Loader in order to be able check if the wallet database has been initialized
 // in an external DB.
 func externalWalletExists(db kvdb.Backend) (bool, error) {
@@ -255,7 +255,7 @@ func externalWalletExists(db kvdb.Backend) (bool, error) {
 	return exists, err
 }
 
-// onWalletCreated is executed when btcwallet creates the wallet the first time.
+// onWalletCreated is executed when bronwallet creates the wallet the first time.
 func onWalletCreated(tx kvdb.RwTx) error {
 	metaBucket, err := tx.CreateTopLevelBucket([]byte(walletMetaBucket))
 	if err != nil {
@@ -268,7 +268,7 @@ func onWalletCreated(tx kvdb.RwTx) error {
 // BackEnd returns the underlying ChainService's name as a string.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) BackEnd() string {
+func (b *Bronwallet) BackEnd() string {
 	if b.chain != nil {
 		return b.chain.BackEnd()
 	}
@@ -277,8 +277,8 @@ func (b *BtcWallet) BackEnd() string {
 }
 
 // InternalWallet returns a pointer to the internal base wallet which is the
-// core of btcwallet.
-func (b *BtcWallet) InternalWallet() *base.Wallet {
+// core of bronwallet.
+func (b *Bronwallet) InternalWallet() *base.Wallet {
 	return b.wallet
 }
 
@@ -286,7 +286,7 @@ func (b *BtcWallet) InternalWallet() *base.Wallet {
 // begins syncing to the current available blockchain state.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) Start() error {
+func (b *Bronwallet) Start() error {
 	// Is the wallet (according to its database) currently watch-only
 	// already? If it is, we won't need to convert it later.
 	walletIsWatchOnly := b.wallet.Manager.WatchOnly()
@@ -395,7 +395,7 @@ func (b *BtcWallet) Start() error {
 		return err
 	}
 
-	// Start the underlying btcwallet core.
+	// Start the underlying bronwallet core.
 	b.wallet.Start()
 
 	// Pass the rpc client into the wallet so it can sync up to the
@@ -409,7 +409,7 @@ func (b *BtcWallet) Start() error {
 // any active sockets, database handles, stopping goroutines, etc.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) Stop() error {
+func (b *Bronwallet) Stop() error {
 	b.wallet.Stop()
 
 	b.wallet.WaitForShutdown()
@@ -427,7 +427,7 @@ func (b *BtcWallet) Stop() error {
 // accounts is returned.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) ConfirmedBalance(confs int32,
+func (b *Bronwallet) ConfirmedBalance(confs int32,
 	accountFilter string) (bronutil.Amount, error) {
 
 	var balance bronutil.Amount
@@ -448,7 +448,7 @@ func (b *BtcWallet) ConfirmedBalance(confs int32,
 
 // keyScopeForAccountAddr determines the appropriate key scope of an account
 // based on its name/address type.
-func (b *BtcWallet) keyScopeForAccountAddr(accountName string,
+func (b *Bronwallet) keyScopeForAccountAddr(accountName string,
 	addrType lnwallet.AddressType) (waddrmgr.KeyScope, uint32, error) {
 
 	// Map the requested address type to its key scope.
@@ -490,7 +490,7 @@ func (b *BtcWallet) keyScopeForAccountAddr(accountName string,
 // account the address should be generated from.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) NewAddress(t lnwallet.AddressType, change bool,
+func (b *Bronwallet) NewAddress(t lnwallet.AddressType, change bool,
 	accountName string) (bronutil.Address, error) {
 
 	// Addresses cannot be derived from the catch-all imported accounts.
@@ -516,7 +516,7 @@ func (b *BtcWallet) NewAddress(t lnwallet.AddressType, change bool,
 // NewAddress it can derive a specified address type, and also optionally a
 // change address. The account parameter must be non-empty as it determines
 // which account the address should be generated from.
-func (b *BtcWallet) LastUnusedAddress(addrType lnwallet.AddressType,
+func (b *Bronwallet) LastUnusedAddress(addrType lnwallet.AddressType,
 	accountName string) (bronutil.Address, error) {
 
 	// Addresses cannot be derived from the catch-all imported accounts.
@@ -535,7 +535,7 @@ func (b *BtcWallet) LastUnusedAddress(addrType lnwallet.AddressType,
 // IsOurAddress checks if the passed address belongs to this wallet
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) IsOurAddress(a bronutil.Address) bool {
+func (b *Bronwallet) IsOurAddress(a bronutil.Address) bool {
 	result, err := b.wallet.HaveAddress(a)
 	return result && (err == nil)
 }
@@ -545,7 +545,7 @@ func (b *BtcWallet) IsOurAddress(a bronutil.Address) bool {
 // accounts and return only those matching.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) ListAccounts(name string,
+func (b *Bronwallet) ListAccounts(name string,
 	keyScope *waddrmgr.KeyScope) ([]*waddrmgr.AccountProperties, error) {
 
 	var res []*waddrmgr.AccountProperties
@@ -666,7 +666,7 @@ func (b *BtcWallet) ListAccounts(name string,
 // externally, witness pubkeys internally).
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) ImportAccount(name string, accountPubKey *hdkeychain.ExtendedKey,
+func (b *Bronwallet) ImportAccount(name string, accountPubKey *hdkeychain.ExtendedKey,
 	masterKeyFingerprint uint32, addrType *waddrmgr.AddressType,
 	dryRun bool) (*waddrmgr.AccountProperties, []bronutil.Address,
 	[]bronutil.Address, error) {
@@ -712,7 +712,7 @@ func (b *BtcWallet) ImportAccount(name string, accountPubKey *hdkeychain.Extende
 // pay-to-pubkey-hash (P2PKH) scheme.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) ImportPublicKey(pubKey *btcec.PublicKey,
+func (b *Bronwallet) ImportPublicKey(pubKey *btcec.PublicKey,
 	addrType waddrmgr.AddressType) error {
 
 	return b.wallet.ImportPublicKey(pubKey, addrType)
@@ -725,7 +725,7 @@ func (b *BtcWallet) ImportPublicKey(pubKey *btcec.PublicKey,
 // NOTE: This method requires the global coin selection lock to be held.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) SendOutputs(outputs []*wire.TxOut,
+func (b *Bronwallet) SendOutputs(outputs []*wire.TxOut,
 	feeRate chainfee.SatPerKWeight, minConfs int32,
 	label string) (*wire.MsgTx, error) {
 
@@ -762,7 +762,7 @@ func (b *BtcWallet) SendOutputs(outputs []*wire.TxOut,
 // NOTE: This method requires the global coin selection lock to be held.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) CreateSimpleTx(outputs []*wire.TxOut,
+func (b *Bronwallet) CreateSimpleTx(outputs []*wire.TxOut,
 	feeRate chainfee.SatPerKWeight, minConfs int32,
 	dryRun bool) (*txauthor.AuthoredTx, error) {
 
@@ -808,7 +808,7 @@ func (b *BtcWallet) CreateSimpleTx(outputs []*wire.TxOut,
 // NOTE: This method requires the global coin selection lock to be held.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) LockOutpoint(o wire.OutPoint) {
+func (b *Bronwallet) LockOutpoint(o wire.OutPoint) {
 	b.wallet.LockOutpoint(o)
 }
 
@@ -818,7 +818,7 @@ func (b *BtcWallet) LockOutpoint(o wire.OutPoint) {
 // NOTE: This method requires the global coin selection lock to be held.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) UnlockOutpoint(o wire.OutPoint) {
+func (b *Bronwallet) UnlockOutpoint(o wire.OutPoint) {
 	b.wallet.UnlockOutpoint(o)
 }
 
@@ -833,7 +833,7 @@ func (b *BtcWallet) UnlockOutpoint(o wire.OutPoint) {
 // wtxmgr.ErrOutputAlreadyLocked is returned.
 //
 // NOTE: This method requires the global coin selection lock to be held.
-func (b *BtcWallet) LeaseOutput(id wtxmgr.LockID, op wire.OutPoint,
+func (b *Bronwallet) LeaseOutput(id wtxmgr.LockID, op wire.OutPoint,
 	duration time.Duration) (time.Time, error) {
 
 	// Make sure we don't attempt to double lock an output that's been
@@ -846,7 +846,7 @@ func (b *BtcWallet) LeaseOutput(id wtxmgr.LockID, op wire.OutPoint,
 }
 
 // ListLeasedOutputs returns a list of all currently locked outputs.
-func (b *BtcWallet) ListLeasedOutputs() ([]*wtxmgr.LockedOutput, error) {
+func (b *Bronwallet) ListLeasedOutputs() ([]*wtxmgr.LockedOutput, error) {
 	return b.wallet.ListLeasedOutputs()
 }
 
@@ -855,7 +855,7 @@ func (b *BtcWallet) ListLeasedOutputs() ([]*wtxmgr.LockedOutput, error) {
 // originally lock the output.
 //
 // NOTE: This method requires the global coin selection lock to be held.
-func (b *BtcWallet) ReleaseOutput(id wtxmgr.LockID, op wire.OutPoint) error {
+func (b *Bronwallet) ReleaseOutput(id wtxmgr.LockID, op wire.OutPoint) error {
 	return b.wallet.ReleaseOutput(id, op)
 }
 
@@ -871,7 +871,7 @@ func (b *BtcWallet) ReleaseOutput(id wtxmgr.LockID, op wire.OutPoint) error {
 // NOTE: This method requires the global coin selection lock to be held.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) ListUnspentWitness(minConfs, maxConfs int32,
+func (b *Bronwallet) ListUnspentWitness(minConfs, maxConfs int32,
 	accountFilter string) ([]*lnwallet.Utxo, error) {
 
 	// First, grab all the unfiltered currently unspent outputs.
@@ -897,7 +897,7 @@ func (b *BtcWallet) ListUnspentWitness(minConfs, maxConfs int32,
 		} else if txscript.IsPayToScriptHash(pkScript) {
 			// TODO(roasbeef): This assumes all p2sh outputs returned by the
 			// wallet are nested p2pkh. We can't check the redeem script because
-			// the btcwallet service does not include it.
+			// the bronwallet service does not include it.
 			addressType = lnwallet.NestedWitnessPubKey
 		}
 
@@ -939,7 +939,7 @@ func (b *BtcWallet) ListUnspentWitness(minConfs, maxConfs int32,
 // publishing the transaction fails, an error describing the reason is returned
 // (currently ErrDoubleSpend). If the transaction is already published to the
 // network (either in the mempool or chain) no error will be returned.
-func (b *BtcWallet) PublishTransaction(tx *wire.MsgTx, label string) error {
+func (b *Bronwallet) PublishTransaction(tx *wire.MsgTx, label string) error {
 	if err := b.wallet.PublishTransaction(tx, label); err != nil {
 
 		// If we failed to publish the transaction, check whether we
@@ -969,7 +969,7 @@ func (b *BtcWallet) PublishTransaction(tx *wire.MsgTx, label string) error {
 // is set. Labels must not be empty, and they are limited to 500 chars.
 //
 // Note: it is part of the WalletController interface.
-func (b *BtcWallet) LabelTransaction(hash chainhash.Hash, label string,
+func (b *Bronwallet) LabelTransaction(hash chainhash.Hash, label string,
 	overwrite bool) error {
 
 	return b.wallet.LabelTransaction(hash, label, overwrite)
@@ -1105,7 +1105,7 @@ func unminedTransactionsToDetail(
 // empty, transactions of all wallet accounts are returned.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) ListTransactionDetails(startHeight, endHeight int32,
+func (b *Bronwallet) ListTransactionDetails(startHeight, endHeight int32,
 	accountFilter string) ([]*lnwallet.TransactionDetail, error) {
 
 	// Grab the best block the wallet knows of, we'll use this to calculate
@@ -1253,7 +1253,7 @@ out:
 // blocks.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) SubscribeTransactions() (lnwallet.TransactionSubscription, error) {
+func (b *Bronwallet) SubscribeTransactions() (lnwallet.TransactionSubscription, error) {
 	walletClient := b.wallet.NtfnServer.TransactionNotifications()
 
 	txClient := &txSubscriptionClient{
@@ -1273,7 +1273,7 @@ func (b *BtcWallet) SubscribeTransactions() (lnwallet.TransactionSubscription, e
 // fully synced to the current best block in the main chain.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) IsSynced() (bool, int64, error) {
+func (b *Bronwallet) IsSynced() (bool, int64, error) {
 	// Grab the best chain state the wallet is currently aware of.
 	syncState := b.wallet.Manager.SyncedTo()
 
@@ -1328,7 +1328,7 @@ func (b *BtcWallet) IsSynced() (bool, int64, error) {
 // representing the recovery progress made so far.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) GetRecoveryInfo() (bool, float64, error) {
+func (b *Bronwallet) GetRecoveryInfo() (bool, float64, error) {
 	isRecoveryMode := true
 	progress := float64(0)
 
@@ -1368,7 +1368,7 @@ func (b *BtcWallet) GetRecoveryInfo() (bool, float64, error) {
 	// Next, query the chain backend to grab the info about the tip of the
 	// main chain.
 	//
-	// NOTE: The actual recovery process is handled by the btcsuite/btcwallet.
+	// NOTE: The actual recovery process is handled by the brsuite/bronwallet.
 	// The process purposefully doesn't update the best height. It might create
 	// a small difference between the height queried here and the height used
 	// in the recovery process, ie, the bestHeight used here might be greater,

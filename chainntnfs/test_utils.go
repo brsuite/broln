@@ -22,8 +22,8 @@ import (
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/btcsuite/btcwallet/chain"
-	"github.com/btcsuite/btcwallet/walletdb"
+	"github.com/brsuite/bronwallet/chain"
+	"github.com/brsuite/bronwallet/walletdb"
 	"github.com/brsuite/neutrino"
 	"github.com/brsuite/broln/kvdb"
 )

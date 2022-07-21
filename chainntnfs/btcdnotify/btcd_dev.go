@@ -1,7 +1,7 @@
 //go:build dev
 // +build dev
 
-package btcdnotify
+package brondnotify
 
 import (
 	"fmt"

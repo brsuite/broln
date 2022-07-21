@@ -1,4 +1,4 @@
-package btcwallet
+package bronwallet
 
 import (
 	"encoding/hex"
@@ -8,7 +8,7 @@ import (
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/btcsuite/btcwallet/chain"
+	"github.com/brsuite/bronwallet/chain"
 	"github.com/brsuite/neutrino"
 	"github.com/brsuite/neutrino/headerfs"
 	"github.com/brsuite/broln/lntypes"
@@ -29,7 +29,7 @@ var (
 // within the main chain.
 //
 // This method is a part of the lnwallet.BlockChainIO interface.
-func (b *BtcWallet) GetBestBlock() (*chainhash.Hash, int32, error) {
+func (b *Bronwallet) GetBestBlock() (*chainhash.Hash, int32, error) {
 	return b.chain.GetBestBlock()
 }
 
@@ -37,7 +37,7 @@ func (b *BtcWallet) GetBestBlock() (*chainhash.Hash, int32, error) {
 // creates the target pkScript.
 //
 // This method is a part of the lnwallet.BlockChainIO interface.
-func (b *BtcWallet) GetUtxo(op *wire.OutPoint, pkScript []byte,
+func (b *Bronwallet) GetUtxo(op *wire.OutPoint, pkScript []byte,
 	heightHint uint32, cancel <-chan struct{}) (*wire.TxOut, error) {
 
 	switch backend := b.chain.(type) {
@@ -133,7 +133,7 @@ func (b *BtcWallet) GetUtxo(op *wire.OutPoint, pkScript []byte,
 // to wrap the call to GetBlock.
 //
 // This method is a part of the lnwallet.BlockChainIO interface.
-func (b *BtcWallet) GetBlock(blockHash *chainhash.Hash) (*wire.MsgBlock, error) {
+func (b *Bronwallet) GetBlock(blockHash *chainhash.Hash) (*wire.MsgBlock, error) {
 	_, ok := b.chain.(*chain.NeutrinoClient)
 	if !ok {
 		return b.blockCache.GetBlock(blockHash, b.chain.GetBlock)
@@ -153,10 +153,10 @@ func (b *BtcWallet) GetBlock(blockHash *chainhash.Hash) (*wire.MsgBlock, error) 
 // given height.
 //
 // This method is a part of the lnwallet.BlockChainIO interface.
-func (b *BtcWallet) GetBlockHash(blockHeight int64) (*chainhash.Hash, error) {
+func (b *Bronwallet) GetBlockHash(blockHeight int64) (*chainhash.Hash, error) {
 	return b.chain.GetBlockHash(blockHeight)
 }
 
-// A compile time check to ensure that BtcWallet implements the BlockChainIO
+// A compile time check to ensure that Bronwallet implements the BlockChainIO
 // interface.
-var _ lnwallet.WalletController = (*BtcWallet)(nil)
+var _ lnwallet.WalletController = (*Bronwallet)(nil)

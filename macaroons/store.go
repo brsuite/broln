@@ -10,8 +10,8 @@ import (
 
 	"github.com/brsuite/broln/kvdb"
 
-	"github.com/btcsuite/btcwallet/snacl"
-	"github.com/btcsuite/btcwallet/walletdb"
+	"github.com/brsuite/bronwallet/snacl"
+	"github.com/brsuite/bronwallet/walletdb"
 )
 
 const (

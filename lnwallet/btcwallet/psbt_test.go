@@ -1,4 +1,4 @@
-package btcwallet
+package bronwallet
 
 import (
 	"bytes"
@@ -13,7 +13,7 @@ import (
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/psbt"
-	"github.com/btcsuite/btcwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/waddrmgr"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
 	"github.com/stretchr/testify/require"

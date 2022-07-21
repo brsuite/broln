@@ -303,7 +303,7 @@ type CheckReservedValueTxReq struct {
 // channel. However, once the chainntnfs package is complete, the wallet will
 // be compatible with multiple RPC/notification services such as Electrum,
 // Brocoin Core + ZeroMQ, etc. Eventually, the wallet won't require a full-node
-// at all, as SPV support is integrated into btcwallet.
+// at all, as SPV support is integrated into bronwallet.
 type LightningWallet struct {
 	started  int32 // To be used atomically.
 	shutdown int32 // To be used atomically.

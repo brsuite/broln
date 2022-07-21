@@ -1,4 +1,4 @@
-package btcwallet
+package bronwallet
 
 import (
 	"fmt"
@@ -9,8 +9,8 @@ import (
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/hdkeychain"
-	"github.com/btcsuite/btcwallet/waddrmgr"
-	"github.com/btcsuite/btcwallet/walletdb"
+	"github.com/brsuite/bronwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/walletdb"
 	"github.com/go-errors/errors"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
@@ -23,7 +23,7 @@ import (
 // of ErrNotMine should be returned instead.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) FetchInputInfo(prevOut *wire.OutPoint) (*lnwallet.Utxo, error) {
+func (b *Bronwallet) FetchInputInfo(prevOut *wire.OutPoint) (*lnwallet.Utxo, error) {
 	prevTx, txOut, bip32, confirmations, err := b.wallet.FetchInputInfo(
 		prevOut,
 	)
@@ -54,7 +54,7 @@ func (b *BtcWallet) FetchInputInfo(prevOut *wire.OutPoint) (*lnwallet.Utxo, erro
 // ScriptForOutput returns the address, witness program and redeem script for a
 // given UTXO. An error is returned if the UTXO does not belong to our wallet or
 // it is not a managed pubKey address.
-func (b *BtcWallet) ScriptForOutput(output *wire.TxOut) (
+func (b *Bronwallet) ScriptForOutput(output *wire.TxOut) (
 	waddrmgr.ManagedPubKeyAddress, []byte, []byte, error) {
 
 	return b.wallet.ScriptForOutput(output)
@@ -83,7 +83,7 @@ func deriveFromKeyLoc(scopedMgr *waddrmgr.ScopedKeyManager,
 // deriveKeyByBIP32Path derives a key described by a BIP32 path. We expect the
 // first three elements of the path to be hardened according to BIP44, so they
 // must be a number >= 2^31.
-func (b *BtcWallet) deriveKeyByBIP32Path(path []uint32) (*btcec.PrivateKey,
+func (b *Bronwallet) deriveKeyByBIP32Path(path []uint32) (*btcec.PrivateKey,
 	error) {
 
 	// Make sure we get a full path with exactly 5 elements. A path is
@@ -143,12 +143,12 @@ func (b *BtcWallet) deriveKeyByBIP32Path(path []uint32) (*btcec.PrivateKey,
 	}
 
 	// Okay, we made sure it's a BIP49/84 key, so we need to derive it now.
-	// Interestingly, the btcwallet never actually uses a coin type other
+	// Interestingly, the bronwallet never actually uses a coin type other
 	// than 0 for those keys, so we need to make sure this behavior is
 	// replicated here.
 	if coinType != 0 {
 		return nil, fmt.Errorf("invalid BIP32 derivation path, coin " +
-			"type must be 0 for BIP49/84 btcwallet keys")
+			"type must be 0 for BIP49/84 bronwallet keys")
 	}
 
 	// We only expect to be asked to sign with key scopes that we know
@@ -209,7 +209,7 @@ func assertHardened(elements ...uint32) error {
 
 // deriveKeyByLocator attempts to derive a key stored in the wallet given a
 // valid key locator.
-func (b *BtcWallet) deriveKeyByLocator(
+func (b *Bronwallet) deriveKeyByLocator(
 	keyLoc keychain.KeyLocator) (*btcec.PrivateKey, error) {
 
 	// We'll assume the special lightning key scope in this case.
@@ -271,7 +271,7 @@ func (b *BtcWallet) deriveKeyByLocator(
 
 // fetchPrivKey attempts to retrieve the raw private key corresponding to the
 // passed public key if populated, or the key descriptor path (if non-empty).
-func (b *BtcWallet) fetchPrivKey(
+func (b *Bronwallet) fetchPrivKey(
 	keyDesc *keychain.KeyDescriptor) (*btcec.PrivateKey, error) {
 
 	// If the key locator within the descriptor *isn't* empty, then we can
@@ -335,7 +335,7 @@ func maybeTweakPrivKey(signDesc *input.SignDescriptor,
 // the data within the passed SignDescriptor.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) SignOutputRaw(tx *wire.MsgTx,
+func (b *Bronwallet) SignOutputRaw(tx *wire.MsgTx,
 	signDesc *input.SignDescriptor) (input.Signature, error) {
 
 	witnessScript := signDesc.WitnessScript
@@ -376,7 +376,7 @@ func (b *BtcWallet) SignOutputRaw(tx *wire.MsgTx,
 // regular p2wkh output and p2wkh outputs nested within a regular p2sh output.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) ComputeInputScript(tx *wire.MsgTx,
+func (b *Bronwallet) ComputeInputScript(tx *wire.MsgTx,
 	signDesc *input.SignDescriptor) (*input.Script, error) {
 
 	// If a tweak (single or double) is specified, then we'll need to use
@@ -401,9 +401,9 @@ func (b *BtcWallet) ComputeInputScript(tx *wire.MsgTx,
 	}, nil
 }
 
-// A compile time check to ensure that BtcWallet implements the Signer
+// A compile time check to ensure that Bronwallet implements the Signer
 // interface.
-var _ input.Signer = (*BtcWallet)(nil)
+var _ input.Signer = (*Bronwallet)(nil)
 
 // SignMessage attempts to sign a target message with the private key that
 // corresponds to the passed key locator. If the target private key is unable to
@@ -411,7 +411,7 @@ var _ input.Signer = (*BtcWallet)(nil)
 // double SHA-256 of the passed message.
 //
 // NOTE: This is a part of the MessageSigner interface.
-func (b *BtcWallet) SignMessage(keyLoc keychain.KeyLocator,
+func (b *Bronwallet) SignMessage(keyLoc keychain.KeyLocator,
 	msg []byte, doubleHash bool) (*btcec.Signature, error) {
 
 	// First attempt to fetch the private key which corresponds to the
@@ -438,6 +438,6 @@ func (b *BtcWallet) SignMessage(keyLoc keychain.KeyLocator,
 	return sign, nil
 }
 
-// A compile time check to ensure that BtcWallet implements the MessageSigner
+// A compile time check to ensure that Bronwallet implements the MessageSigner
 // interface.
-var _ lnwallet.MessageSigner = (*BtcWallet)(nil)
+var _ lnwallet.MessageSigner = (*Bronwallet)(nil)

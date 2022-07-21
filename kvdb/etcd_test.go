@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/btcsuite/btcwallet/walletdb"
+	"github.com/brsuite/bronwallet/walletdb"
 	"github.com/brsuite/broln/kvdb/etcd"
 	"github.com/stretchr/testify/require"
 )

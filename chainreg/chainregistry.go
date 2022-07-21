@@ -16,12 +16,12 @@ import (
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/rpcclient"
 	"github.com/brsuite/bronutil"
-	"github.com/btcsuite/btcwallet/chain"
+	"github.com/brsuite/bronwallet/chain"
 	"github.com/brsuite/neutrino"
 	"github.com/brsuite/broln/blockcache"
 	"github.com/brsuite/broln/chainntnfs"
-	"github.com/brsuite/broln/chainntnfs/bitcoindnotify"
-	"github.com/brsuite/broln/chainntnfs/btcdnotify"
+	"github.com/brsuite/broln/chainntnfs/brocoindnotify"
+	"github.com/brsuite/broln/chainntnfs/brondnotify"
 	"github.com/brsuite/broln/chainntnfs/neutrinonotify"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/htlcswitch"
@@ -365,9 +365,9 @@ func NewPartialChainControl(cfg *Config) (*PartialChainControl, func(), error) {
 			brocoindHost = brocoindMode.RPCHost
 		} else {
 			// The RPC ports specified in chainparams.go assume
-			// brond, which picks a different port so that btcwallet
+			// brond, which picks a different port so that bronwallet
 			// can use the same RPC port as brocoind. We convert
-			// this back to the btcwallet/brocoind port.
+			// this back to the bronwallet/brocoind port.
 			rpcPort, err := strconv.Atoi(cfg.ActiveNetParams.RPCPort)
 			if err != nil {
 				return nil, nil, err
@@ -420,7 +420,7 @@ func NewPartialChainControl(cfg *Config) (*PartialChainControl, func(), error) {
 				"brocoind: %v", err)
 		}
 
-		cc.ChainNotifier = bitcoindnotify.New(
+		cc.ChainNotifier = brocoindnotify.New(
 			brocoindConn, cfg.ActiveNetParams.Params, hintCache,
 			hintCache, cfg.BlockCache,
 		)
@@ -475,7 +475,7 @@ func NewPartialChainControl(cfg *Config) (*PartialChainControl, func(), error) {
 			}
 		}
 
-		// We need to use some apis that are not exposed by btcwallet,
+		// We need to use some apis that are not exposed by bronwallet,
 		// for a health check function so we create an ad-hoc brocoind
 		// connection.
 		chainConn, err := rpcclient.New(rpcConfig, nil)
@@ -553,7 +553,7 @@ func NewPartialChainControl(cfg *Config) (*PartialChainControl, func(), error) {
 			DisableConnectOnNew:  true,
 			DisableAutoReconnect: false,
 		}
-		cc.ChainNotifier, err = btcdnotify.New(
+		cc.ChainNotifier, err = brondnotify.New(
 			rpcConfig, cfg.ActiveNetParams.Params, hintCache,
 			hintCache, cfg.BlockCache,
 		)

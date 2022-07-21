@@ -602,7 +602,7 @@ messages directly. There is no routing/path finding involved.
 
 * A [`concurrent map writes` crash was
   fixed](https://github.com/brsuite/broln/pull/5893) in the
- [`btcwallet` dependency](https://github.com/btcsuite/btcwallet/pull/773).
+ [`bronwallet` dependency](https://github.com/brsuite/bronwallet/pull/773).
 
 * [A bug has been fixed that would at times cause intercepted HTLCs to be
   re-notified](https://github.com/brsuite/broln/pull/5901), which could

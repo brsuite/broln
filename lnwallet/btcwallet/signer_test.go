@@ -1,4 +1,4 @@
-package btcwallet
+package bronwallet
 
 import (
 	"encoding/hex"
@@ -11,7 +11,7 @@ import (
 	"github.com/brsuite/brond/integration/rpctest"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/hdkeychain"
-	"github.com/btcsuite/btcwallet/chain"
+	"github.com/brsuite/bronwallet/chain"
 	"github.com/brsuite/broln/blockcache"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/stretchr/testify/require"
@@ -29,7 +29,7 @@ var (
 
 	// firstAddress is the first address that we should get from the wallet,
 	// corresponding to the derivation path m/84'/0'/0'/0/0 (even on regtest
-	// which is a special case for the BIP49/84 addresses in btcwallet).
+	// which is a special case for the BIP49/84 addresses in bronwallet).
 	firstAddress = "bcrt1qgdlgjc5ede7fjv350wcjqat80m0zsmfaswsj9p"
 
 	testCases = []struct {
@@ -99,7 +99,7 @@ var (
 		path: []uint32{
 			hardenedKey(84), hardenedKey(1), hardenedKey(0), 0, 0,
 		},
-		err: "coin type must be 0 for BIP49/84 btcwallet keys",
+		err: "coin type must be 0 for BIP49/84 bronwallet keys",
 	}, {
 		name: "m/1017'/0'/0'/0/0",
 		path: []uint32{
@@ -168,7 +168,7 @@ func TestBip32KeyDerivation(t *testing.T) {
 }
 
 func newTestWallet(t *testing.T, netParams *chaincfg.Params,
-	seedBytes []byte) (*BtcWallet, func()) {
+	seedBytes []byte) (*Bronwallet, func()) {
 
 	tempDir, err := ioutil.TempDir("", "lnwallet")
 	if err != nil {

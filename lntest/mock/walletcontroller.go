@@ -12,9 +12,9 @@ import (
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/hdkeychain"
 	"github.com/brsuite/bronutil/psbt"
-	"github.com/btcsuite/btcwallet/waddrmgr"
-	"github.com/btcsuite/btcwallet/wallet/txauthor"
-	"github.com/btcsuite/btcwallet/wtxmgr"
+	"github.com/brsuite/bronwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/wallet/txauthor"
+	"github.com/brsuite/bronwallet/wtxmgr"
 
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwallet/chainfee"

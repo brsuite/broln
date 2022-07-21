@@ -1,4 +1,4 @@
-package btcwallet
+package bronwallet
 
 import (
 	"github.com/btcsuite/btclog"

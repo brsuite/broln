@@ -10,7 +10,7 @@ import (
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/macaroons"
 
-	"github.com/btcsuite/btcwallet/snacl"
+	"github.com/brsuite/bronwallet/snacl"
 	"github.com/stretchr/testify/require"
 )
 

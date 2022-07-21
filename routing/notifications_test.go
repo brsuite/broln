@@ -19,7 +19,7 @@ import (
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lnwallet"
-	"github.com/brsuite/broln/lnwallet/btcwallet"
+	"github.com/brsuite/broln/lnwallet/bronwallet"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/chainview"
 	"github.com/brsuite/broln/routing/route"
@@ -201,7 +201,7 @@ func (m *mockChain) GetUtxo(op *wire.OutPoint, _ []byte, _ uint32,
 
 	utxo, ok := m.utxos[*op]
 	if !ok {
-		return nil, btcwallet.ErrOutputSpent
+		return nil, bronwallet.ErrOutputSpent
 	}
 
 	return &utxo, nil

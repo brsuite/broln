@@ -16,9 +16,9 @@ import (
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/btcsuite/btclog"
-	"github.com/btcsuite/btcwallet/waddrmgr"
-	"github.com/btcsuite/btcwallet/wallet"
-	"github.com/btcsuite/btcwallet/walletdb"
+	"github.com/brsuite/bronwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/wallet"
+	"github.com/brsuite/bronwallet/walletdb"
 	proxy "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/brsuite/neutrino"
 	"github.com/brsuite/neutrino/headerfs"
@@ -30,7 +30,7 @@ import (
 	"github.com/brsuite/broln/lncfg"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnwallet"
-	"github.com/brsuite/broln/lnwallet/btcwallet"
+	"github.com/brsuite/broln/lnwallet/bronwallet"
 	"github.com/brsuite/broln/lnwallet/rpcwallet"
 	"github.com/brsuite/broln/macaroons"
 	"github.com/brsuite/broln/rpcperms"
@@ -97,7 +97,7 @@ type WalletConfigBuilder interface {
 	BuildWalletConfig(context.Context, *DatabaseInstances,
 		*rpcperms.InterceptorChain,
 		[]*ListenerWithSignal) (*chainreg.PartialChainControl,
-		*btcwallet.Config, func(), error)
+		*bronwallet.Config, func(), error)
 }
 
 // ChainControlBuilder is an interface that must be satisfied by a custom wallet
@@ -106,7 +106,7 @@ type ChainControlBuilder interface {
 	// BuildChainControl is responsible for creating a fully populated chain
 	// control instance from a wallet.
 	BuildChainControl(*chainreg.PartialChainControl,
-		*btcwallet.Config) (*chainreg.ChainControl, func(), error)
+		*bronwallet.Config) (*chainreg.ChainControl, func(), error)
 }
 
 // ImplementationCfg is a struct that holds all configuration items for
@@ -137,7 +137,7 @@ type ImplementationCfg struct {
 	ChainControlBuilder
 }
 
-// DefaultWalletImpl is the default implementation of our normal, btcwallet
+// DefaultWalletImpl is the default implementation of our normal, bronwallet
 // backed configuration.
 type DefaultWalletImpl struct {
 	cfg         *Config
@@ -221,7 +221,7 @@ func (d *DefaultWalletImpl) Permissions() map[string][]bakery.Op {
 func (d *DefaultWalletImpl) BuildWalletConfig(ctx context.Context,
 	dbs *DatabaseInstances, interceptorChain *rpcperms.InterceptorChain,
 	grpcListeners []*ListenerWithSignal) (*chainreg.PartialChainControl,
-	*btcwallet.Config, func(), error) {
+	*bronwallet.Config, func(), error) {
 
 	// Keep track of our various cleanup functions. We use a defer function
 	// as well to not repeat ourselves with every return statement.
@@ -284,7 +284,7 @@ func (d *DefaultWalletImpl) BuildWalletConfig(ctx context.Context,
 	// this information.
 	walletInitParams.Birthday = time.Now()
 
-	d.pwService.SetLoaderOpts([]btcwallet.LoaderOption{dbs.WalletDB})
+	d.pwService.SetLoaderOpts([]bronwallet.LoaderOption{dbs.WalletDB})
 	d.pwService.SetMacaroonDB(dbs.MacaroonDB)
 	walletExists, err := d.pwService.WalletExists()
 	if err != nil {
@@ -365,7 +365,7 @@ func (d *DefaultWalletImpl) BuildWalletConfig(ctx context.Context,
 		}
 
 		params, err := waitForWalletPassword(
-			d.cfg, d.pwService, []btcwallet.LoaderOption{dbs.WalletDB},
+			d.cfg, d.pwService, []bronwallet.LoaderOption{dbs.WalletDB},
 			d.interceptor.ShutdownChannel(),
 		)
 		if err != nil {
@@ -560,7 +560,7 @@ func (d *DefaultWalletImpl) BuildWalletConfig(ctx context.Context,
 		return nil, nil, nil, err
 	}
 
-	walletConfig := &btcwallet.Config{
+	walletConfig := &bronwallet.Config{
 		PrivatePass:      privateWalletPw,
 		PublicPass:       publicWalletPw,
 		Birthday:         walletInitParams.Birthday,
@@ -568,7 +568,7 @@ func (d *DefaultWalletImpl) BuildWalletConfig(ctx context.Context,
 		NetParams:        d.cfg.ActiveNetParams.Params,
 		CoinType:         d.cfg.ActiveNetParams.CoinType,
 		Wallet:           walletInitParams.Wallet,
-		LoaderOptions:    []btcwallet.LoaderOption{dbs.WalletDB},
+		LoaderOptions:    []bronwallet.LoaderOption{dbs.WalletDB},
 		ChainSource:      partialChainControl.ChainSource,
 		WatchOnly:        d.watchOnly,
 		MigrateWatchOnly: d.migrateWatchOnly,
@@ -597,9 +597,9 @@ func (d *DefaultWalletImpl) BuildWalletConfig(ctx context.Context,
 // NOTE: This is part of the ChainControlBuilder interface.
 func (d *DefaultWalletImpl) BuildChainControl(
 	partialChainControl *chainreg.PartialChainControl,
-	walletConfig *btcwallet.Config) (*chainreg.ChainControl, func(), error) {
+	walletConfig *bronwallet.Config) (*chainreg.ChainControl, func(), error) {
 
-	walletController, err := btcwallet.New(
+	walletController, err := bronwallet.New(
 		*walletConfig, partialChainControl.Cfg.BlockCache,
 	)
 	if err != nil {
@@ -608,7 +608,7 @@ func (d *DefaultWalletImpl) BuildChainControl(
 		return nil, nil, err
 	}
 
-	keyRing := keychain.NewBtcWalletKeyRing(
+	keyRing := keychain.NewBronwalletKeyRing(
 		walletController.InternalWallet(), walletConfig.CoinType,
 	)
 
@@ -674,9 +674,9 @@ func NewRPCSignerWalletImpl(cfg *Config, logger btclog.Logger,
 // NOTE: This is part of the ChainControlBuilder interface.
 func (d *RPCSignerWalletImpl) BuildChainControl(
 	partialChainControl *chainreg.PartialChainControl,
-	walletConfig *btcwallet.Config) (*chainreg.ChainControl, func(), error) {
+	walletConfig *bronwallet.Config) (*chainreg.ChainControl, func(), error) {
 
-	walletController, err := btcwallet.New(
+	walletController, err := bronwallet.New(
 		*walletConfig, partialChainControl.Cfg.BlockCache,
 	)
 	if err != nil {
@@ -685,7 +685,7 @@ func (d *RPCSignerWalletImpl) BuildChainControl(
 		return nil, nil, err
 	}
 
-	baseKeyRing := keychain.NewBtcWalletKeyRing(
+	baseKeyRing := keychain.NewBronwalletKeyRing(
 		walletController.InternalWallet(), walletConfig.CoinType,
 	)
 
@@ -766,8 +766,8 @@ type DatabaseInstances struct {
 	TowerServerDB watchtower.DB
 
 	// WalletDB is the configuration for loading the wallet database using
-	// the btcwallet's loader.
-	WalletDB btcwallet.LoaderOption
+	// the bronwallet's loader.
+	WalletDB bronwallet.LoaderOption
 }
 
 // DefaultDatabaseBuilder is a type that builds the default database backends
@@ -939,7 +939,7 @@ func (d *DefaultDatabaseBuilder) BuildDatabase(
 // this RPC server.
 func waitForWalletPassword(cfg *Config,
 	pwService *walletunlocker.UnlockerService,
-	loaderOpts []btcwallet.LoaderOption, shutdownChan <-chan struct{}) (
+	loaderOpts []bronwallet.LoaderOption, shutdownChan <-chan struct{}) (
 	*walletunlocker.WalletUnlockParams, error) {
 
 	// Wait for user to provide the password.
@@ -977,7 +977,7 @@ func waitForWalletPassword(cfg *Config,
 				keychain.KeyDerivationVersion)
 		}
 
-		loader, err := btcwallet.NewWalletLoader(
+		loader, err := bronwallet.NewWalletLoader(
 			cfg.ActiveNetParams.Params, recoveryWindow,
 			loaderOpts...,
 		)
@@ -1158,7 +1158,7 @@ func initNeutrinoBackend(cfg *Config, chainDir string,
 
 	// First we'll open the database file for neutrino, creating the
 	// database if needed. We append the normalized network name here to
-	// match the behavior of btcwallet.
+	// match the behavior of bronwallet.
 	dbPath := filepath.Join(
 		chainDir, lncfg.NormalizeNetwork(cfg.ActiveNetParams.Name),
 	)

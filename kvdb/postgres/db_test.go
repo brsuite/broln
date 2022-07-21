@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/btcsuite/btcwallet/walletdb"
-	"github.com/btcsuite/btcwallet/walletdb/walletdbtest"
+	"github.com/brsuite/bronwallet/walletdb"
+	"github.com/brsuite/bronwallet/walletdb/walletdbtest"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/context"
 )

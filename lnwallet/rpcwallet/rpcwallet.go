@@ -15,14 +15,14 @@ import (
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/hdkeychain"
 	"github.com/brsuite/bronutil/psbt"
-	basewallet "github.com/btcsuite/btcwallet/wallet"
+	basewallet "github.com/brsuite/bronwallet/wallet"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lncfg"
 	"github.com/brsuite/broln/lnrpc/signrpc"
 	"github.com/brsuite/broln/lnrpc/walletrpc"
 	"github.com/brsuite/broln/lnwallet"
-	"github.com/brsuite/broln/lnwallet/btcwallet"
+	"github.com/brsuite/broln/lnwallet/bronwallet"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/macaroons"
@@ -236,7 +236,7 @@ func (r *RPCKeyRing) SignPsbt(packet *psbt.Packet) error {
 // we get an error because the signer doesn't know the UTXO information required
 // in ComputeInputScript.
 //
-// TODO(guggero): Refactor btcwallet to accept ComputeInputScript as a function
+// TODO(guggero): Refactor bronwallet to accept ComputeInputScript as a function
 // parameter in FinalizePsbt so we can get rid of this code duplication.
 func (r *RPCKeyRing) FinalizePsbt(packet *psbt.Packet, _ string) error {
 	// Let's check that this is actually something we can and want to sign.
@@ -631,13 +631,13 @@ func (r *RPCKeyRing) remoteSign(tx *wire.MsgTx, signDesc *input.SignDescriptor,
 
 	if len(signDesc.SingleTweak) > 0 {
 		in.Unknowns = append(in.Unknowns, &psbt.Unknown{
-			Key:   btcwallet.PsbtKeyTypeInputSignatureTweakSingle,
+			Key:   bronwallet.PsbtKeyTypeInputSignatureTweakSingle,
 			Value: signDesc.SingleTweak,
 		})
 	}
 	if signDesc.DoubleTweak != nil {
 		in.Unknowns = append(in.Unknowns, &psbt.Unknown{
-			Key:   btcwallet.PsbtKeyTypeInputSignatureTweakDouble,
+			Key:   bronwallet.PsbtKeyTypeInputSignatureTweakDouble,
 			Value: signDesc.DoubleTweak.Serialize(),
 		})
 	}

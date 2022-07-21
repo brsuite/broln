@@ -23,7 +23,7 @@ func (l *LightningWallet) nextRevocationProducer(res *ChannelReservation,
 	}
 
 	// If the DeriveNextKey call returns the first key with Index 0, we need
-	// to re-derive the key as the keychain/btcwallet.go DerivePrivKey call
+	// to re-derive the key as the keychain/bronwallet.go DerivePrivKey call
 	// special-cases Index 0.
 	if nextRevocationKeyDesc.Index == 0 {
 		nextRevocationKeyDesc, err = keyRing.DeriveNextKey(

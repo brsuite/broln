@@ -1,7 +1,7 @@
 package kvdb
 
 import (
-	"github.com/btcsuite/btcwallet/walletdb"
+	"github.com/brsuite/bronwallet/walletdb"
 )
 
 // Update opens a database read/write transaction and executes the function f

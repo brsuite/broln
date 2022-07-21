@@ -1,4 +1,4 @@
-package btcwallet
+package bronwallet
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/psbt"
-	"github.com/btcsuite/btcwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/waddrmgr"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwallet/chainfee"
@@ -44,7 +44,7 @@ var (
 // responsibility to lock the inputs before handing them out.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) FundPsbt(packet *psbt.Packet, minConfs int32,
+func (b *Bronwallet) FundPsbt(packet *psbt.Packet, minConfs int32,
 	feeRate chainfee.SatPerKWeight, accountName string) (int32, error) {
 
 	// The fee rate is passed in using units of sat/kw, so we'll convert
@@ -94,7 +94,7 @@ func (b *BtcWallet) FundPsbt(packet *psbt.Packet, minConfs int32,
 // perform any other tasks (such as coin selection, UTXO locking or
 // input/output/fee value validation, PSBT finalization). Any input that is
 // incomplete will be skipped.
-func (b *BtcWallet) SignPsbt(packet *psbt.Packet) error {
+func (b *Bronwallet) SignPsbt(packet *psbt.Packet) error {
 	// Let's check that this is actually something we can and want to sign.
 	// We need at least one input and one output.
 	err := psbt.VerifyInputOutputLen(packet, true, true)
@@ -267,7 +267,7 @@ func maybeTweakPrivKeyPsbt(unknowns []*psbt.Unknown,
 // finalized successfully.
 //
 // This is a part of the WalletController interface.
-func (b *BtcWallet) FinalizePsbt(packet *psbt.Packet, accountName string) error {
+func (b *Bronwallet) FinalizePsbt(packet *psbt.Packet, accountName string) error {
 	var (
 		keyScope   *waddrmgr.KeyScope
 		accountNum uint32

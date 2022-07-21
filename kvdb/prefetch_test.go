@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/btcsuite/btcwallet/walletdb"
+	"github.com/brsuite/bronwallet/walletdb"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
 )

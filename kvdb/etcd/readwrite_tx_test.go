@@ -7,7 +7,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/btcsuite/btcwallet/walletdb"
+	"github.com/brsuite/bronwallet/walletdb"
 	"github.com/stretchr/testify/require"
 )
 

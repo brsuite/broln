@@ -12,7 +12,7 @@ import (
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/btcsuite/btcwallet/wallet"
+	"github.com/brsuite/bronwallet/wallet"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/funding"

@@ -1,7 +1,7 @@
 //go:build dev
 // +build dev
 
-package bitcoindnotify
+package brocoindnotify
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/integration/rpctest"
-	"github.com/btcsuite/btcwallet/chain"
+	"github.com/brsuite/bronwallet/chain"
 	"github.com/brsuite/broln/blockcache"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"

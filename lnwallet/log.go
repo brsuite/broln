@@ -2,9 +2,9 @@ package lnwallet
 
 import (
 	"github.com/btcsuite/btclog"
-	"github.com/btcsuite/btcwallet/chain"
-	btcwallet "github.com/btcsuite/btcwallet/wallet"
-	"github.com/btcsuite/btcwallet/wtxmgr"
+	"github.com/brsuite/bronwallet/chain"
+	bronwallet "github.com/brsuite/bronwallet/wallet"
+	"github.com/brsuite/bronwallet/wtxmgr"
 	"github.com/brsuite/broln/build"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 )
@@ -31,7 +31,7 @@ func DisableLog() {
 func UseLogger(logger btclog.Logger) {
 	walletLog = logger
 
-	btcwallet.UseLogger(logger)
+	bronwallet.UseLogger(logger)
 	wtxmgr.UseLogger(logger)
 	chain.UseLogger(logger)
 	chainfee.UseLogger(logger)

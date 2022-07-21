@@ -7,7 +7,7 @@ import (
 
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/hdkeychain"
-	"github.com/btcsuite/btcwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/waddrmgr"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/walletrpc"

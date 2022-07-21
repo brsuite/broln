@@ -12,9 +12,9 @@ import (
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/hdkeychain"
 	"github.com/brsuite/bronutil/psbt"
-	"github.com/btcsuite/btcwallet/waddrmgr"
-	"github.com/btcsuite/btcwallet/wallet/txauthor"
-	"github.com/btcsuite/btcwallet/wtxmgr"
+	"github.com/brsuite/bronwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/wallet/txauthor"
+	"github.com/brsuite/bronwallet/wtxmgr"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 )
@@ -147,7 +147,7 @@ type TransactionSubscription interface {
 // Go wallet, a local or remote wallet via an RPC mechanism, or possibly even
 // a daemon assisted hardware wallet. This interface serves the purpose of
 // allowing LightningWallet to be seamlessly compatible with several wallets
-// such as: uspv, btcwallet, Brocoin Core, Electrum, etc. This interface then
+// such as: uspv, bronwallet, Brocoin Core, Electrum, etc. This interface then
 // serves as a "base wallet", with Lightning Network awareness taking place at
 // a "higher" level of abstraction. Essentially, an overlay wallet.
 // Implementors of this interface must closely adhere to the documented

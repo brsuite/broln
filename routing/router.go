@@ -27,7 +27,7 @@ import (
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwallet"
-	"github.com/brsuite/broln/lnwallet/btcwallet"
+	"github.com/brsuite/broln/lnwallet/bronwallet"
 	"github.com/brsuite/broln/lnwallet/chanvalidate"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/multimutex"
@@ -1556,7 +1556,7 @@ func (r *ChannelRouter) processUpdate(msg interface{},
 			r.quit,
 		)
 		if err != nil {
-			if errors.Is(err, btcwallet.ErrOutputSpent) {
+			if errors.Is(err, bronwallet.ErrOutputSpent) {
 				zErr := r.addZombieEdge(msg.ChannelID)
 				if zErr != nil {
 					return zErr

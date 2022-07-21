@@ -10,15 +10,15 @@ import (
 
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/bronutil/hdkeychain"
-	"github.com/btcsuite/btcwallet/waddrmgr"
-	"github.com/btcsuite/btcwallet/wallet"
+	"github.com/brsuite/bronwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/wallet"
 	"github.com/brsuite/broln/aezeed"
 	"github.com/brsuite/broln/chanbackup"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnwallet"
-	"github.com/brsuite/broln/lnwallet/btcwallet"
+	"github.com/brsuite/broln/lnwallet/bronwallet"
 	"github.com/brsuite/broln/macaroons"
 )
 
@@ -200,7 +200,7 @@ type UnlockerService struct {
 	resetWalletTransactions bool
 
 	// LoaderOpts holds the functional options for the wallet loader.
-	loaderOpts []btcwallet.LoaderOption
+	loaderOpts []bronwallet.LoaderOption
 
 	// macaroonDB is an instance of a database backend that stores all
 	// macaroon root keys. This will be nil on initialization and must be
@@ -211,7 +211,7 @@ type UnlockerService struct {
 // New creates and returns a new UnlockerService.
 func New(params *chaincfg.Params, macaroonFiles []string,
 	resetWalletTransactions bool,
-	loaderOpts []btcwallet.LoaderOption) *UnlockerService {
+	loaderOpts []bronwallet.LoaderOption) *UnlockerService {
 
 	return &UnlockerService{
 		InitMsgs:   make(chan *WalletInitMsg, 1),
@@ -229,7 +229,7 @@ func New(params *chaincfg.Params, macaroonFiles []string,
 
 // SetLoaderOpts can be used to inject wallet loader options after the unlocker
 // service has been hooked to the main RPC server.
-func (u *UnlockerService) SetLoaderOpts(loaderOpts []btcwallet.LoaderOption) {
+func (u *UnlockerService) SetLoaderOpts(loaderOpts []bronwallet.LoaderOption) {
 	u.loaderOpts = loaderOpts
 }
 
@@ -242,7 +242,7 @@ func (u *UnlockerService) SetMacaroonDB(macaroonDB kvdb.Backend) {
 func (u *UnlockerService) newLoader(recoveryWindow uint32) (*wallet.Loader,
 	error) {
 
-	return btcwallet.NewWalletLoader(
+	return bronwallet.NewWalletLoader(
 		u.netParams, recoveryWindow, u.loaderOpts...,
 	)
 }
@@ -451,7 +451,7 @@ func (u *UnlockerService) InitWallet(ctx context.Context,
 	// To support restoring a wallet where the seed isn't known or a wallet
 	// created externally to broln, we also allow the extended master key
 	// (xprv) to be imported directly. This is what'll be stored in the
-	// btcwallet database anyway.
+	// bronwallet database anyway.
 	case len(in.ExtendedMasterKey) > 0:
 		extendedKey, err := hdkeychain.NewKeyFromString(
 			in.ExtendedMasterKey,

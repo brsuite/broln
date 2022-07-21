@@ -17,13 +17,13 @@ import (
 	"github.com/brsuite/brond/rpcclient"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/btcsuite/btcwallet/chain"
-	_ "github.com/btcsuite/btcwallet/walletdb/bdb" // Required to auto-register the boltdb walletdb implementation.
+	"github.com/brsuite/bronwallet/chain"
+	_ "github.com/brsuite/bronwallet/walletdb/bdb" // Required to auto-register the boltdb walletdb implementation.
 	"github.com/brsuite/neutrino"
 	"github.com/brsuite/broln/blockcache"
 	"github.com/brsuite/broln/chainntnfs"
-	"github.com/brsuite/broln/chainntnfs/bitcoindnotify"
-	"github.com/brsuite/broln/chainntnfs/btcdnotify"
+	"github.com/brsuite/broln/chainntnfs/brocoindnotify"
+	"github.com/brsuite/broln/chainntnfs/brondnotify"
 	"github.com/brsuite/broln/chainntnfs/neutrinonotify"
 	"github.com/brsuite/broln/channeldb"
 )
@@ -1967,7 +1967,7 @@ func TestInterfaces(t *testing.T, targetBackEnd string) {
 				t, p2pAddr, true,
 			)
 			newNotifier = func() (chainntnfs.TestChainNotifier, error) {
-				return bitcoindnotify.New(
+				return brocoindnotify.New(
 					brocoindConn, chainntnfs.NetParams,
 					hintCache, hintCache, blockCache,
 				), nil
@@ -1975,7 +1975,7 @@ func TestInterfaces(t *testing.T, targetBackEnd string) {
 
 		case "brond":
 			newNotifier = func() (chainntnfs.TestChainNotifier, error) {
-				return btcdnotify.New(
+				return brondnotify.New(
 					&rpcConfig, chainntnfs.NetParams,
 					hintCache, hintCache, blockCache,
 				)

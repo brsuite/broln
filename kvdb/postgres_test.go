@@ -6,7 +6,7 @@ package kvdb
 import (
 	"testing"
 
-	"github.com/btcsuite/btcwallet/walletdb"
+	"github.com/brsuite/bronwallet/walletdb"
 	"github.com/brsuite/broln/kvdb/postgres"
 	"github.com/stretchr/testify/require"
 )

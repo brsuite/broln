@@ -472,7 +472,7 @@ lines utilized, while still adhering to the 80-character column limit.
 ## Pointing to Remote Dependant Branches in Go Modules
 
 It's common that a developer may need to make a change in a dependent project
-of `broln` such as `brond`, `neutrino`, `btcwallet`, etc. In order to test changes
+of `broln` such as `brond`, `neutrino`, `bronwallet`, etc. In order to test changes
 without testing infrastructure, or simply make a PR into `broln` that will build
 without any further work, the `go.mod` and `go.sum` files will need to be
 updated. Luckily, the `go mod` command has a handy tool to do this

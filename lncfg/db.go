@@ -8,7 +8,7 @@ import (
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/kvdb/etcd"
 	"github.com/brsuite/broln/kvdb/postgres"
-	"github.com/brsuite/broln/lnwallet/btcwallet"
+	"github.com/brsuite/broln/lnwallet/bronwallet"
 )
 
 const (
@@ -178,7 +178,7 @@ type DatabaseBackends struct {
 
 	// WalletDB is an option that instructs the wallet loader where to load
 	// the underlying wallet database from.
-	WalletDB btcwallet.LoaderOption
+	WalletDB bronwallet.LoaderOption
 
 	// Remote indicates whether the database backends are remote, possibly
 	// replicated instances or local bbolt backed databases.
@@ -298,7 +298,7 @@ func (db *DB) GetBackends(ctx context.Context, chanDBPath,
 			// in a clustered environment. This will ensure that all
 			// members of the cluster have access to the same wallet
 			// state.
-			WalletDB: btcwallet.LoaderWithExternalWalletDB(
+			WalletDB: bronwallet.LoaderWithExternalWalletDB(
 				etcdWalletBackend,
 			),
 			Remote:     true,
@@ -380,7 +380,7 @@ func (db *DB) GetBackends(ctx context.Context, chanDBPath,
 			// in a clustered environment. This will ensure that all
 			// members of the cluster have access to the same wallet
 			// state.
-			WalletDB: btcwallet.LoaderWithExternalWalletDB(
+			WalletDB: bronwallet.LoaderWithExternalWalletDB(
 				postgresWalletBackend,
 			),
 			Remote:     true,
@@ -484,7 +484,7 @@ func (db *DB) GetBackends(ctx context.Context, chanDBPath,
 		// by the active network. The wallet loader has its own cleanup
 		// method so we don't need to add anything to our map (in fact
 		// nothing is opened just yet).
-		WalletDB: btcwallet.LoaderWithLocalWalletDB(
+		WalletDB: bronwallet.LoaderWithLocalWalletDB(
 			walletDBPath, db.Bolt.NoFreelistSync, db.Bolt.DBTimeout,
 		),
 		CloseFuncs: closeFuncs,
