@@ -39,13 +39,13 @@ var (
 	waddrmgrNamespaceKey = []byte("waddrmgr")
 )
 
-// BronwalletKeyRing is an implementation of both the KeyRing and SecretKeyRing
+// bronwalletKeyRing is an implementation of both the KeyRing and SecretKeyRing
 // interfaces backed by bronwallet's internal root waddrmgr. Internally, we'll
 // be using a ScopedKeyManager to do all of our derivations, using the key
 // scope and scope addr scehma defined above. Re-using the existing key scope
 // construction means that all key derivation will be protected under the root
 // seed of the wallet, making each derived key fully deterministic.
-type BronwalletKeyRing struct {
+type bronwalletKeyRing struct {
 	// wallet is a pointer to the active instance of the bronwallet core.
 	// This is required as we'll need to manually open database
 	// transactions in order to derive addresses and lookup relevant keys
@@ -60,12 +60,12 @@ type BronwalletKeyRing struct {
 	lightningScope *waddrmgr.ScopedKeyManager
 }
 
-// NewBronwalletKeyRing creates a new implementation of the
+// NewbronwalletKeyRing creates a new implementation of the
 // keychain.SecretKeyRing interface backed by bronwallet.
 //
 // NOTE: The passed waddrmgr.Manager MUST be unlocked in order for the keychain
 // to function.
-func NewBronwalletKeyRing(w *wallet.Wallet, coinType uint32) SecretKeyRing {
+func NewbronwalletKeyRing(w *wallet.Wallet, coinType uint32) SecretKeyRing {
 	// Construct the key scope that will be used within the waddrmgr to
 	// create an HD chain for deriving all of our required keys. A different
 	// scope is used for each specific coin type.
@@ -74,7 +74,7 @@ func NewBronwalletKeyRing(w *wallet.Wallet, coinType uint32) SecretKeyRing {
 		Coin:    coinType,
 	}
 
-	return &BronwalletKeyRing{
+	return &bronwalletKeyRing{
 		wallet:        w,
 		chainKeyScope: chainKeyScope,
 	}
@@ -84,7 +84,7 @@ func NewBronwalletKeyRing(w *wallet.Wallet, coinType uint32) SecretKeyRing {
 // our keys. If the scope has already been fetched from the database, then a
 // cached version will be returned. Otherwise, we'll fetch it from the database
 // and cache it for subsequent accesses.
-func (b *BronwalletKeyRing) keyScope() (*waddrmgr.ScopedKeyManager, error) {
+func (b *bronwalletKeyRing) keyScope() (*waddrmgr.ScopedKeyManager, error) {
 	// If the scope has already been populated, then we'll return it
 	// directly.
 	if b.lightningScope != nil {
@@ -94,7 +94,7 @@ func (b *BronwalletKeyRing) keyScope() (*waddrmgr.ScopedKeyManager, error) {
 	// Otherwise, we'll first do a check to ensure that the root manager
 	// isn't locked, as otherwise we won't be able to *use* the scope.
 	if !b.wallet.Manager.WatchOnly() && b.wallet.Manager.IsLocked() {
-		return nil, fmt.Errorf("cannot create BronwalletKeyRing with " +
+		return nil, fmt.Errorf("cannot create bronwalletKeyRing with " +
 			"locked waddrmgr.Manager")
 	}
 
@@ -112,7 +112,7 @@ func (b *BronwalletKeyRing) keyScope() (*waddrmgr.ScopedKeyManager, error) {
 
 // createAccountIfNotExists will create the corresponding account for a key
 // family if it doesn't already exist in the database.
-func (b *BronwalletKeyRing) createAccountIfNotExists(
+func (b *bronwalletKeyRing) createAccountIfNotExists(
 	addrmgrNs walletdb.ReadWriteBucket, keyFam KeyFamily,
 	scope *waddrmgr.ScopedKeyManager) error {
 
@@ -139,7 +139,7 @@ func (b *BronwalletKeyRing) createAccountIfNotExists(
 // child within this branch.
 //
 // NOTE: This is part of the keychain.KeyRing interface.
-func (b *BronwalletKeyRing) DeriveNextKey(keyFam KeyFamily) (KeyDescriptor, error) {
+func (b *bronwalletKeyRing) DeriveNextKey(keyFam KeyFamily) (KeyDescriptor, error) {
 	var (
 		pubKey *btcec.PublicKey
 		keyLoc KeyLocator
@@ -202,7 +202,7 @@ func (b *BronwalletKeyRing) DeriveNextKey(keyFam KeyFamily) (KeyDescriptor, erro
 // rotating something like our current default node key.
 //
 // NOTE: This is part of the keychain.KeyRing interface.
-func (b *BronwalletKeyRing) DeriveKey(keyLoc KeyLocator) (KeyDescriptor, error) {
+func (b *bronwalletKeyRing) DeriveKey(keyLoc KeyLocator) (KeyDescriptor, error) {
 	var keyDesc KeyDescriptor
 
 	db := b.wallet.Database()
@@ -254,7 +254,7 @@ func (b *BronwalletKeyRing) DeriveKey(keyLoc KeyLocator) (KeyDescriptor, error) 
 // passed key descriptor.
 //
 // NOTE: This is part of the keychain.SecretKeyRing interface.
-func (b *BronwalletKeyRing) DerivePrivKey(keyDesc KeyDescriptor) (
+func (b *bronwalletKeyRing) DerivePrivKey(keyDesc KeyDescriptor) (
 	*btcec.PrivateKey, error) {
 
 	var key *btcec.PrivateKey
@@ -383,7 +383,7 @@ func (b *BronwalletKeyRing) DerivePrivKey(keyDesc KeyDescriptor) (
 //  sx := k*P s := sha256(sx.SerializeCompressed())
 //
 // NOTE: This is part of the keychain.ECDHRing interface.
-func (b *BronwalletKeyRing) ECDH(keyDesc KeyDescriptor,
+func (b *bronwalletKeyRing) ECDH(keyDesc KeyDescriptor,
 	pub *btcec.PublicKey) ([32]byte, error) {
 
 	privKey, err := b.DerivePrivKey(keyDesc)
@@ -405,7 +405,7 @@ func (b *BronwalletKeyRing) ECDH(keyDesc KeyDescriptor,
 // first, with the private key described in the key locator.
 //
 // NOTE: This is part of the keychain.MessageSignerRing interface.
-func (b *BronwalletKeyRing) SignMessage(keyLoc KeyLocator,
+func (b *bronwalletKeyRing) SignMessage(keyLoc KeyLocator,
 	msg []byte, doubleHash bool) (*btcec.Signature, error) {
 
 	privKey, err := b.DerivePrivKey(KeyDescriptor{
@@ -429,7 +429,7 @@ func (b *BronwalletKeyRing) SignMessage(keyLoc KeyLocator,
 // the signature in the compact, public key recoverable format.
 //
 // NOTE: This is part of the keychain.MessageSignerRing interface.
-func (b *BronwalletKeyRing) SignMessageCompact(keyLoc KeyLocator,
+func (b *bronwalletKeyRing) SignMessageCompact(keyLoc KeyLocator,
 	msg []byte, doubleHash bool) ([]byte, error) {
 
 	privKey, err := b.DerivePrivKey(KeyDescriptor{

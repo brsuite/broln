@@ -168,7 +168,7 @@ func TestBip32KeyDerivation(t *testing.T) {
 }
 
 func newTestWallet(t *testing.T, netParams *chaincfg.Params,
-	seedBytes []byte) (*Bronwallet, func()) {
+	seedBytes []byte) (*bronwallet, func()) {
 
 	tempDir, err := ioutil.TempDir("", "lnwallet")
 	if err != nil {

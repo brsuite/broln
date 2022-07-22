@@ -33,7 +33,7 @@ var (
 	testDBTimeout = time.Second * 10
 )
 
-func createTestBronwallet(coinType uint32) (func(), *wallet.Wallet, error) {
+func createTestbronwallet(coinType uint32) (func(), *wallet.Wallet, error) {
 	// Instruct waddrmgr to use the cranked down scrypt parameters when
 	// creating new wallet encryption keys.
 	fastScrypt := waddrmgr.FastScryptOptions
@@ -122,32 +122,32 @@ func TestKeyRingDerivation(t *testing.T) {
 
 	keyRingImplementations := []keyRingConstructor{
 		func() (string, func(), KeyRing, error) {
-			cleanUp, wallet, err := createTestBronwallet(
+			cleanUp, wallet, err := createTestbronwallet(
 				CoinTypeBrocoin,
 			)
 			require.NoError(t, err)
 
-			keyRing := NewBronwalletKeyRing(wallet, CoinTypeBrocoin)
+			keyRing := NewbronwalletKeyRing(wallet, CoinTypeBrocoin)
 
 			return "bronwallet", cleanUp, keyRing, nil
 		},
 		func() (string, func(), KeyRing, error) {
-			cleanUp, wallet, err := createTestBronwallet(
+			cleanUp, wallet, err := createTestbronwallet(
 				CoinTypeLitecoin,
 			)
 			require.NoError(t, err)
 
-			keyRing := NewBronwalletKeyRing(wallet, CoinTypeLitecoin)
+			keyRing := NewbronwalletKeyRing(wallet, CoinTypeLitecoin)
 
 			return "ltcwallet", cleanUp, keyRing, nil
 		},
 		func() (string, func(), KeyRing, error) {
-			cleanUp, wallet, err := createTestBronwallet(
+			cleanUp, wallet, err := createTestbronwallet(
 				CoinTypeTestnet,
 			)
 			require.NoError(t, err)
 
-			keyRing := NewBronwalletKeyRing(wallet, CoinTypeTestnet)
+			keyRing := NewbronwalletKeyRing(wallet, CoinTypeTestnet)
 
 			return "testwallet", cleanUp, keyRing, nil
 		},
@@ -257,32 +257,32 @@ func TestSecretKeyRingDerivation(t *testing.T) {
 
 	secretKeyRingImplementations := []secretKeyRingConstructor{
 		func() (string, func(), SecretKeyRing, error) {
-			cleanUp, wallet, err := createTestBronwallet(
+			cleanUp, wallet, err := createTestbronwallet(
 				CoinTypeBrocoin,
 			)
 			require.NoError(t, err)
 
-			keyRing := NewBronwalletKeyRing(wallet, CoinTypeBrocoin)
+			keyRing := NewbronwalletKeyRing(wallet, CoinTypeBrocoin)
 
 			return "bronwallet", cleanUp, keyRing, nil
 		},
 		func() (string, func(), SecretKeyRing, error) {
-			cleanUp, wallet, err := createTestBronwallet(
+			cleanUp, wallet, err := createTestbronwallet(
 				CoinTypeLitecoin,
 			)
 			require.NoError(t, err)
 
-			keyRing := NewBronwalletKeyRing(wallet, CoinTypeLitecoin)
+			keyRing := NewbronwalletKeyRing(wallet, CoinTypeLitecoin)
 
 			return "ltcwallet", cleanUp, keyRing, nil
 		},
 		func() (string, func(), SecretKeyRing, error) {
-			cleanUp, wallet, err := createTestBronwallet(
+			cleanUp, wallet, err := createTestbronwallet(
 				CoinTypeTestnet,
 			)
 			require.NoError(t, err)
 
-			keyRing := NewBronwalletKeyRing(wallet, CoinTypeTestnet)
+			keyRing := NewbronwalletKeyRing(wallet, CoinTypeTestnet)
 
 			return "testwallet", cleanUp, keyRing, nil
 		},

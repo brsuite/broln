@@ -76,11 +76,11 @@ var (
 		"for account")
 )
 
-// Bronwallet is an implementation of the lnwallet.WalletController interface
+// bronwallet is an implementation of the lnwallet.WalletController interface
 // backed by an active instance of bronwallet. At the time of the writing of
 // this documentation, this implementation requires a full brond node to
 // operate.
-type Bronwallet struct {
+type bronwallet struct {
 	// wallet is an active instance of bronwallet.
 	wallet *base.Wallet
 
@@ -97,14 +97,14 @@ type Bronwallet struct {
 	blockCache *blockcache.BlockCache
 }
 
-// A compile time check to ensure that Bronwallet implements the
+// A compile time check to ensure that bronwallet implements the
 // WalletController and BlockChainIO interfaces.
-var _ lnwallet.WalletController = (*Bronwallet)(nil)
-var _ lnwallet.BlockChainIO = (*Bronwallet)(nil)
+var _ lnwallet.WalletController = (*bronwallet)(nil)
+var _ lnwallet.BlockChainIO = (*bronwallet)(nil)
 
-// New returns a new fully initialized instance of Bronwallet given a valid
+// New returns a new fully initialized instance of bronwallet given a valid
 // configuration struct.
-func New(cfg Config, blockCache *blockcache.BlockCache) (*Bronwallet, error) {
+func New(cfg Config, blockCache *blockcache.BlockCache) (*bronwallet, error) {
 	// Create the key scope for the coin type being managed by this wallet.
 	chainKeyScope := waddrmgr.KeyScope{
 		Purpose: keychain.BIP0043Purpose,
@@ -156,7 +156,7 @@ func New(cfg Config, blockCache *blockcache.BlockCache) (*Bronwallet, error) {
 		}
 	}
 
-	return &Bronwallet{
+	return &bronwallet{
 		cfg:           &cfg,
 		wallet:        wallet,
 		db:            wallet.Database(),
@@ -268,7 +268,7 @@ func onWalletCreated(tx kvdb.RwTx) error {
 // BackEnd returns the underlying ChainService's name as a string.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) BackEnd() string {
+func (b *bronwallet) BackEnd() string {
 	if b.chain != nil {
 		return b.chain.BackEnd()
 	}
@@ -278,7 +278,7 @@ func (b *Bronwallet) BackEnd() string {
 
 // InternalWallet returns a pointer to the internal base wallet which is the
 // core of bronwallet.
-func (b *Bronwallet) InternalWallet() *base.Wallet {
+func (b *bronwallet) InternalWallet() *base.Wallet {
 	return b.wallet
 }
 
@@ -286,7 +286,7 @@ func (b *Bronwallet) InternalWallet() *base.Wallet {
 // begins syncing to the current available blockchain state.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) Start() error {
+func (b *bronwallet) Start() error {
 	// Is the wallet (according to its database) currently watch-only
 	// already? If it is, we won't need to convert it later.
 	walletIsWatchOnly := b.wallet.Manager.WatchOnly()
@@ -409,7 +409,7 @@ func (b *Bronwallet) Start() error {
 // any active sockets, database handles, stopping goroutines, etc.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) Stop() error {
+func (b *bronwallet) Stop() error {
 	b.wallet.Stop()
 
 	b.wallet.WaitForShutdown()
@@ -427,7 +427,7 @@ func (b *Bronwallet) Stop() error {
 // accounts is returned.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) ConfirmedBalance(confs int32,
+func (b *bronwallet) ConfirmedBalance(confs int32,
 	accountFilter string) (bronutil.Amount, error) {
 
 	var balance bronutil.Amount
@@ -448,7 +448,7 @@ func (b *Bronwallet) ConfirmedBalance(confs int32,
 
 // keyScopeForAccountAddr determines the appropriate key scope of an account
 // based on its name/address type.
-func (b *Bronwallet) keyScopeForAccountAddr(accountName string,
+func (b *bronwallet) keyScopeForAccountAddr(accountName string,
 	addrType lnwallet.AddressType) (waddrmgr.KeyScope, uint32, error) {
 
 	// Map the requested address type to its key scope.
@@ -490,7 +490,7 @@ func (b *Bronwallet) keyScopeForAccountAddr(accountName string,
 // account the address should be generated from.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) NewAddress(t lnwallet.AddressType, change bool,
+func (b *bronwallet) NewAddress(t lnwallet.AddressType, change bool,
 	accountName string) (bronutil.Address, error) {
 
 	// Addresses cannot be derived from the catch-all imported accounts.
@@ -516,7 +516,7 @@ func (b *Bronwallet) NewAddress(t lnwallet.AddressType, change bool,
 // NewAddress it can derive a specified address type, and also optionally a
 // change address. The account parameter must be non-empty as it determines
 // which account the address should be generated from.
-func (b *Bronwallet) LastUnusedAddress(addrType lnwallet.AddressType,
+func (b *bronwallet) LastUnusedAddress(addrType lnwallet.AddressType,
 	accountName string) (bronutil.Address, error) {
 
 	// Addresses cannot be derived from the catch-all imported accounts.
@@ -535,7 +535,7 @@ func (b *Bronwallet) LastUnusedAddress(addrType lnwallet.AddressType,
 // IsOurAddress checks if the passed address belongs to this wallet
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) IsOurAddress(a bronutil.Address) bool {
+func (b *bronwallet) IsOurAddress(a bronutil.Address) bool {
 	result, err := b.wallet.HaveAddress(a)
 	return result && (err == nil)
 }
@@ -545,7 +545,7 @@ func (b *Bronwallet) IsOurAddress(a bronutil.Address) bool {
 // accounts and return only those matching.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) ListAccounts(name string,
+func (b *bronwallet) ListAccounts(name string,
 	keyScope *waddrmgr.KeyScope) ([]*waddrmgr.AccountProperties, error) {
 
 	var res []*waddrmgr.AccountProperties
@@ -666,7 +666,7 @@ func (b *Bronwallet) ListAccounts(name string,
 // externally, witness pubkeys internally).
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) ImportAccount(name string, accountPubKey *hdkeychain.ExtendedKey,
+func (b *bronwallet) ImportAccount(name string, accountPubKey *hdkeychain.ExtendedKey,
 	masterKeyFingerprint uint32, addrType *waddrmgr.AddressType,
 	dryRun bool) (*waddrmgr.AccountProperties, []bronutil.Address,
 	[]bronutil.Address, error) {
@@ -712,7 +712,7 @@ func (b *Bronwallet) ImportAccount(name string, accountPubKey *hdkeychain.Extend
 // pay-to-pubkey-hash (P2PKH) scheme.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) ImportPublicKey(pubKey *btcec.PublicKey,
+func (b *bronwallet) ImportPublicKey(pubKey *btcec.PublicKey,
 	addrType waddrmgr.AddressType) error {
 
 	return b.wallet.ImportPublicKey(pubKey, addrType)
@@ -725,7 +725,7 @@ func (b *Bronwallet) ImportPublicKey(pubKey *btcec.PublicKey,
 // NOTE: This method requires the global coin selection lock to be held.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) SendOutputs(outputs []*wire.TxOut,
+func (b *bronwallet) SendOutputs(outputs []*wire.TxOut,
 	feeRate chainfee.SatPerKWeight, minConfs int32,
 	label string) (*wire.MsgTx, error) {
 
@@ -762,7 +762,7 @@ func (b *Bronwallet) SendOutputs(outputs []*wire.TxOut,
 // NOTE: This method requires the global coin selection lock to be held.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) CreateSimpleTx(outputs []*wire.TxOut,
+func (b *bronwallet) CreateSimpleTx(outputs []*wire.TxOut,
 	feeRate chainfee.SatPerKWeight, minConfs int32,
 	dryRun bool) (*txauthor.AuthoredTx, error) {
 
@@ -808,7 +808,7 @@ func (b *Bronwallet) CreateSimpleTx(outputs []*wire.TxOut,
 // NOTE: This method requires the global coin selection lock to be held.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) LockOutpoint(o wire.OutPoint) {
+func (b *bronwallet) LockOutpoint(o wire.OutPoint) {
 	b.wallet.LockOutpoint(o)
 }
 
@@ -818,7 +818,7 @@ func (b *Bronwallet) LockOutpoint(o wire.OutPoint) {
 // NOTE: This method requires the global coin selection lock to be held.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) UnlockOutpoint(o wire.OutPoint) {
+func (b *bronwallet) UnlockOutpoint(o wire.OutPoint) {
 	b.wallet.UnlockOutpoint(o)
 }
 
@@ -833,7 +833,7 @@ func (b *Bronwallet) UnlockOutpoint(o wire.OutPoint) {
 // wtxmgr.ErrOutputAlreadyLocked is returned.
 //
 // NOTE: This method requires the global coin selection lock to be held.
-func (b *Bronwallet) LeaseOutput(id wtxmgr.LockID, op wire.OutPoint,
+func (b *bronwallet) LeaseOutput(id wtxmgr.LockID, op wire.OutPoint,
 	duration time.Duration) (time.Time, error) {
 
 	// Make sure we don't attempt to double lock an output that's been
@@ -846,7 +846,7 @@ func (b *Bronwallet) LeaseOutput(id wtxmgr.LockID, op wire.OutPoint,
 }
 
 // ListLeasedOutputs returns a list of all currently locked outputs.
-func (b *Bronwallet) ListLeasedOutputs() ([]*wtxmgr.LockedOutput, error) {
+func (b *bronwallet) ListLeasedOutputs() ([]*wtxmgr.LockedOutput, error) {
 	return b.wallet.ListLeasedOutputs()
 }
 
@@ -855,7 +855,7 @@ func (b *Bronwallet) ListLeasedOutputs() ([]*wtxmgr.LockedOutput, error) {
 // originally lock the output.
 //
 // NOTE: This method requires the global coin selection lock to be held.
-func (b *Bronwallet) ReleaseOutput(id wtxmgr.LockID, op wire.OutPoint) error {
+func (b *bronwallet) ReleaseOutput(id wtxmgr.LockID, op wire.OutPoint) error {
 	return b.wallet.ReleaseOutput(id, op)
 }
 
@@ -871,7 +871,7 @@ func (b *Bronwallet) ReleaseOutput(id wtxmgr.LockID, op wire.OutPoint) error {
 // NOTE: This method requires the global coin selection lock to be held.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) ListUnspentWitness(minConfs, maxConfs int32,
+func (b *bronwallet) ListUnspentWitness(minConfs, maxConfs int32,
 	accountFilter string) ([]*lnwallet.Utxo, error) {
 
 	// First, grab all the unfiltered currently unspent outputs.
@@ -939,7 +939,7 @@ func (b *Bronwallet) ListUnspentWitness(minConfs, maxConfs int32,
 // publishing the transaction fails, an error describing the reason is returned
 // (currently ErrDoubleSpend). If the transaction is already published to the
 // network (either in the mempool or chain) no error will be returned.
-func (b *Bronwallet) PublishTransaction(tx *wire.MsgTx, label string) error {
+func (b *bronwallet) PublishTransaction(tx *wire.MsgTx, label string) error {
 	if err := b.wallet.PublishTransaction(tx, label); err != nil {
 
 		// If we failed to publish the transaction, check whether we
@@ -969,7 +969,7 @@ func (b *Bronwallet) PublishTransaction(tx *wire.MsgTx, label string) error {
 // is set. Labels must not be empty, and they are limited to 500 chars.
 //
 // Note: it is part of the WalletController interface.
-func (b *Bronwallet) LabelTransaction(hash chainhash.Hash, label string,
+func (b *bronwallet) LabelTransaction(hash chainhash.Hash, label string,
 	overwrite bool) error {
 
 	return b.wallet.LabelTransaction(hash, label, overwrite)
@@ -1105,7 +1105,7 @@ func unminedTransactionsToDetail(
 // empty, transactions of all wallet accounts are returned.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) ListTransactionDetails(startHeight, endHeight int32,
+func (b *bronwallet) ListTransactionDetails(startHeight, endHeight int32,
 	accountFilter string) ([]*lnwallet.TransactionDetail, error) {
 
 	// Grab the best block the wallet knows of, we'll use this to calculate
@@ -1253,7 +1253,7 @@ out:
 // blocks.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) SubscribeTransactions() (lnwallet.TransactionSubscription, error) {
+func (b *bronwallet) SubscribeTransactions() (lnwallet.TransactionSubscription, error) {
 	walletClient := b.wallet.NtfnServer.TransactionNotifications()
 
 	txClient := &txSubscriptionClient{
@@ -1273,7 +1273,7 @@ func (b *Bronwallet) SubscribeTransactions() (lnwallet.TransactionSubscription, 
 // fully synced to the current best block in the main chain.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) IsSynced() (bool, int64, error) {
+func (b *bronwallet) IsSynced() (bool, int64, error) {
 	// Grab the best chain state the wallet is currently aware of.
 	syncState := b.wallet.Manager.SyncedTo()
 
@@ -1328,7 +1328,7 @@ func (b *Bronwallet) IsSynced() (bool, int64, error) {
 // representing the recovery progress made so far.
 //
 // This is a part of the WalletController interface.
-func (b *Bronwallet) GetRecoveryInfo() (bool, float64, error) {
+func (b *bronwallet) GetRecoveryInfo() (bool, float64, error) {
 	isRecoveryMode := true
 	progress := float64(0)
 

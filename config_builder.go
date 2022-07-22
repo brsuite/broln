@@ -608,7 +608,7 @@ func (d *DefaultWalletImpl) BuildChainControl(
 		return nil, nil, err
 	}
 
-	keyRing := keychain.NewBronwalletKeyRing(
+	keyRing := keychain.NewbronwalletKeyRing(
 		walletController.InternalWallet(), walletConfig.CoinType,
 	)
 
@@ -685,7 +685,7 @@ func (d *RPCSignerWalletImpl) BuildChainControl(
 		return nil, nil, err
 	}
 
-	baseKeyRing := keychain.NewBronwalletKeyRing(
+	baseKeyRing := keychain.NewbronwalletKeyRing(
 		walletController.InternalWallet(), walletConfig.CoinType,
 	)
 

@@ -3444,9 +3444,9 @@ func runTests(t *testing.T, walletDriver *lnwallet.WalletDriver,
 		if err != nil {
 			t.Fatalf("unable to create bronwallet: %v", err)
 		}
-		aliceSigner = aliceWalletController.(*bronwallet.Bronwallet)
-		aliceKeyRing = keychain.NewBronwalletKeyRing(
-			aliceWalletController.(*bronwallet.Bronwallet).InternalWallet(),
+		aliceSigner = aliceWalletController.(*bronwallet.bronwallet)
+		aliceKeyRing = keychain.NewbronwalletKeyRing(
+			aliceWalletController.(*bronwallet.bronwallet).InternalWallet(),
 			keychain.CoinTypeTestnet,
 		)
 
@@ -3475,12 +3475,12 @@ func runTests(t *testing.T, walletDriver *lnwallet.WalletDriver,
 		if err != nil {
 			t.Fatalf("unable to create bronwallet: %v", err)
 		}
-		bobSigner = bobWalletController.(*bronwallet.Bronwallet)
-		bobKeyRing = keychain.NewBronwalletKeyRing(
-			bobWalletController.(*bronwallet.Bronwallet).InternalWallet(),
+		bobSigner = bobWalletController.(*bronwallet.bronwallet)
+		bobKeyRing = keychain.NewbronwalletKeyRing(
+			bobWalletController.(*bronwallet.bronwallet).InternalWallet(),
 			keychain.CoinTypeTestnet,
 		)
-		bio = bobWalletController.(*bronwallet.Bronwallet)
+		bio = bobWalletController.(*bronwallet.bronwallet)
 	default:
 		t.Fatalf("unknown wallet driver: %v", walletType)
 	}

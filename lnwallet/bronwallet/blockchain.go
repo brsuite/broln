@@ -29,7 +29,7 @@ var (
 // within the main chain.
 //
 // This method is a part of the lnwallet.BlockChainIO interface.
-func (b *Bronwallet) GetBestBlock() (*chainhash.Hash, int32, error) {
+func (b *bronwallet) GetBestBlock() (*chainhash.Hash, int32, error) {
 	return b.chain.GetBestBlock()
 }
 
@@ -37,7 +37,7 @@ func (b *Bronwallet) GetBestBlock() (*chainhash.Hash, int32, error) {
 // creates the target pkScript.
 //
 // This method is a part of the lnwallet.BlockChainIO interface.
-func (b *Bronwallet) GetUtxo(op *wire.OutPoint, pkScript []byte,
+func (b *bronwallet) GetUtxo(op *wire.OutPoint, pkScript []byte,
 	heightHint uint32, cancel <-chan struct{}) (*wire.TxOut, error) {
 
 	switch backend := b.chain.(type) {
@@ -133,7 +133,7 @@ func (b *Bronwallet) GetUtxo(op *wire.OutPoint, pkScript []byte,
 // to wrap the call to GetBlock.
 //
 // This method is a part of the lnwallet.BlockChainIO interface.
-func (b *Bronwallet) GetBlock(blockHash *chainhash.Hash) (*wire.MsgBlock, error) {
+func (b *bronwallet) GetBlock(blockHash *chainhash.Hash) (*wire.MsgBlock, error) {
 	_, ok := b.chain.(*chain.NeutrinoClient)
 	if !ok {
 		return b.blockCache.GetBlock(blockHash, b.chain.GetBlock)
@@ -153,10 +153,10 @@ func (b *Bronwallet) GetBlock(blockHash *chainhash.Hash) (*wire.MsgBlock, error)
 // given height.
 //
 // This method is a part of the lnwallet.BlockChainIO interface.
-func (b *Bronwallet) GetBlockHash(blockHeight int64) (*chainhash.Hash, error) {
+func (b *bronwallet) GetBlockHash(blockHeight int64) (*chainhash.Hash, error) {
 	return b.chain.GetBlockHash(blockHeight)
 }
 
-// A compile time check to ensure that Bronwallet implements the BlockChainIO
+// A compile time check to ensure that bronwallet implements the BlockChainIO
 // interface.
-var _ lnwallet.WalletController = (*Bronwallet)(nil)
+var _ lnwallet.WalletController = (*bronwallet)(nil)

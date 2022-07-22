@@ -12,10 +12,10 @@ const (
 	walletType = "bronwallet"
 )
 
-// createNewWallet creates a new instance of Bronwallet given the proper list of
+// createNewWallet creates a new instance of bronwallet given the proper list of
 // initialization parameters. This function is the factory function required to
 // properly create an instance of the lnwallet.WalletDriver struct for
-// Bronwallet.
+// bronwallet.
 func createNewWallet(args ...interface{}) (lnwallet.WalletController, error) {
 	if len(args) != 2 {
 		return nil, fmt.Errorf("incorrect number of arguments to .New(...), "+
@@ -37,7 +37,7 @@ func createNewWallet(args ...interface{}) (lnwallet.WalletController, error) {
 	return New(*config, blockCache)
 }
 
-// init registers a driver for the Bronwallet concrete implementation of the
+// init registers a driver for the bronwallet concrete implementation of the
 // lnwallet.WalletController interface.
 func init() {
 	// Register the driver.
