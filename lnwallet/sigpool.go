@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/wire"
 )
 
 const (
@@ -31,11 +31,11 @@ type VerifyJob struct {
 	// valid signature. Note that with the current channel construction,
 	// this public key will likely have been tweaked using the current per
 	// commitment point for a particular commitment transactions.
-	PubKey *btcec.PublicKey
+	PubKey *bronec.PublicKey
 
 	// Sig is the raw signature generated using the above public key.  This
 	// is the signature to be verified.
-	Sig *btcec.Signature
+	Sig *bronec.Signature
 
 	// SigHash is a function closure generates the sighashes that the
 	// passed signature is known to have signed.

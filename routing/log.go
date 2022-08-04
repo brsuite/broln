@@ -1,15 +1,15 @@
 package routing
 
 import (
-	"github.com/btcsuite/btclog"
 	"github.com/brsuite/broln/build"
 	"github.com/brsuite/broln/routing/chainview"
+	"github.com/brsuite/bronlog"
 )
 
 // log is a logger that is initialized with no output filters.  This means the
 // package will not perform any logging by default until the caller requests
 // it.
-var log btclog.Logger
+var log bronlog.Logger
 
 const Subsystem = "CRTR"
 
@@ -21,13 +21,13 @@ func init() {
 // DisableLog disables all library log output.  Logging output is disabled by
 // by default until UseLogger is called.
 func DisableLog() {
-	UseLogger(btclog.Disabled)
+	UseLogger(bronlog.Disabled)
 }
 
 // UseLogger uses a specified Logger to output package logging info.  This
 // should be used in preference to SetLogWriter if the caller is also using
-// btclog.
-func UseLogger(logger btclog.Logger) {
+// bronlog.
+func UseLogger(logger bronlog.Logger) {
 	log = logger
 	chainview.UseLogger(logger)
 }

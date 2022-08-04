@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/tlv"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/bronutil"
 )
 
 // AcceptChannel is the message Bob sends to Alice after she initiates the
@@ -27,9 +27,9 @@ type AcceptChannel struct {
 	// MaxValueInFlight represents the maximum amount of coins that can be
 	// pending within the channel at any given time. If the amount of funds
 	// in limbo exceeds this amount, then the channel will be failed.
-	MaxValueInFlight MilliSatoshi
+	MaxValueInFlight MilliBronees
 
-	// ChannelReserve is the amount of BTC that the receiving party MUST
+	// ChannelReserve is the amount of BRON that the receiving party MUST
 	// maintain a balance above at all times. This is a safety mechanism to
 	// ensure that both sides always have skin in the game during the
 	// channel's lifetime.
@@ -37,7 +37,7 @@ type AcceptChannel struct {
 
 	// HtlcMinimum is the smallest HTLC that the sender of this message
 	// will accept.
-	HtlcMinimum MilliSatoshi
+	HtlcMinimum MilliBronees
 
 	// MinAcceptDepth is the minimum depth that the initiator of the
 	// channel should wait before considering the channel open.
@@ -56,38 +56,38 @@ type AcceptChannel struct {
 	// FundingKey is the key that should be used on behalf of the sender
 	// within the 2-of-2 multi-sig output that it contained within the
 	// funding transaction.
-	FundingKey *btcec.PublicKey
+	FundingKey *bronec.PublicKey
 
 	// RevocationPoint is the base revocation point for the sending party.
 	// Any commitment transaction belonging to the receiver of this message
 	// should use this key and their per-commitment point to derive the
 	// revocation key for the commitment transaction.
-	RevocationPoint *btcec.PublicKey
+	RevocationPoint *bronec.PublicKey
 
 	// PaymentPoint is the base payment point for the sending party. This
 	// key should be combined with the per commitment point for a
 	// particular commitment state in order to create the key that should
 	// be used in any output that pays directly to the sending party, and
 	// also within the HTLC covenant transactions.
-	PaymentPoint *btcec.PublicKey
+	PaymentPoint *bronec.PublicKey
 
 	// DelayedPaymentPoint is the delay point for the sending party. This
 	// key should be combined with the per commitment point to derive the
 	// keys that are used in outputs of the sender's commitment transaction
 	// where they claim funds.
-	DelayedPaymentPoint *btcec.PublicKey
+	DelayedPaymentPoint *bronec.PublicKey
 
 	// HtlcPoint is the base point used to derive the set of keys for this
 	// party that will be used within the HTLC public key scripts.  This
 	// value is combined with the receiver's revocation base point in order
 	// to derive the keys that are used within HTLC scripts.
-	HtlcPoint *btcec.PublicKey
+	HtlcPoint *bronec.PublicKey
 
 	// FirstCommitmentPoint is the first commitment point for the sending
 	// party. This value should be combined with the receiver's revocation
 	// base point in order to derive the revocation keys that are placed
 	// within the commitment transaction of the sender.
-	FirstCommitmentPoint *btcec.PublicKey
+	FirstCommitmentPoint *bronec.PublicKey
 
 	// UpfrontShutdownScript is the script to which the channel funds should
 	// be paid when mutually closing the channel. This field is optional, and
@@ -143,19 +143,19 @@ func (a *AcceptChannel) Encode(w *bytes.Buffer, pver uint32) error {
 		return err
 	}
 
-	if err := WriteSatoshi(w, a.DustLimit); err != nil {
+	if err := WriteBronees(w, a.DustLimit); err != nil {
 		return err
 	}
 
-	if err := WriteMilliSatoshi(w, a.MaxValueInFlight); err != nil {
+	if err := WriteMilliBronees(w, a.MaxValueInFlight); err != nil {
 		return err
 	}
 
-	if err := WriteSatoshi(w, a.ChannelReserve); err != nil {
+	if err := WriteBronees(w, a.ChannelReserve); err != nil {
 		return err
 	}
 
-	if err := WriteMilliSatoshi(w, a.HtlcMinimum); err != nil {
+	if err := WriteMilliBronees(w, a.HtlcMinimum); err != nil {
 		return err
 	}
 

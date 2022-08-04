@@ -4,10 +4,10 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/channeldb"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/brsuite/broln/channeldb"
 )
 
 const (
@@ -46,7 +46,7 @@ var (
 //   * <0> <sender sig> <recvr sig> <preimage>
 func CreateHtlcSuccessTx(chanType channeldb.ChannelType, initiator bool,
 	htlcOutput wire.OutPoint, htlcAmt bronutil.Amount, csvDelay,
-	leaseExpiry uint32, revocationKey, delayKey *btcec.PublicKey) (
+	leaseExpiry uint32, revocationKey, delayKey *bronec.PublicKey) (
 	*wire.MsgTx, error) {
 
 	// Create a version two transaction (as the success version of this
@@ -102,7 +102,7 @@ func CreateHtlcSuccessTx(chanType channeldb.ChannelType, initiator bool,
 func CreateHtlcTimeoutTx(chanType channeldb.ChannelType, initiator bool,
 	htlcOutput wire.OutPoint, htlcAmt bronutil.Amount,
 	cltvExpiry, csvDelay, leaseExpiry uint32,
-	revocationKey, delayKey *btcec.PublicKey) (*wire.MsgTx, error) {
+	revocationKey, delayKey *bronec.PublicKey) (*wire.MsgTx, error) {
 
 	// Create a version two transaction (as the success version of this
 	// spends an output with a CSV timeout), and set the lock-time to the

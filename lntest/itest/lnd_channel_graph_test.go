@@ -8,13 +8,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/funding"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/routerrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lntest/wait"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -45,9 +45,9 @@ func testUpdateChanStatus(net *lntest.NetworkHarness, t *harnessTest) {
 	net.ConnectNodes(t.t, alice, bob)
 
 	// Give Alice some coins so she can fund a channel.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, alice)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, alice)
 
-	// Open a channel with 100k satoshis between Alice and Bob with Alice
+	// Open a channel with 100k broneess between Alice and Bob with Alice
 	// being the sole funder of the channel.
 	chanAmt := bronutil.Amount(100000)
 	chanPoint := openChannelAndAssert(
@@ -246,7 +246,7 @@ func testUpdateChanStatus(net *lntest.NetworkHarness, t *harnessTest) {
 func testUnannouncedChannels(net *lntest.NetworkHarness, t *harnessTest) {
 	ctxb := context.Background()
 
-	amount := funding.MaxBtcFundingAmount
+	amount := funding.MaxBronFundingAmount
 
 	// Open a channel between Alice and Bob, ensuring the
 	// channel has been opened properly.
@@ -359,7 +359,7 @@ func testGraphTopologyNotifications(net *lntest.NetworkHarness, t *harnessTest) 
 func testGraphTopologyNtfns(net *lntest.NetworkHarness, t *harnessTest, pinned bool) {
 	ctxb := context.Background()
 
-	const chanAmt = funding.MaxBtcFundingAmount
+	const chanAmt = funding.MaxBronFundingAmount
 
 	// Spin up Bob first, since we will need to grab his pubkey when
 	// starting Alice to test pinned syncing.
@@ -388,10 +388,10 @@ func testGraphTopologyNtfns(net *lntest.NetworkHarness, t *harnessTest, pinned b
 	net.EnsureConnected(t.t, alice, bob)
 
 	// Alice stimmy.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, alice)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, alice)
 
 	// Bob stimmy.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, bob)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, bob)
 
 	// Assert that Bob has the correct sync type before proceeeding.
 	if pinned {

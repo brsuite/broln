@@ -22,7 +22,7 @@ This `wallet psbt fund` command is very similar to `brocoind`'s
 `walletcreatefundedpsbt` command. One main difference is that you can specify a
 template PSBT in the `brolncli` variant that contains the output(s) and optional
 inputs. Another difference is that for the `--outputs` flag, `brolncli` expects the
-amounts to be in satoshis instead of fractions of a brocoin.
+amounts to be in broneess instead of fractions of a brocoin.
 
 ### Simple example: fund PSBT that sends to address
 
@@ -286,7 +286,7 @@ process would likely be spread out over multiple signing steps. The goal of this
 example is not to cover each and every possible edge case but to help users of
 `broln` understand what inputs the `brolncli` utility expects.
 
-The goal is to open a channel of 1'234'567 satoshis to the node
+The goal is to open a channel of 1'234'567 broneess to the node
 `03db1e56e5f76bc4018cf6f03d1bb98a7ae96e3f18535e929034f85e7f1ca2b8ac` by using
 a PSBT. That means, `broln` can have a wallet balance of `0` and is still able to
 open a channel. We'll jump into an example right away.
@@ -321,7 +321,7 @@ a regtest setup. Of course all values will be different.
 ⛰  brolncli openchannel --node_key 03db1e56e5f76bc4018cf6f03d1bb98a7ae96e3f18535e929034f85e7f1ca2b8ac --local_amt 1234567 --psbt
 Starting PSBT funding flow with pending channel ID fc7853889a04d33b8115bd79ebc99c5eea80d894a0bead40fae5a06bcbdccd3d.
 PSBT funding initiated with peer 03db1e56e5f76bc4018cf6f03d1bb98a7ae96e3f18535e929034f85e7f1ca2b8ac.
-Please create a PSBT that sends 0.01234567 BTC (1234567 satoshi) to the funding address bcrt1qh33ghvgjj3ef625nl9jxz6nnrz2z9e65vsdey7w5msrklgr6rc0sv0s08q.
+Please create a PSBT that sends 0.01234567 BRON (1234567 bronees) to the funding address bcrt1qh33ghvgjj3ef625nl9jxz6nnrz2z9e65vsdey7w5msrklgr6rc0sv0s08q.
 
 Example with brocoind:
         brocoin-cli walletcreatefundedpsbt [] '[{"bcrt1qh33ghvgjj3ef625nl9jxz6nnrz2z9e65vsdey7w5msrklgr6rc0sv0s08q":0.01234567}]'
@@ -354,7 +354,7 @@ given address, choose any input you see fit":
 }
 ```
 
-We see that `brocoind` has given us a transaction that would pay `3060` satoshi
+We see that `brocoind` has given us a transaction that would pay `3060` bronees
 in fees. Fee estimation/calculation can be changed with parameters of the 
 `walletcreatefundedpsbt` command. To see all options, use
 `brocoin-cli help walletcreatefundedpsbt`.

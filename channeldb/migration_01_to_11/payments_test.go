@@ -6,12 +6,12 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
 	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
+	"github.com/brsuite/brond/bronec"
 )
 
 var (
-	priv, _ = btcec.NewPrivateKey(btcec.S256())
+	priv, _ = bronec.NewPrivateKey(bronec.S256())
 	pub     = priv.PubKey()
 )
 
@@ -26,7 +26,7 @@ func makeFakePayment() *outgoingPayment {
 	}
 
 	copy(fakeInvoice.Terms.PaymentPreimage[:], rev[:])
-	fakeInvoice.Terms.Value = lnwire.NewMSatFromSatoshis(10000)
+	fakeInvoice.Terms.Value = lnwire.NewMSatFromBroneess(10000)
 
 	fakePath := make([][33]byte, 3)
 	for i := 0; i < 3; i++ {
@@ -84,7 +84,7 @@ func makeRandomFakePayment() (*outgoingPayment, error) {
 	}
 	copy(fakeInvoice.Terms.PaymentPreimage[:], preImg)
 
-	fakeInvoice.Terms.Value = lnwire.MilliSatoshi(rand.Intn(10000))
+	fakeInvoice.Terms.Value = lnwire.MilliBronees(rand.Intn(10000))
 
 	fakePathLen := 1 + rand.Intn(5)
 	fakePath := make([][33]byte, fakePathLen)
@@ -98,7 +98,7 @@ func makeRandomFakePayment() (*outgoingPayment, error) {
 
 	fakePayment := &outgoingPayment{
 		Invoice:        *fakeInvoice,
-		Fee:            lnwire.MilliSatoshi(rand.Intn(1001)),
+		Fee:            lnwire.MilliBronees(rand.Intn(1001)),
 		Path:           fakePath,
 		TimeLockLength: uint32(rand.Intn(10000)),
 	}

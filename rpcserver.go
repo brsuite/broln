@@ -17,18 +17,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/brsuite/brond/blockchain"
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/brsuite/bronutil/psbt"
-	"github.com/brsuite/bronwallet/waddrmgr"
-	"github.com/brsuite/bronwallet/wallet/txauthor"
-	"github.com/davecgh/go-spew/spew"
-	proxy "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/brsuite/broln/autopilot"
 	"github.com/brsuite/broln/build"
 	"github.com/brsuite/broln/chainreg"
@@ -71,6 +59,18 @@ import (
 	"github.com/brsuite/broln/sweep"
 	"github.com/brsuite/broln/watchtower"
 	"github.com/brsuite/broln/zpay32"
+	"github.com/brsuite/brond/blockchain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/brsuite/bronutil/psbt"
+	"github.com/brsuite/bronwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/wallet/txauthor"
+	"github.com/davecgh/go-spew/spew"
+	proxy "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/tv42/zbase32"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -1081,7 +1081,7 @@ func (r *rpcServer) sendCoinsOnChain(paymentMap map[string]int64,
 
 // ListUnspent returns useful information about each unspent output owned by the
 // wallet, as reported by the underlying `ListUnspentWitness`; the information
-// returned is: outpoint, amount in satoshis, address, address type,
+// returned is: outpoint, amount in broneess, address, address type,
 // scriptPubKey in hex and number of confirmations.  The result is filtered to
 // contain outputs whose number of confirmations is between a minimum and
 // maximum number of confirmations specified by the user, with 0 meaning
@@ -1241,7 +1241,7 @@ func (r *rpcServer) SendCoins(ctx context.Context,
 	// accidentally tried to send funds to a bare pubkey address. This check is
 	// here to prevent unintended transfers.
 	decodedAddr, _ := hex.DecodeString(in.Addr)
-	_, err = btcec.ParsePubKey(decodedAddr, btcec.S256())
+	_, err = bronec.ParsePubKey(decodedAddr, bronec.S256())
 	if err == nil {
 		return nil, fmt.Errorf("cannot send coins to pubkeys")
 	}
@@ -1572,7 +1572,7 @@ func (r *rpcServer) VerifyMessage(ctx context.Context,
 	digest := chainhash.DoubleHashB(in.Msg)
 
 	// RecoverCompact both recovers the pubkey and validates the signature.
-	pubKey, _, err := btcec.RecoverCompact(btcec.S256(), sig, digest)
+	pubKey, _, err := bronec.RecoverCompact(bronec.S256(), sig, digest)
 	if err != nil {
 		return &lnrpc.VerifyMessageResponse{Valid: false}, nil
 	}
@@ -1615,7 +1615,7 @@ func (r *rpcServer) ConnectPeer(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	pubKey, err := btcec.ParsePubKey(pubkeyHex, btcec.S256())
+	pubKey, err := bronec.ParsePubKey(pubkeyHex, bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -1684,7 +1684,7 @@ func (r *rpcServer) DisconnectPeer(ctx context.Context,
 	if err != nil {
 		return nil, fmt.Errorf("unable to decode pubkey bytes: %v", err)
 	}
-	peerPubKey, err := btcec.ParsePubKey(pubKeyBytes, btcec.S256())
+	peerPubKey, err := bronec.ParsePubKey(pubKeyBytes, bronec.S256())
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse pubkey: %v", err)
 	}
@@ -1751,16 +1751,16 @@ func newFundingShimAssembler(chanPointShim *lnrpc.ChanPointShim, initiator bool,
 
 	// Next we'll parse out the remote party's funding key, as well as our
 	// full key descriptor.
-	remoteKey, err := btcec.ParsePubKey(
-		chanPointShim.RemoteKey, btcec.S256(),
+	remoteKey, err := bronec.ParsePubKey(
+		chanPointShim.RemoteKey, bronec.S256(),
 	)
 	if err != nil {
 		return nil, err
 	}
 
 	shimKeyDesc := chanPointShim.LocalKey
-	localKey, err := btcec.ParsePubKey(
-		shimKeyDesc.RawKeyBytes, btcec.S256(),
+	localKey, err := bronec.ParsePubKey(
+		shimKeyDesc.RawKeyBytes, bronec.S256(),
 	)
 	if err != nil {
 		return nil, err
@@ -1877,15 +1877,15 @@ func (r *rpcServer) parseOpenChannelReq(in *lnrpc.OpenChannelRequest,
 
 	localFundingAmt := bronutil.Amount(in.LocalFundingAmount)
 	remoteInitialBalance := bronutil.Amount(in.PushSat)
-	minHtlcIn := lnwire.MilliSatoshi(in.MinHtlcMsat)
+	minHtlcIn := lnwire.MilliBronees(in.MinHtlcMsat)
 	remoteCsvDelay := uint16(in.RemoteCsvDelay)
-	maxValue := lnwire.MilliSatoshi(in.RemoteMaxValueInFlightMsat)
+	maxValue := lnwire.MilliBronees(in.RemoteMaxValueInFlightMsat)
 	maxHtlcs := uint16(in.RemoteMaxHtlcs)
 
 	globalFeatureSet := r.server.featureMgr.Get(feature.SetNodeAnn)
 
 	// Ensure that the initial balance of the remote party (if pushing
-	// satoshis) does not exceed the amount the local party has requested
+	// broneess) does not exceed the amount the local party has requested
 	// for funding.
 	//
 	// TODO(roasbeef): incorporate base fee?
@@ -1930,7 +1930,7 @@ func (r *rpcServer) parseOpenChannelReq(in *lnrpc.OpenChannelRequest,
 
 	// TODO(roasbeef): also return channel ID?
 
-	var nodePubKey *btcec.PublicKey
+	var nodePubKey *bronec.PublicKey
 
 	// Parse the remote pubkey the NodePubkey field of the request. If it's
 	// not present, we'll fallback to the deprecated version that parses the
@@ -1940,7 +1940,7 @@ func (r *rpcServer) parseOpenChannelReq(in *lnrpc.OpenChannelRequest,
 	// Parse the raw bytes of the node key into a pubkey object so we can
 	// easily manipulate it.
 	case len(in.NodePubkey) > 0:
-		nodePubKey, err = btcec.ParsePubKey(in.NodePubkey, btcec.S256())
+		nodePubKey, err = bronec.ParsePubKey(in.NodePubkey, bronec.S256())
 		if err != nil {
 			return nil, err
 		}
@@ -1954,7 +1954,7 @@ func (r *rpcServer) parseOpenChannelReq(in *lnrpc.OpenChannelRequest,
 			return nil, err
 		}
 
-		nodePubKey, err = btcec.ParsePubKey(keyBytes, btcec.S256())
+		nodePubKey, err = bronec.ParsePubKey(keyBytes, bronec.S256())
 		if err != nil {
 			return nil, err
 		}
@@ -2031,7 +2031,7 @@ func (r *rpcServer) parseOpenChannelReq(in *lnrpc.OpenChannelRequest,
 		TargetPubkey:     nodePubKey,
 		ChainHash:        *r.cfg.ActiveNetParams.GenesisHash,
 		LocalFundingAmt:  localFundingAmt,
-		PushAmt:          lnwire.NewMSatFromSatoshis(remoteInitialBalance),
+		PushAmt:          lnwire.NewMSatFromBroneess(remoteInitialBalance),
 		MinHtlcIn:        minHtlcIn,
 		FundingFeePerKw:  feeRate,
 		Private:          in.Private,
@@ -2840,15 +2840,15 @@ func (r *rpcServer) ListPeers(ctx context.Context,
 			satRecv int64
 		)
 
-		// In order to display the total number of satoshis of outbound
-		// (sent) and inbound (recv'd) satoshis that have been
+		// In order to display the total number of broneess of outbound
+		// (sent) and inbound (recv'd) broneess that have been
 		// transported through this peer, we'll sum up the sent/recv'd
 		// values for each of the active channels we have with the
 		// peer.
 		chans := serverPeer.ChannelSnapshots()
 		for _, c := range chans {
-			satSent += int64(c.TotalMSatSent.ToSatoshis())
-			satRecv += int64(c.TotalMSatReceived.ToSatoshis())
+			satSent += int64(c.TotalMSatSent.ToBroneess())
+			satRecv += int64(c.TotalMSatReceived.ToBroneess())
 		}
 
 		nodePub := serverPeer.PubKey()
@@ -3106,18 +3106,18 @@ func (r *rpcServer) WalletBalance(ctx context.Context,
 }
 
 // ChannelBalance returns the total available channel flow across all open
-// channels in satoshis.
+// channels in broneess.
 func (r *rpcServer) ChannelBalance(ctx context.Context,
 	in *lnrpc.ChannelBalanceRequest) (
 	*lnrpc.ChannelBalanceResponse, error) {
 
 	var (
-		localBalance             lnwire.MilliSatoshi
-		remoteBalance            lnwire.MilliSatoshi
-		unsettledLocalBalance    lnwire.MilliSatoshi
-		unsettledRemoteBalance   lnwire.MilliSatoshi
-		pendingOpenLocalBalance  lnwire.MilliSatoshi
-		pendingOpenRemoteBalance lnwire.MilliSatoshi
+		localBalance             lnwire.MilliBronees
+		remoteBalance            lnwire.MilliBronees
+		unsettledLocalBalance    lnwire.MilliBronees
+		unsettledRemoteBalance   lnwire.MilliBronees
+		pendingOpenLocalBalance  lnwire.MilliBronees
+		pendingOpenRemoteBalance lnwire.MilliBronees
 	)
 
 	openChannels, err := r.server.chanStateDB.FetchAllOpenChannels()
@@ -3160,33 +3160,33 @@ func (r *rpcServer) ChannelBalance(ctx context.Context,
 
 	return &lnrpc.ChannelBalanceResponse{
 		LocalBalance: &lnrpc.Amount{
-			Sat:  uint64(localBalance.ToSatoshis()),
+			Sat:  uint64(localBalance.ToBroneess()),
 			Msat: uint64(localBalance),
 		},
 		RemoteBalance: &lnrpc.Amount{
-			Sat:  uint64(remoteBalance.ToSatoshis()),
+			Sat:  uint64(remoteBalance.ToBroneess()),
 			Msat: uint64(remoteBalance),
 		},
 		UnsettledLocalBalance: &lnrpc.Amount{
-			Sat:  uint64(unsettledLocalBalance.ToSatoshis()),
+			Sat:  uint64(unsettledLocalBalance.ToBroneess()),
 			Msat: uint64(unsettledLocalBalance),
 		},
 		UnsettledRemoteBalance: &lnrpc.Amount{
-			Sat:  uint64(unsettledRemoteBalance.ToSatoshis()),
+			Sat:  uint64(unsettledRemoteBalance.ToBroneess()),
 			Msat: uint64(unsettledRemoteBalance),
 		},
 		PendingOpenLocalBalance: &lnrpc.Amount{
-			Sat:  uint64(pendingOpenLocalBalance.ToSatoshis()),
+			Sat:  uint64(pendingOpenLocalBalance.ToBroneess()),
 			Msat: uint64(pendingOpenLocalBalance),
 		},
 		PendingOpenRemoteBalance: &lnrpc.Amount{
-			Sat:  uint64(pendingOpenRemoteBalance.ToSatoshis()),
+			Sat:  uint64(pendingOpenRemoteBalance.ToBroneess()),
 			Msat: uint64(pendingOpenRemoteBalance),
 		},
 
 		// Deprecated fields.
-		Balance:            int64(localBalance.ToSatoshis()),
-		PendingOpenBalance: int64(pendingOpenLocalBalance.ToSatoshis()),
+		Balance:            int64(localBalance.ToBroneess()),
+		PendingOpenBalance: int64(pendingOpenLocalBalance.ToBroneess()),
 	}, nil
 }
 
@@ -3230,8 +3230,8 @@ func (r *rpcServer) fetchPendingOpenChannels() (pendingOpenChannels, error) {
 				RemoteNodePub:        hex.EncodeToString(pub),
 				ChannelPoint:         pendingChan.FundingOutpoint.String(),
 				Capacity:             int64(pendingChan.Capacity),
-				LocalBalance:         int64(localCommitment.LocalBalance.ToSatoshis()),
-				RemoteBalance:        int64(localCommitment.RemoteBalance.ToSatoshis()),
+				LocalBalance:         int64(localCommitment.LocalBalance.ToBroneess()),
+				RemoteBalance:        int64(localCommitment.RemoteBalance.ToBroneess()),
 				LocalChanReserveSat:  int64(pendingChan.LocalChanCfg.ChanReserve),
 				RemoteChanReserveSat: int64(pendingChan.RemoteChanCfg.ChanReserve),
 				Initiator:            rpcInitiator(pendingChan.IsInitiator),
@@ -3506,8 +3506,8 @@ func (r *rpcServer) fetchWaitingCloseChannels() (waitingCloseChannels,
 			RemoteNodePub:         hex.EncodeToString(pub),
 			ChannelPoint:          chanPoint.String(),
 			Capacity:              int64(waitingClose.Capacity),
-			LocalBalance:          int64(waitingClose.LocalCommitment.LocalBalance.ToSatoshis()),
-			RemoteBalance:         int64(waitingClose.LocalCommitment.RemoteBalance.ToSatoshis()),
+			LocalBalance:          int64(waitingClose.LocalCommitment.LocalBalance.ToBroneess()),
+			RemoteBalance:         int64(waitingClose.LocalCommitment.RemoteBalance.ToBroneess()),
 			LocalChanReserveSat:   int64(waitingClose.LocalChanCfg.ChanReserve),
 			RemoteChanReserveSat:  int64(waitingClose.RemoteChanCfg.ChanReserve),
 			Initiator:             rpcInitiator(waitingClose.IsInitiator),
@@ -3924,7 +3924,7 @@ func createRPCOpenChannel(r *rpcServer, graph *channeldb.ChannelGraph,
 
 	// As an artifact of our usage of mSAT internally, either party
 	// may end up in a state where they're holding a fractional
-	// amount of satoshis which can't be expressed within the
+	// amount of broneess which can't be expressed within the
 	// actual commitment output. Since we round down when going
 	// from mSAT -> SAT, we may at any point be adding an
 	// additional SAT to miners fees. As a result, we display a
@@ -3945,13 +3945,13 @@ func createRPCOpenChannel(r *rpcServer, graph *channeldb.ChannelGraph,
 		ChannelPoint:          chanPoint.String(),
 		ChanId:                dbChannel.ShortChannelID.ToUint64(),
 		Capacity:              int64(dbChannel.Capacity),
-		LocalBalance:          int64(localBalance.ToSatoshis()),
-		RemoteBalance:         int64(remoteBalance.ToSatoshis()),
+		LocalBalance:          int64(localBalance.ToBroneess()),
+		RemoteBalance:         int64(remoteBalance.ToBroneess()),
 		CommitFee:             int64(externalCommitFee),
 		CommitWeight:          commitWeight,
 		FeePerKw:              int64(localCommit.FeePerKw),
-		TotalSatoshisSent:     int64(dbChannel.TotalMSatSent.ToSatoshis()),
-		TotalSatoshisReceived: int64(dbChannel.TotalMSatReceived.ToSatoshis()),
+		TotalBroneessSent:     int64(dbChannel.TotalMSatSent.ToBroneess()),
+		TotalBroneessReceived: int64(dbChannel.TotalMSatReceived.ToBroneess()),
 		NumUpdates:            localCommit.CommitHeight,
 		PendingHtlcs:          make([]*lnrpc.HTLC, len(localCommit.Htlcs)),
 		Initiator:             dbChannel.IsInitiator,
@@ -4016,7 +4016,7 @@ func createRPCOpenChannel(r *rpcServer, graph *channeldb.ChannelGraph,
 
 		channel.PendingHtlcs[i] = &lnrpc.HTLC{
 			Incoming:            htlc.Incoming,
-			Amount:              int64(htlc.Amt.ToSatoshis()),
+			Amount:              int64(htlc.Amt.ToBroneess()),
 			HashLock:            rHash[:],
 			ExpirationHeight:    htlc.RefundTimeout,
 			HtlcIndex:           htlc.HtlcIndex,
@@ -4040,9 +4040,9 @@ func createRPCOpenChannel(r *rpcServer, graph *channeldb.ChannelGraph,
 	// is the push amount. Otherwise, our starting balance is the push
 	// amount. If there is no push amount, these values will simply be zero.
 	if dbChannel.IsInitiator {
-		channel.PushAmountSat = uint64(remoteBalance.ToSatoshis())
+		channel.PushAmountSat = uint64(remoteBalance.ToBroneess())
 	} else {
-		channel.PushAmountSat = uint64(localBalance.ToSatoshis())
+		channel.PushAmountSat = uint64(localBalance.ToBroneess())
 	}
 
 	if len(dbChannel.LocalShutdownScript) > 0 {
@@ -4539,8 +4539,8 @@ func (r *rpcServer) unmarshallSendToRouteRequest(
 // hints), or we'll get a fully populated route from the user that we'll pass
 // directly to the channel router for dispatching.
 type rpcPaymentIntent struct {
-	msat               lnwire.MilliSatoshi
-	feeLimit           lnwire.MilliSatoshi
+	msat               lnwire.MilliBronees
+	feeLimit           lnwire.MilliBronees
 	cltvLimit          uint32
 	dest               route.Vertex
 	rHash              [32]byte
@@ -4650,7 +4650,7 @@ func (r *rpcServer) extractPaymentIntent(rpcPayReq *rpcPaymentRequest) (rpcPayme
 		}
 
 		// If the amount was not included in the invoice, then we let
-		// the payee specify the amount of satoshis they wish to send.
+		// the payee specify the amount of broneess they wish to send.
 		// We override the amount to pay with the amount provided from
 		// the payment request.
 		if payReq.MilliSat == nil {
@@ -5784,7 +5784,7 @@ func (r *rpcServer) GetNodeInfo(ctx context.Context,
 
 // QueryRoutes attempts to query the daemons' Channel Router for a possible
 // route to a target destination capable of carrying a specific amount of
-// satoshis within the route's flow. The retuned route contains the full
+// broneess within the route's flow. The retuned route contains the full
 // details required to craft and send an HTLC, also including the necessary
 // information that should be present within the Sphinx packet encapsulated
 // within the HTLC.
@@ -6018,7 +6018,7 @@ func marshallTopologyChange(topChange *routing.TopologyChange) *lnrpc.GraphTopol
 	// encodeKey is a simple helper function that converts a live public
 	// key into a hex-encoded version of the compressed serialization for
 	// the public key.
-	encodeKey := func(k *btcec.PublicKey) string {
+	encodeKey := func(k *bronec.PublicKey) string {
 		return hex.EncodeToString(k.SerializeCompressed())
 	}
 
@@ -6254,7 +6254,7 @@ func (r *rpcServer) DecodePayReq(ctx context.Context,
 
 	var amtSat, amtMsat int64
 	if payReq.MilliSat != nil {
-		amtSat = int64(payReq.MilliSat.ToSatoshis())
+		amtSat = int64(payReq.MilliSat.ToBroneess())
 		amtMsat = int64(*payReq.MilliSat)
 	}
 
@@ -6268,7 +6268,7 @@ func (r *rpcServer) DecodePayReq(ctx context.Context,
 	return &lnrpc.PayReq{
 		Destination:     hex.EncodeToString(dest),
 		PaymentHash:     hex.EncodeToString(payReq.PaymentHash[:]),
-		NumSatoshis:     amtSat,
+		NumBroneess:     amtSat,
 		NumMsat:         amtMsat,
 		Timestamp:       payReq.Timestamp.Unix(),
 		Description:     desc,
@@ -6340,9 +6340,9 @@ func (r *rpcServer) FeeReport(ctx context.Context,
 
 	// computeFeeSum is a helper function that computes the total fees for
 	// a particular time slice described by a forwarding event query.
-	computeFeeSum := func(query channeldb.ForwardingEventQuery) (lnwire.MilliSatoshi, error) {
+	computeFeeSum := func(query channeldb.ForwardingEventQuery) (lnwire.MilliBronees, error) {
 
-		var totalFees lnwire.MilliSatoshi
+		var totalFees lnwire.MilliBronees
 
 		// We'll continue to fetch the next query and accumulate the
 		// fees until the next query returns no events.
@@ -6421,9 +6421,9 @@ func (r *rpcServer) FeeReport(ctx context.Context,
 
 	return &lnrpc.FeeReportResponse{
 		ChannelFees: feeReports,
-		DayFeeSum:   uint64(dayFees.ToSatoshis()),
-		WeekFeeSum:  uint64(weekFees.ToSatoshis()),
-		MonthFeeSum: uint64(monthFees.ToSatoshis()),
+		DayFeeSum:   uint64(dayFees.ToBroneess()),
+		WeekFeeSum:  uint64(weekFees.ToBroneess()),
+		MonthFeeSum: uint64(monthFees.ToBroneess()),
 	}, nil
 }
 
@@ -6505,16 +6505,16 @@ func (r *rpcServer) UpdateChannelPolicy(ctx context.Context,
 			minTimeLockDelta)
 	}
 
-	baseFeeMsat := lnwire.MilliSatoshi(req.BaseFeeMsat)
+	baseFeeMsat := lnwire.MilliBronees(req.BaseFeeMsat)
 	feeSchema := routing.FeeSchema{
 		BaseFee: baseFeeMsat,
 		FeeRate: feeRateFixed,
 	}
 
-	maxHtlc := lnwire.MilliSatoshi(req.MaxHtlcMsat)
-	var minHtlc *lnwire.MilliSatoshi
+	maxHtlc := lnwire.MilliBronees(req.MaxHtlcMsat)
+	var minHtlc *lnwire.MilliBronees
 	if req.MinHtlcMsatSpecified {
-		min := lnwire.MilliSatoshi(req.MinHtlcMsat)
+		min := lnwire.MilliBronees(req.MinHtlcMsat)
 		minHtlc = &min
 	}
 
@@ -6627,9 +6627,9 @@ func (r *rpcServer) ForwardingHistory(ctx context.Context,
 			TimestampNs: uint64(event.Timestamp.UnixNano()),
 			ChanIdIn:    event.IncomingChanID.ToUint64(),
 			ChanIdOut:   event.OutgoingChanID.ToUint64(),
-			AmtIn:       uint64(amtInMsat.ToSatoshis()),
-			AmtOut:      uint64(amtOutMsat.ToSatoshis()),
-			Fee:         uint64(feeMsat.ToSatoshis()),
+			AmtIn:       uint64(amtInMsat.ToBroneess()),
+			AmtOut:      uint64(amtOutMsat.ToBroneess()),
+			Fee:         uint64(feeMsat.ToBroneess()),
 			FeeMsat:     uint64(feeMsat),
 			AmtInMsat:   uint64(amtInMsat),
 			AmtOutMsat:  uint64(amtOutMsat),

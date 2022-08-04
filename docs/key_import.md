@@ -258,7 +258,7 @@ when a transaction is crafted that requires a change output.
 
 ### Crafting Transactions through PSBTs from an Imported Account
 
-Assuming a deposit of 1 tBTC was made to the address above
+Assuming a deposit of 1 tBRON was made to the address above
 (`bcrt1q8zdjz2q92eh7jw9ah3upf2u9553226gq79el5l`), Bob should be able to craft a
 transaction spending their new UTXO. Since Bob is unable to sign the transaction
 themselves, they'll use PSBTs to craft the transaction, and provide it to Alice

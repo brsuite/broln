@@ -5,15 +5,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/davecgh/go-spew/spew"
-	sphinx "github.com/brsuite/lightning-onion"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/htlcswitch"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/route"
 	"github.com/brsuite/broln/routing/shards"
+	"github.com/brsuite/brond/bronec"
+	sphinx "github.com/brsuite/lightning-onion"
+	"github.com/davecgh/go-spew/spew"
 )
 
 // errShardHandlerExiting is returned from the shardHandler when it exits.
@@ -23,8 +23,8 @@ var errShardHandlerExiting = fmt.Errorf("shard handler exiting")
 // needed to resume if from any point.
 type paymentLifecycle struct {
 	router        *ChannelRouter
-	totalAmount   lnwire.MilliSatoshi
-	feeLimit      lnwire.MilliSatoshi
+	totalAmount   lnwire.MilliBronees
+	feeLimit      lnwire.MilliBronees
 	identifier    lntypes.Hash
 	paySession    PaymentSession
 	shardTracker  shards.ShardTracker
@@ -36,8 +36,8 @@ type paymentLifecycle struct {
 // that we use to determine what to do on each payment loop iteration.
 type paymentState struct {
 	numShardsInFlight int
-	remainingAmt      lnwire.MilliSatoshi
-	remainingFees     lnwire.MilliSatoshi
+	remainingAmt      lnwire.MilliBronees
+	remainingFees     lnwire.MilliBronees
 
 	// terminate indicates the payment is in its final stage and no more
 	// shards should be launched. This value is true if we have an HTLC
@@ -886,8 +886,8 @@ func (p *shardHandler) handleFailureMessage(rt *route.Route,
 	// always succeed, otherwise there is something wrong in our
 	// implementation. Therefore return an error.
 	errVertex := rt.Hops[errorSourceIdx-1].PubKeyBytes
-	errSource, err := btcec.ParsePubKey(
-		errVertex[:], btcec.S256(),
+	errSource, err := bronec.ParsePubKey(
+		errVertex[:], bronec.S256(),
 	)
 	if err != nil {
 		log.Errorf("Cannot parse pubkey: idx=%v, pubkey=%v",

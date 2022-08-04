@@ -9,6 +9,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/brsuite/broln/funding"
+	"github.com/brsuite/broln/lnrpc"
+	"github.com/brsuite/broln/lnrpc/walletrpc"
+	"github.com/brsuite/broln/lntest"
+	"github.com/brsuite/broln/lntest/wait"
+	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
@@ -16,12 +22,6 @@ import (
 	"github.com/brsuite/bronutil/hdkeychain"
 	"github.com/brsuite/bronwallet/waddrmgr"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/brsuite/broln/funding"
-	"github.com/brsuite/broln/lnrpc"
-	"github.com/brsuite/broln/lnrpc/walletrpc"
-	"github.com/brsuite/broln/lntest"
-	"github.com/brsuite/broln/lntest/wait"
-	"github.com/brsuite/broln/lnwallet"
 	"github.com/stretchr/testify/require"
 )
 
@@ -607,7 +607,7 @@ func runWalletImportAccountScenario(net *lntest.NetworkHarness, t *harnessTest,
 	addrType walletrpc.AddressType, carol, dave *lntest.HarnessNode) {
 
 	ctxb := context.Background()
-	const utxoAmt int64 = bronutil.SatoshiPerBrocoin
+	const utxoAmt int64 = bronutil.BroneesPerBrocoin
 
 	ctxt, cancel := context.WithTimeout(ctxb, defaultTimeout)
 	defer cancel()
@@ -696,7 +696,7 @@ func runWalletImportAccountScenario(net *lntest.NetworkHarness, t *harnessTest,
 	// along the way.
 	fundChanAndCloseFromImportedAccount(
 		t, dave, net.Alice, carol, importedAccount, addrType, utxoAmt,
-		int64(funding.MaxBtcFundingAmount),
+		int64(funding.MaxBronFundingAmount),
 	)
 }
 
@@ -746,7 +746,7 @@ func testWalletImportPubKeyScenario(net *lntest.NetworkHarness, t *harnessTest,
 	addrType walletrpc.AddressType) {
 
 	ctxb := context.Background()
-	const utxoAmt int64 = bronutil.SatoshiPerBrocoin
+	const utxoAmt int64 = bronutil.BroneesPerBrocoin
 
 	// We'll start our test by having two nodes, Carol and Dave.
 	carol := net.NewNode(t.t, "carol", nil)
@@ -854,6 +854,6 @@ func testWalletImportPubKeyScenario(net *lntest.NetworkHarness, t *harnessTest,
 	// along the way.
 	fundChanAndCloseFromImportedAccount(
 		t, dave, net.Alice, carol, defaultImportedAccount, addrType,
-		utxoAmt, int64(funding.MaxBtcFundingAmount),
+		utxoAmt, int64(funding.MaxBronFundingAmount),
 	)
 }

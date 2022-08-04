@@ -6,16 +6,16 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/brsuite/brond/btcjson"
+	"github.com/brsuite/broln/blockcache"
+	"github.com/brsuite/broln/chainntnfs"
+	"github.com/brsuite/broln/queue"
+	"github.com/brsuite/brond/bronjson"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronwallet/chain"
-	"github.com/brsuite/broln/blockcache"
-	"github.com/brsuite/broln/chainntnfs"
-	"github.com/brsuite/broln/queue"
 )
 
 const (
@@ -730,8 +730,8 @@ func (b *BrocoindNotifier) RegisterSpendNtfn(outpoint *wire.OutPoint,
 	if err != nil {
 		// Avoid returning an error if the transaction was not found to
 		// proceed with fallback methods.
-		jsonErr, ok := err.(*btcjson.RPCError)
-		if !ok || jsonErr.Code != btcjson.ErrRPCNoTxInfo {
+		jsonErr, ok := err.(*bronjson.RPCError)
+		if !ok || jsonErr.Code != bronjson.ErrRPCNoTxInfo {
 			return nil, fmt.Errorf("unable to query for txid %v: %v",
 				outpoint.Hash, err)
 		}

@@ -12,9 +12,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/clock"
@@ -24,6 +21,9 @@ import (
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -841,7 +841,7 @@ func TestChannelArbitratorLocalForceClosePendingHtlc(t *testing.T) {
 	htlcAmt := 10000
 	htlc := channeldb.HTLC{
 		Incoming:  false,
-		Amt:       lnwire.MilliSatoshi(htlcAmt),
+		Amt:       lnwire.MilliBronees(htlcAmt),
 		HtlcIndex: 99,
 	}
 

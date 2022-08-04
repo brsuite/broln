@@ -16,7 +16,7 @@ func TestLazySessionKeyDeserialize(t *testing.T) {
 	err := WriteElements(&b, priv)
 	require.NoError(t, err)
 
-	// Deserialize into [btcec.PrivKeyBytesLen]byte.
+	// Deserialize into [bronec.PrivKeyBytesLen]byte.
 	attempt := HTLCAttemptInfo{}
 	err = ReadElements(&b, &attempt.sessionKey)
 	require.NoError(t, err)

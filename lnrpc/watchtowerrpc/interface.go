@@ -3,7 +3,7 @@ package watchtowerrpc
 import (
 	"net"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 )
 
 // WatchtowerBackend abstracts access to the watchtower information that is
@@ -11,7 +11,7 @@ import (
 type WatchtowerBackend interface {
 	// PubKey returns the public key for the watchtower used to
 	// authentication and encrypt traffic with clients.
-	PubKey() *btcec.PublicKey
+	PubKey() *bronec.PublicKey
 
 	// ListeningAddrs returns the listening addresses where the watchtower
 	// server can accept client connections.

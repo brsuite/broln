@@ -10,15 +10,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/brond/bronec"
+	"github.com/davecgh/go-spew/spew"
 )
 
 var (
-	priv, _ = btcec.NewPrivateKey(btcec.S256())
+	priv, _ = bronec.NewPrivateKey(bronec.S256())
 	pub     = priv.PubKey()
 
 	testHop = &route.Hop{

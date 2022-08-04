@@ -7,12 +7,12 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/btcsuite/btclog"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/macaroons"
 	"github.com/brsuite/broln/monitoring"
 	"github.com/brsuite/broln/subscribe"
+	"github.com/brsuite/bronlog"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
 	"gopkg.in/macaroon-bakery.v2/bakery"
 )
@@ -165,7 +165,7 @@ type InterceptorChain struct {
 	permissionMap map[string][]bakery.Op
 
 	// rpcsLog is the logger used to log calls to the RPCs intercepted.
-	rpcsLog btclog.Logger
+	rpcsLog bronlog.Logger
 
 	// registeredMiddleware is a map of all macaroon permission based RPC
 	// middleware clients that are currently registered. The map is keyed
@@ -189,7 +189,7 @@ type InterceptorChain struct {
 var _ lnrpc.StateServer = (*InterceptorChain)(nil)
 
 // NewInterceptorChain creates a new InterceptorChain.
-func NewInterceptorChain(log btclog.Logger, noMacaroons bool,
+func NewInterceptorChain(log bronlog.Logger, noMacaroons bool,
 	mandatoryMiddleware []string) *InterceptorChain {
 
 	return &InterceptorChain{
@@ -572,7 +572,7 @@ func (r *InterceptorChain) CreateServerOpts() []grpc.ServerOption {
 // errorLogUnaryServerInterceptor is a simple UnaryServerInterceptor that will
 // automatically log any errors that occur when serving a client's unary
 // request.
-func errorLogUnaryServerInterceptor(logger btclog.Logger) grpc.UnaryServerInterceptor {
+func errorLogUnaryServerInterceptor(logger bronlog.Logger) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler) (interface{}, error) {
 
@@ -589,7 +589,7 @@ func errorLogUnaryServerInterceptor(logger btclog.Logger) grpc.UnaryServerInterc
 // errorLogStreamServerInterceptor is a simple StreamServerInterceptor that
 // will log any errors that occur while processing a client or server streaming
 // RPC.
-func errorLogStreamServerInterceptor(logger btclog.Logger) grpc.StreamServerInterceptor {
+func errorLogStreamServerInterceptor(logger bronlog.Logger) grpc.StreamServerInterceptor {
 	return func(srv interface{}, ss grpc.ServerStream,
 		info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 

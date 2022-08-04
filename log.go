@@ -1,10 +1,6 @@
 package broln
 
 import (
-	"github.com/brsuite/brond/connmgr"
-	"github.com/btcsuite/btclog"
-	"github.com/brsuite/neutrino"
-	sphinx "github.com/brsuite/lightning-onion"
 	"github.com/brsuite/broln/autopilot"
 	"github.com/brsuite/broln/build"
 	"github.com/brsuite/broln/chainntnfs"
@@ -45,12 +41,16 @@ import (
 	"github.com/brsuite/broln/tor"
 	"github.com/brsuite/broln/watchtower"
 	"github.com/brsuite/broln/watchtower/wtclient"
+	"github.com/brsuite/brond/connmgr"
+	"github.com/brsuite/bronlog"
+	sphinx "github.com/brsuite/lightning-onion"
+	"github.com/brsuite/neutrino"
 )
 
 // replaceableLogger is a thin wrapper around a logger that is used so the
 // logger can be replaced easily without some black pointer magic.
 type replaceableLogger struct {
-	btclog.Logger
+	bronlog.Logger
 	subsystem string
 }
 
@@ -90,7 +90,7 @@ var (
 // genSubLogger creates a logger for a subsystem. We provide an instance of
 // a signal.Interceptor to be able to shutdown in the case of a critical error.
 func genSubLogger(root *build.RotatingLogWriter,
-	interceptor signal.Interceptor) func(string) btclog.Logger {
+	interceptor signal.Interceptor) func(string) bronlog.Logger {
 
 	// Create a shutdown function which will request shutdown from our
 	// interceptor if it is listening.
@@ -104,7 +104,7 @@ func genSubLogger(root *build.RotatingLogWriter,
 
 	// Return a function which will create a sublogger from our root
 	// logger without shutdown fn.
-	return func(tag string) btclog.Logger {
+	return func(tag string) bronlog.Logger {
 		return root.GenSubLogger(tag, shutdown)
 	}
 }
@@ -172,7 +172,7 @@ func SetupLoggers(root *build.RotatingLogWriter, interceptor signal.Interceptor)
 // AddSubLogger is a helper method to conveniently create and register the
 // logger of one or more sub systems.
 func AddSubLogger(root *build.RotatingLogWriter, subsystem string,
-	interceptor signal.Interceptor, useLoggers ...func(btclog.Logger)) {
+	interceptor signal.Interceptor, useLoggers ...func(bronlog.Logger)) {
 
 	// genSubLogger will return a callback for creating a logger instance,
 	// which we will give to the root logger.
@@ -187,7 +187,7 @@ func AddSubLogger(root *build.RotatingLogWriter, subsystem string,
 // SetSubLogger is a helper method to conveniently register the logger of a sub
 // system.
 func SetSubLogger(root *build.RotatingLogWriter, subsystem string,
-	logger btclog.Logger, useLoggers ...func(btclog.Logger)) {
+	logger bronlog.Logger, useLoggers ...func(bronlog.Logger)) {
 
 	root.RegisterSubLogger(subsystem, logger)
 	for _, useLogger := range useLoggers {

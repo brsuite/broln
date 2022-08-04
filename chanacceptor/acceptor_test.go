@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnwallet/chancloser"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -126,7 +126,7 @@ func (c *channelAcceptorCtx) stop() {
 // request in a goroutine and then asserts that we get the outcome we expect.
 func (c *channelAcceptorCtx) queryAndAssert(queries map[*lnwire.OpenChannel]*ChannelAcceptResponse) {
 	var (
-		node = &btcec.PublicKey{
+		node = &bronec.PublicKey{
 			X: big.NewInt(1),
 			Y: big.NewInt(1),
 		}

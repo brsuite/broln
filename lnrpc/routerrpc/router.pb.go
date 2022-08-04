@@ -365,12 +365,12 @@ type SendPaymentRequest struct {
 	// The identity pubkey of the payment recipient
 	Dest []byte `protobuf:"bytes,1,opt,name=dest,proto3" json:"dest,omitempty"`
 	//
-	//Number of satoshis to send.
+	//Number of broneess to send.
 	//
 	//The fields amt and amt_msat are mutually exclusive.
 	Amt int64 `protobuf:"varint,2,opt,name=amt,proto3" json:"amt,omitempty"`
 	//
-	//Number of millisatoshis to send.
+	//Number of millibroneess to send.
 	//
 	//The fields amt and amt_msat are mutually exclusive.
 	AmtMsat int64 `protobuf:"varint,12,opt,name=amt_msat,json=amtMsat,proto3" json:"amt_msat,omitempty"`
@@ -396,7 +396,7 @@ type SendPaymentRequest struct {
 	//This field must be non-zero.
 	TimeoutSeconds int32 `protobuf:"varint,6,opt,name=timeout_seconds,json=timeoutSeconds,proto3" json:"timeout_seconds,omitempty"`
 	//
-	//The maximum number of satoshis that will be paid as a fee of the payment.
+	//The maximum number of broneess that will be paid as a fee of the payment.
 	//If this field is left to the default value of 0, only zero-fee routes will
 	//be considered. This usually means single hop routes connecting directly to
 	//the destination. To send the payment without a fee limit, use max int here.
@@ -404,7 +404,7 @@ type SendPaymentRequest struct {
 	//The fields fee_limit_sat and fee_limit_msat are mutually exclusive.
 	FeeLimitSat int64 `protobuf:"varint,7,opt,name=fee_limit_sat,json=feeLimitSat,proto3" json:"fee_limit_sat,omitempty"`
 	//
-	//The maximum number of millisatoshis that will be paid as a fee of the
+	//The maximum number of millibroneess that will be paid as a fee of the
 	//payment. If this field is left to the default value of 0, only zero-fee
 	//routes will be considered. This usually means single hop routes connecting
 	//directly to the destination. To send the payment without a fee limit, use
@@ -462,7 +462,7 @@ type SendPaymentRequest struct {
 	//The largest payment split that should be attempted when making a payment if
 	//splitting is necessary. Setting this value will effectively cause broln to
 	//split more aggressively, vs only when it thinks it needs to. Note that this
-	//value is in milli-satoshis.
+	//value is in milli-broneess.
 	MaxShardSizeMsat uint64 `protobuf:"varint,21,opt,name=max_shard_size_msat,json=maxShardSizeMsat,proto3" json:"max_shard_size_msat,omitempty"`
 	//
 	//If set, an AMP-payment will be attempted.
@@ -781,7 +781,7 @@ type RouteFeeResponse struct {
 
 	//
 	//A lower bound of the estimated fee to the target destination within the
-	//network, expressed in milli-satoshis.
+	//network, expressed in milli-broneess.
 	RoutingFeeMsat int64 `protobuf:"varint,1,opt,name=routing_fee_msat,json=routingFeeMsat,proto3" json:"routing_fee_msat,omitempty"`
 	//
 	//An estimate of the worst case time delay that can occur. Note that callers

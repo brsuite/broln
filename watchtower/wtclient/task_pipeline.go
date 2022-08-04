@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/btcsuite/btclog"
+	"github.com/brsuite/bronlog"
 )
 
 // taskPipeline implements a reliable, in-order queue that ensures its queue
@@ -19,7 +19,7 @@ type taskPipeline struct {
 	stopped sync.Once
 	forced  sync.Once
 
-	log btclog.Logger
+	log bronlog.Logger
 
 	queueMtx  sync.Mutex
 	queueCond *sync.Cond
@@ -33,7 +33,7 @@ type taskPipeline struct {
 }
 
 // newTaskPipeline initializes a new taskPipeline.
-func newTaskPipeline(log btclog.Logger) *taskPipeline {
+func newTaskPipeline(log bronlog.Logger) *taskPipeline {
 	rq := &taskPipeline{
 		log:            log,
 		queue:          list.New(),

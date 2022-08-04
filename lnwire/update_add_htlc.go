@@ -29,8 +29,8 @@ type UpdateAddHTLC struct {
 	// with each offered HTLC.
 	ID uint64
 
-	// Amount is the amount of millisatoshis this HTLC is worth.
-	Amount MilliSatoshi
+	// Amount is the amount of millibroneess this HTLC is worth.
+	Amount MilliBronees
 
 	// PaymentHash is the payment hash to be included in the HTLC this
 	// request creates. The pre-image to this HTLC must be revealed by the
@@ -98,7 +98,7 @@ func (c *UpdateAddHTLC) Encode(w *bytes.Buffer, pver uint32) error {
 		return err
 	}
 
-	if err := WriteMilliSatoshi(w, c.Amount); err != nil {
+	if err := WriteMilliBronees(w, c.Amount); err != nil {
 		return err
 	}
 

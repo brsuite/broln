@@ -9,9 +9,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/clock"
@@ -23,6 +20,9 @@ import (
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/ticker"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/davecgh/go-spew/spew"
 )
 
 const (
@@ -79,7 +79,7 @@ var (
 
 	// DefaultDustThreshold is the default threshold after which we'll fail
 	// payments if they are dust. This is currently set to 500m msats.
-	DefaultDustThreshold = lnwire.MilliSatoshi(500_000_000)
+	DefaultDustThreshold = lnwire.MilliBronees(500_000_000)
 )
 
 // plexPacket encapsulates switch packet and adds error channel to receive
@@ -197,9 +197,9 @@ type Config struct {
 	// AddPacket.
 	HTLCExpiry time.Duration
 
-	// DustThreshold is the threshold in milli-satoshis after which we'll
+	// DustThreshold is the threshold in milli-broneess after which we'll
 	// fail incoming or outgoing dust payments for a particular channel.
-	DustThreshold lnwire.MilliSatoshi
+	DustThreshold lnwire.MilliBronees
 }
 
 // Switch is the central messaging bus for all incoming/outgoing HTLCs.
@@ -1755,8 +1755,8 @@ out:
 				// stats printed.
 				updates, sent, recv := link.Stats()
 				newNumUpdates += updates
-				newSatSent += sent.ToSatoshis()
-				newSatRecv += recv.ToSatoshis()
+				newSatSent += sent.ToBroneess()
+				newSatRecv += recv.ToBroneess()
 			}
 			s.indexMtx.RUnlock()
 
@@ -1799,7 +1799,7 @@ out:
 
 			// Otherwise, we'll log this diff, then accumulate the
 			// new stats into the running total.
-			log.Debugf("Sent %d satoshis and received %d satoshis "+
+			log.Debugf("Sent %d broneess and received %d broneess "+
 				"in the last 10 seconds (%f tx/sec)",
 				diffSatSent, diffSatRecv,
 				float64(diffNumUpdates)/10)
@@ -2366,15 +2366,15 @@ func (s *Switch) BestHeight() uint32 {
 // in the sum as it was already included in the commitment's dust. A boolean is
 // returned telling the caller whether the HTLC should be failed back.
 func (s *Switch) evaluateDustThreshold(link ChannelLink,
-	amount lnwire.MilliSatoshi, incoming bool) bool {
+	amount lnwire.MilliBronees, incoming bool) bool {
 
 	// Retrieve the link's current commitment feerate and dustClosure.
 	feeRate := link.getFeeRate()
 	isDust := link.getDustClosure()
 
 	// Evaluate if the HTLC is dust on either sides' commitment.
-	isLocalDust := isDust(feeRate, incoming, true, amount.ToSatoshis())
-	isRemoteDust := isDust(feeRate, incoming, false, amount.ToSatoshis())
+	isLocalDust := isDust(feeRate, incoming, true, amount.ToBroneess())
+	isRemoteDust := isDust(feeRate, incoming, false, amount.ToBroneess())
 
 	if !(isLocalDust || isRemoteDust) {
 		// If the HTLC is not dust on either commitment, it's fine to

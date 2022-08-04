@@ -8,10 +8,10 @@ import (
 	"net"
 	"testing"
 
+	"github.com/brsuite/broln/tor"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/brsuite/broln/tor"
 	"github.com/stretchr/testify/require"
 )
 
@@ -69,23 +69,23 @@ func TestWriteUint64(t *testing.T) {
 	require.Equal(t, expectedBytes, buf.Bytes())
 }
 
-func TestWriteSatoshi(t *testing.T) {
+func TestWriteBronees(t *testing.T) {
 	buf := new(bytes.Buffer)
 	data := bronutil.Amount(1)
 	expectedBytes := []byte{0, 0, 0, 0, 0, 0, 0, 1}
 
-	err := WriteSatoshi(buf, data)
+	err := WriteBronees(buf, data)
 
 	require.NoError(t, err)
 	require.Equal(t, expectedBytes, buf.Bytes())
 }
 
-func TestWriteMilliSatoshi(t *testing.T) {
+func TestWriteMilliBronees(t *testing.T) {
 	buf := new(bytes.Buffer)
-	data := MilliSatoshi(1)
+	data := MilliBronees(1)
 	expectedBytes := []byte{0, 0, 0, 0, 0, 0, 0, 1}
 
-	err := WriteMilliSatoshi(buf, data)
+	err := WriteMilliBronees(buf, data)
 
 	require.NoError(t, err)
 	require.Equal(t, expectedBytes, buf.Bytes())

@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/brsuite/broln/channeldb"
+	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/brsuite/broln/channeldb"
-	"github.com/brsuite/broln/lnwire"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,7 +48,7 @@ func TestCreateChanAnnouncement(t *testing.T) {
 		ChainHash:        expChanAnn.ChainHash,
 		ChannelID:        expChanAnn.ShortChannelID.ToUint64(),
 		ChannelPoint:     wire.OutPoint{Index: 1},
-		Capacity:         bronutil.SatoshiPerBrocoin,
+		Capacity:         bronutil.BroneesPerBrocoin,
 		NodeKey1Bytes:    key,
 		NodeKey2Bytes:    key,
 		BrocoinKey1Bytes: key,

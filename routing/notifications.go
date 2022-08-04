@@ -7,13 +7,13 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/channeldb"
+	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-errors/errors"
-	"github.com/brsuite/broln/channeldb"
-	"github.com/brsuite/broln/lnwire"
 )
 
 // TopologyClient represents an intent to receive notifications from the
@@ -235,7 +235,7 @@ type NetworkNodeUpdate struct {
 	// IdentityKey is the identity public key of the target node. This is
 	// used to encrypt onion blobs as well as to authenticate any new
 	// updates.
-	IdentityKey *btcec.PublicKey
+	IdentityKey *bronec.PublicKey
 
 	// Alias is the alias or nick name of the node.
 	Alias string
@@ -269,18 +269,18 @@ type ChannelEdgeUpdate struct {
 	Capacity bronutil.Amount
 
 	// MinHTLC is the minimum HTLC amount that this channel will forward.
-	MinHTLC lnwire.MilliSatoshi
+	MinHTLC lnwire.MilliBronees
 
 	// MaxHTLC is the maximum HTLC amount that this channel will forward.
-	MaxHTLC lnwire.MilliSatoshi
+	MaxHTLC lnwire.MilliBronees
 
 	// BaseFee is the base fee that will charged for all HTLC's forwarded
 	// across the this channel direction.
-	BaseFee lnwire.MilliSatoshi
+	BaseFee lnwire.MilliBronees
 
 	// FeeRate is the fee rate that will be shared for all HTLC's forwarded
 	// across this channel direction.
-	FeeRate lnwire.MilliSatoshi
+	FeeRate lnwire.MilliBronees
 
 	// TimeLockDelta is the time-lock expressed in blocks that will be
 	// added to outgoing HTLC's from incoming HTLC's. This value is the
@@ -289,10 +289,10 @@ type ChannelEdgeUpdate struct {
 	TimeLockDelta uint16
 
 	// AdvertisingNode is the node that's advertising this edge.
-	AdvertisingNode *btcec.PublicKey
+	AdvertisingNode *bronec.PublicKey
 
 	// ConnectingNode is the node that the advertising node connects to.
-	ConnectingNode *btcec.PublicKey
+	ConnectingNode *bronec.PublicKey
 
 	// Disabled, if true, signals that the channel is unavailable to relay
 	// payments.

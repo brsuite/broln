@@ -8,13 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/go-errors/errors"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/chanacceptor"
@@ -31,6 +24,13 @@ import (
 	"github.com/brsuite/broln/lnwallet/chanfunding"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/go-errors/errors"
 	"golang.org/x/crypto/salsa20"
 )
 
@@ -55,13 +55,13 @@ func WriteOutpoint(w io.Writer, o *wire.OutPoint) error {
 }
 
 const (
-	// MinBtcRemoteDelay is the minimum CSV delay we will require the remote
+	// MinBronRemoteDelay is the minimum CSV delay we will require the remote
 	// to use for its commitment transaction.
-	MinBtcRemoteDelay uint16 = 144
+	MinBronRemoteDelay uint16 = 144
 
-	// MaxBtcRemoteDelay is the maximum CSV delay we will require the remote
+	// MaxBronRemoteDelay is the maximum CSV delay we will require the remote
 	// to use for its commitment transaction.
-	MaxBtcRemoteDelay uint16 = 2016
+	MaxBronRemoteDelay uint16 = 2016
 
 	// MinLtcRemoteDelay is the minimum Litecoin CSV delay we will require the
 	// remote to use for its commitment transaction.
@@ -75,22 +75,22 @@ const (
 	// created over the RPC interface.
 	MinChanFundingSize = bronutil.Amount(20000)
 
-	// MaxBtcFundingAmount is a soft-limit of the maximum channel size
+	// MaxBronFundingAmount is a soft-limit of the maximum channel size
 	// currently accepted on the Brocoin chain within the Lightning
 	// Protocol. This limit is defined in BOLT-0002, and serves as an
 	// initial precautionary limit while implementations are battle tested
 	// in the real world.
-	MaxBtcFundingAmount = bronutil.Amount(1<<24) - 1
+	MaxBronFundingAmount = bronutil.Amount(1<<24) - 1
 
-	// MaxBtcFundingAmountWumbo is a soft-limit on the maximum size of wumbo
-	// channels. This limit is 10 BTC and is the only thing standing between
+	// MaxBronFundingAmountWumbo is a soft-limit on the maximum size of wumbo
+	// channels. This limit is 10 BRON and is the only thing standing between
 	// you and limitless channel size (apart from 21 million cap)
-	MaxBtcFundingAmountWumbo = bronutil.Amount(1000000000)
+	MaxBronFundingAmountWumbo = bronutil.Amount(1000000000)
 
 	// MaxLtcFundingAmount is a soft-limit of the maximum channel size
 	// currently accepted on the Litecoin chain within the Lightning
 	// Protocol.
-	MaxLtcFundingAmount = MaxBtcFundingAmount * chainreg.BtcToLtcConversionRate
+	MaxLtcFundingAmount = MaxBronFundingAmount * chainreg.BronToLtcConversionRate
 
 	// TODO(roasbeef): tune
 	msgBufferSize = 50
@@ -139,8 +139,8 @@ type reservationWithCtx struct {
 
 	// Constraints we require for the remote.
 	remoteCsvDelay uint16
-	remoteMinHtlc  lnwire.MilliSatoshi
-	remoteMaxValue lnwire.MilliSatoshi
+	remoteMinHtlc  lnwire.MilliBronees
+	remoteMaxValue lnwire.MilliBronees
 	remoteMaxHtlcs uint16
 
 	// maxLocalCsv is the maximum csv we will accept from the remote.
@@ -184,7 +184,7 @@ type InitFundingMsg struct {
 	Peer lnpeer.Peer
 
 	// TargetPubkey is the public key of the peer.
-	TargetPubkey *btcec.PublicKey
+	TargetPubkey *bronec.PublicKey
 
 	// ChainHash is the target genesis hash for this channel.
 	ChainHash chainhash.Hash
@@ -197,7 +197,7 @@ type InitFundingMsg struct {
 	LocalFundingAmt bronutil.Amount
 
 	// PushAmt is the amount pushed to the counterparty.
-	PushAmt lnwire.MilliSatoshi
+	PushAmt lnwire.MilliBronees
 
 	// FundingFeePerKw is the fee for the funding transaction.
 	FundingFeePerKw chainfee.SatPerKWeight
@@ -206,7 +206,7 @@ type InitFundingMsg struct {
 	Private bool
 
 	// MinHtlcIn is the minimum incoming HTLC that we accept.
-	MinHtlcIn lnwire.MilliSatoshi
+	MinHtlcIn lnwire.MilliBronees
 
 	// RemoteCsvDelay is the CSV delay we require for the remote peer.
 	RemoteCsvDelay uint16
@@ -219,10 +219,10 @@ type InitFundingMsg struct {
 	// channel. This value is optional, so may be nil.
 	ShutdownScript lnwire.DeliveryAddress
 
-	// MaxValueInFlight is the maximum amount of coins in MilliSatoshi
+	// MaxValueInFlight is the maximum amount of coins in MilliBronees
 	// that can be pending within the channel. It only applies to the
 	// remote party.
-	MaxValueInFlight lnwire.MilliSatoshi
+	MaxValueInFlight lnwire.MilliBronees
 
 	// MaxHtlcs is the maximum number of HTLCs that the remote peer
 	// can offer us.
@@ -276,7 +276,7 @@ type serializedPubKey [33]byte
 
 // newSerializedKey creates a new serialized public key from an instance of a
 // live pubkey object.
-func newSerializedKey(pubKey *btcec.PublicKey) serializedPubKey {
+func newSerializedKey(pubKey *bronec.PublicKey) serializedPubKey {
 	var s serializedPubKey
 	copy(s[:], pubKey.SerializeCompressed())
 	return s
@@ -292,7 +292,7 @@ type Config struct {
 
 	// IDKey is the PublicKey that is used to identify this node within the
 	// Lightning Network.
-	IDKey *btcec.PublicKey
+	IDKey *bronec.PublicKey
 
 	// IDKeyLoc is the locator for the key that is used to identify this
 	// node within the LightningNetwork.
@@ -327,7 +327,7 @@ type Config struct {
 	// TODO(roasbeef): should instead pass on this responsibility to a
 	// distinct sub-system?
 	SignMessage func(keyLoc keychain.KeyLocator,
-		msg []byte, doubleHash bool) (*btcec.Signature, error)
+		msg []byte, doubleHash bool) (*bronec.Signature, error)
 
 	// CurrentNodeAnnouncement should return the latest, fully signed node
 	// announcement from the backing Lightning Network node.
@@ -363,14 +363,14 @@ type Config struct {
 
 	// DefaultMinHtlcIn is the default minimum incoming htlc value that is
 	// set as a channel parameter.
-	DefaultMinHtlcIn lnwire.MilliSatoshi
+	DefaultMinHtlcIn lnwire.MilliBronees
 
 	// NumRequiredConfs is a function closure that helps the funding
 	// manager decide how many confirmations it should require for a
 	// channel extended to it. The function is able to take into account
 	// the amount of the channel, and any funds we'll be pushed in the
 	// process to determine how many confirmations we'll require.
-	NumRequiredConfs func(bronutil.Amount, lnwire.MilliSatoshi) uint16
+	NumRequiredConfs func(bronutil.Amount, lnwire.MilliBronees) uint16
 
 	// RequiredRemoteDelay is a function that maps the total amount in a
 	// proposed channel to the CSV delay that we'll require for the remote
@@ -386,9 +386,9 @@ type Config struct {
 	RequiredRemoteChanReserve func(capacity, dustLimit bronutil.Amount) bronutil.Amount
 
 	// RequiredRemoteMaxValue is a function closure that, given the channel
-	// capacity, returns the amount of MilliSatoshis that our remote peer
+	// capacity, returns the amount of MilliBroneess that our remote peer
 	// can have in total outstanding HTLCs with us.
-	RequiredRemoteMaxValue func(bronutil.Amount) lnwire.MilliSatoshi
+	RequiredRemoteMaxValue func(bronutil.Amount) lnwire.MilliBronees
 
 	// RequiredRemoteMaxHTLCs is a function closure that, given the channel
 	// capacity, returns the number of maximum HTLCs the remote peer can
@@ -400,7 +400,7 @@ type Config struct {
 	// the channel to the ChainArbitrator so it can watch for any on-chain
 	// events related to the channel. We also provide the public key of the
 	// node we're establishing a channel with for reconnection purposes.
-	WatchNewChannel func(*channeldb.OpenChannel, *btcec.PublicKey) error
+	WatchNewChannel func(*channeldb.OpenChannel, *bronec.PublicKey) error
 
 	// ReportShortChanID allows the funding manager to report the newly
 	// discovered short channel ID of a formerly pending channel to outside
@@ -1063,7 +1063,7 @@ func (f *Manager) advancePendingChannelState(
 		// maxWaitNumBlocksFundingConf and we are not the
 		// channel initiator.
 		ch := channel
-		localBalance := ch.LocalCommitment.LocalBalance.ToSatoshis()
+		localBalance := ch.LocalCommitment.LocalBalance.ToBroneess()
 		closeInfo := &channeldb.ChannelCloseSummary{
 			ChainHash:               ch.ChainHash,
 			ChanPoint:               ch.FundingOutpoint,
@@ -1962,7 +1962,7 @@ func (f *Manager) handleFundingCreated(peer lnpeer.Peer,
 	// we use this convenience method to delete the pending OpenChannel
 	// from the database.
 	deleteFromDatabase := func() {
-		localBalance := completeChan.LocalCommitment.LocalBalance.ToSatoshis()
+		localBalance := completeChan.LocalCommitment.LocalBalance.ToBroneess()
 		closeInfo := &channeldb.ChannelCloseSummary{
 			ChanPoint:               completeChan.FundingOutpoint,
 			ChainHash:               completeChan.ChainHash,
@@ -2607,7 +2607,7 @@ func (f *Manager) addToRouterGraph(completeChan *channeldb.OpenChannel,
 	// we'll use this value within our ChannelUpdate. This value must be <=
 	// channel capacity and <= the maximum in-flight msats set by the peer.
 	fwdMaxHTLC := completeChan.LocalChanCfg.MaxPendingAmount
-	capacityMSat := lnwire.NewMSatFromSatoshis(completeChan.Capacity)
+	capacityMSat := lnwire.NewMSatFromBroneess(completeChan.Capacity)
 	if fwdMaxHTLC > capacityMSat {
 		fwdMaxHTLC = capacityMSat
 	}
@@ -2918,10 +2918,10 @@ type chanAnnouncement struct {
 // authenticated only by us and contains our directional routing policy for the
 // channel.
 func (f *Manager) newChanAnnouncement(localPubKey,
-	remotePubKey *btcec.PublicKey, localFundingKey *keychain.KeyDescriptor,
-	remoteFundingKey *btcec.PublicKey, shortChanID lnwire.ShortChannelID,
+	remotePubKey *bronec.PublicKey, localFundingKey *keychain.KeyDescriptor,
+	remoteFundingKey *bronec.PublicKey, shortChanID lnwire.ShortChannelID,
 	chanID lnwire.ChannelID, fwdMinHTLC,
-	fwdMaxHTLC lnwire.MilliSatoshi) (*chanAnnouncement, error) {
+	fwdMaxHTLC lnwire.MilliBronees) (*chanAnnouncement, error) {
 
 	chainHash := *f.cfg.Wallet.Cfg.NetParams.GenesisHash
 
@@ -3063,9 +3063,9 @@ func (f *Manager) newChanAnnouncement(localPubKey,
 // the network during its next trickle.
 // This method is synchronous and will return when all the network requests
 // finish, either successfully or with an error.
-func (f *Manager) announceChannel(localIDKey, remoteIDKey *btcec.PublicKey,
+func (f *Manager) announceChannel(localIDKey, remoteIDKey *bronec.PublicKey,
 	localFundingKey *keychain.KeyDescriptor,
-	remoteFundingKey *btcec.PublicKey, shortChanID lnwire.ShortChannelID,
+	remoteFundingKey *bronec.PublicKey, shortChanID lnwire.ShortChannelID,
 	chanID lnwire.ChannelID) error {
 
 	// First, we'll create the batch of announcements to be sent upon
@@ -3523,7 +3523,7 @@ func (f *Manager) pruneZombieReservations() {
 
 // cancelReservationCtx does all needed work in order to securely cancel the
 // reservation.
-func (f *Manager) cancelReservationCtx(peerKey *btcec.PublicKey,
+func (f *Manager) cancelReservationCtx(peerKey *bronec.PublicKey,
 	pendingChanID [32]byte, byRemote bool) (*reservationWithCtx, error) {
 
 	log.Infof("Cancelling funding reservation for node_key=%x, "+
@@ -3571,7 +3571,7 @@ func (f *Manager) cancelReservationCtx(peerKey *btcec.PublicKey,
 
 // deleteReservationCtx deletes the reservation uniquely identified by the
 // target public key of the peer, and the specified pending channel ID.
-func (f *Manager) deleteReservationCtx(peerKey *btcec.PublicKey,
+func (f *Manager) deleteReservationCtx(peerKey *bronec.PublicKey,
 	pendingChanID [32]byte) {
 
 	// TODO(roasbeef): possibly cancel funding barrier in peer's
@@ -3596,7 +3596,7 @@ func (f *Manager) deleteReservationCtx(peerKey *btcec.PublicKey,
 
 // getReservationCtx returns the reservation context for a particular pending
 // channel ID for a target peer.
-func (f *Manager) getReservationCtx(peerKey *btcec.PublicKey,
+func (f *Manager) getReservationCtx(peerKey *bronec.PublicKey,
 	pendingChanID [32]byte) (*reservationWithCtx, error) {
 
 	peerIDKey := newSerializedKey(peerKey)
@@ -3628,9 +3628,9 @@ func (f *Manager) IsPendingChannel(pendingChanID [32]byte,
 	return ok
 }
 
-func copyPubKey(pub *btcec.PublicKey) *btcec.PublicKey {
-	return &btcec.PublicKey{
-		Curve: btcec.S256(),
+func copyPubKey(pub *bronec.PublicKey) *bronec.PublicKey {
+	return &bronec.PublicKey{
+		Curve: bronec.S256(),
 		X:     pub.X,
 		Y:     pub.Y,
 	}

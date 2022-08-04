@@ -6,7 +6,7 @@ import (
 	"io"
 	"sort"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 )
 
 // Type is an 64-bit identifier for a TLV Record.
@@ -134,7 +134,7 @@ func MakePrimitiveRecord(typ Type, val interface{}) Record {
 		encoder = EBytes33
 		decoder = DBytes33
 
-	case **btcec.PublicKey:
+	case **bronec.PublicKey:
 		staticSize = 33
 		encoder = EPubKey
 		decoder = DPubKey

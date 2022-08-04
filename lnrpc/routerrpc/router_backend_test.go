@@ -6,12 +6,12 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/record"
 	"github.com/brsuite/broln/routing"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 
 	"github.com/brsuite/broln/lnrpc"
@@ -124,7 +124,7 @@ func testQueryRoutes(t *testing.T, useMissionControl bool, useMsat bool,
 	}
 
 	findRoute := func(source, target route.Vertex,
-		amt lnwire.MilliSatoshi, restrictions *routing.RestrictParams,
+		amt lnwire.MilliBronees, restrictions *routing.RestrictParams,
 		_ record.CustomSet,
 		routeHints map[route.Vertex][]*channeldb.CachedEdgePolicy,
 		finalExpiry uint16) (*route.Route, error) {
@@ -240,7 +240,7 @@ type mockMissionControl struct {
 }
 
 func (m *mockMissionControl) GetProbability(fromNode, toNode route.Vertex,
-	amt lnwire.MilliSatoshi) float64 {
+	amt lnwire.MilliBronees) float64 {
 
 	return testMissionControlProb
 }

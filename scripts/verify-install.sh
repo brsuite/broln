@@ -243,7 +243,7 @@ function check_hash() {
 
 # By default we're picking up broln and brolncli from the system $PATH.
 broln_BIN=$(which broln)
-LNCLI_BIN=$(which brolncli)
+BROLNCLI_BIN=$(which brolncli)
 
 if [[ $# -eq 0 ]]; then
   echo "ERROR: missing expected version!"
@@ -269,21 +269,21 @@ check_command gpg
 # the system path.
 if [[ $# -eq 2 ]]; then
   broln_BIN=$(realpath $1)
-  LNCLI_BIN=$(realpath $2)
+  BROLNCLI_BIN=$(realpath $2)
 
   # Make sure both files actually exist.
   if [[ ! -f $broln_BIN ]]; then
     echo "ERROR: $broln_BIN not found!"
     exit 1
   fi
-  if [[ ! -f $LNCLI_BIN ]]; then
-    echo "ERROR: $LNCLI_BIN not found!"
+  if [[ ! -f $BROLNCLI_BIN ]]; then
+    echo "ERROR: $BROLNCLI_BIN not found!"
     exit 1
   fi
 
   # Make sure both binaries can be found and are executable.
   check_command "$broln_BIN"
-  check_command "$LNCLI_BIN"
+  check_command "$BROLNCLI_BIN"
 
 elif [[ $# -eq 1 ]]; then
   # We're verifying a single binary or a packaged release archive.
@@ -292,11 +292,11 @@ elif [[ $# -eq 1 ]]; then
 elif [[ $# -eq 0 ]]; then
   # By default we're picking up broln and brolncli from the system $PATH.
   broln_BIN=$(which broln)
-  LNCLI_BIN=$(which brolncli)
+  BROLNCLI_BIN=$(which brolncli)
 
   # Make sure both binaries can be found and are executable.
   check_command "$broln_BIN"
-  check_command "$LNCLI_BIN"
+  check_command "$BROLNCLI_BIN"
 
 else
   echo "ERROR: invalid number of parameters!"
@@ -322,7 +322,7 @@ if [[ "$PACKAGE_BIN" != "" ]]; then
 
 else
   check_hash "$broln_BIN" "broln"
-  check_hash "$LNCLI_BIN" "brolncli"
+  check_hash "$BROLNCLI_BIN" "brolncli"
 
   echo ""
   echo "SUCCESS! Verified broln and brolncli against $MANIFEST signed by $NUM_CHECKS developers."

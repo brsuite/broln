@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,19 +16,19 @@ func TestDefaultRoutingFeeLimitForAmount(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		amount        lnwire.MilliSatoshi
-		expectedLimit lnwire.MilliSatoshi
+		amount        lnwire.MilliBronees
+		expectedLimit lnwire.MilliBronees
 	}{
 		{
 			amount:        1,
 			expectedLimit: 1,
 		},
 		{
-			amount:        lnwire.NewMSatFromSatoshis(1_000),
-			expectedLimit: lnwire.NewMSatFromSatoshis(1_000),
+			amount:        lnwire.NewMSatFromBroneess(1_000),
+			expectedLimit: lnwire.NewMSatFromBroneess(1_000),
 		},
 		{
-			amount:        lnwire.NewMSatFromSatoshis(1_001),
+			amount:        lnwire.NewMSatFromBroneess(1_001),
 			expectedLimit: 50_050,
 		},
 		{

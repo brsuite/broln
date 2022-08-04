@@ -7,11 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
@@ -24,6 +19,11 @@ import (
 	"github.com/brsuite/broln/watchtower/wtmock"
 	"github.com/brsuite/broln/watchtower/wtpolicy"
 	"github.com/brsuite/broln/watchtower/wtserver"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -64,10 +64,10 @@ var (
 )
 
 // randPrivKey generates a new secp keypair, and returns the public key.
-func randPrivKey(t *testing.T) *btcec.PrivateKey {
+func randPrivKey(t *testing.T) *bronec.PrivateKey {
 	t.Helper()
 
-	sk, err := btcec.NewPrivateKey(btcec.S256())
+	sk, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to generate pubkey: %v", err)
 	}
@@ -135,25 +135,25 @@ type mockChannel struct {
 	mu            sync.Mutex
 	commitHeight  uint64
 	retributions  map[uint64]*lnwallet.BreachRetribution
-	localBalance  lnwire.MilliSatoshi
-	remoteBalance lnwire.MilliSatoshi
+	localBalance  lnwire.MilliBronees
+	remoteBalance lnwire.MilliBronees
 
-	revSK     *btcec.PrivateKey
-	revPK     *btcec.PublicKey
+	revSK     *bronec.PrivateKey
+	revPK     *bronec.PublicKey
 	revKeyLoc keychain.KeyLocator
 
-	toRemoteSK     *btcec.PrivateKey
-	toRemotePK     *btcec.PublicKey
+	toRemoteSK     *bronec.PrivateKey
+	toRemotePK     *bronec.PublicKey
 	toRemoteKeyLoc keychain.KeyLocator
 
-	toLocalPK *btcec.PublicKey // only need to generate to-local script
+	toLocalPK *bronec.PublicKey // only need to generate to-local script
 
-	dustLimit lnwire.MilliSatoshi
+	dustLimit lnwire.MilliBronees
 	csvDelay  uint32
 }
 
 func newMockChannel(t *testing.T, signer *wtmock.MockSigner,
-	localAmt, remoteAmt lnwire.MilliSatoshi) *mockChannel {
+	localAmt, remoteAmt lnwire.MilliBronees) *mockChannel {
 
 	// Generate the revocation, to-local, and to-remote keypairs.
 	revSK := randPrivKey(t)
@@ -233,7 +233,7 @@ func (c *mockChannel) createRemoteCommitTx(t *testing.T) {
 	var outputIndex int
 	if c.remoteBalance >= c.dustLimit {
 		commitTxn.TxOut = append(commitTxn.TxOut, &wire.TxOut{
-			Value:    int64(c.remoteBalance.ToSatoshis()),
+			Value:    int64(c.remoteBalance.ToBroneess()),
 			PkScript: toLocalScriptHash,
 		})
 
@@ -252,7 +252,7 @@ func (c *mockChannel) createRemoteCommitTx(t *testing.T) {
 	}
 	if c.localBalance >= c.dustLimit {
 		commitTxn.TxOut = append(commitTxn.TxOut, &wire.TxOut{
-			Value:    int64(c.localBalance.ToSatoshis()),
+			Value:    int64(c.localBalance.ToBroneess()),
 			PkScript: toRemoteScriptHash,
 		})
 
@@ -325,7 +325,7 @@ func (c *mockChannel) advanceState(t *testing.T) {
 
 // sendPayment creates the next channel state and retribution after transferring
 // amt to the remote party.
-func (c *mockChannel) sendPayment(t *testing.T, amt lnwire.MilliSatoshi) {
+func (c *mockChannel) sendPayment(t *testing.T, amt lnwire.MilliBronees) {
 	t.Helper()
 
 	c.mu.Lock()
@@ -343,7 +343,7 @@ func (c *mockChannel) sendPayment(t *testing.T, amt lnwire.MilliSatoshi) {
 
 // receivePayment creates the next channel state and retribution after
 // transferring amt to the local party.
-func (c *mockChannel) receivePayment(t *testing.T, amt lnwire.MilliSatoshi) {
+func (c *mockChannel) receivePayment(t *testing.T, amt lnwire.MilliBronees) {
 	t.Helper()
 
 	c.mu.Lock()
@@ -373,7 +373,7 @@ type testHarness struct {
 	t          *testing.T
 	cfg        harnessCfg
 	signer     *wtmock.MockSigner
-	capacity   lnwire.MilliSatoshi
+	capacity   lnwire.MilliBronees
 	clientDB   *wtmock.ClientDB
 	clientCfg  *wtclient.Config
 	client     wtclient.Client
@@ -388,8 +388,8 @@ type testHarness struct {
 }
 
 type harnessCfg struct {
-	localBalance       lnwire.MilliSatoshi
-	remoteBalance      lnwire.MilliSatoshi
+	localBalance       lnwire.MilliBronees
+	remoteBalance      lnwire.MilliBronees
 	policy             wtpolicy.Policy
 	noRegisterChan0    bool
 	noAckCreateSession bool
@@ -401,7 +401,7 @@ func newHarness(t *testing.T, cfg harnessCfg) *testHarness {
 		t.Fatalf("Unable to resolve tower TCP addr: %v", err)
 	}
 
-	privKey, err := btcec.NewPrivateKey(btcec.S256())
+	privKey, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		t.Fatalf("Unable to generate tower private key: %v", err)
 	}
@@ -551,7 +551,7 @@ func chanIDFromInt(id uint64) lnwire.ChannelID {
 //
 // NOTE: The method fails if channel for id already exists.
 func (h *testHarness) makeChannel(id uint64,
-	localAmt, remoteAmt lnwire.MilliSatoshi) {
+	localAmt, remoteAmt lnwire.MilliBronees) {
 
 	h.t.Helper()
 
@@ -645,7 +645,7 @@ func (h *testHarness) backupState(id, i uint64, expErr error) {
 // party for each state in from-to times and returns the breach hints for states
 // [from, to).
 func (h *testHarness) sendPayments(id, from, to uint64,
-	amt lnwire.MilliSatoshi) []blob.BreachHint {
+	amt lnwire.MilliBronees) []blob.BreachHint {
 
 	h.t.Helper()
 
@@ -666,7 +666,7 @@ func (h *testHarness) sendPayments(id, from, to uint64,
 // remote party for each state in from-to times and returns the breach hints for
 // states [from, to).
 func (h *testHarness) recvPayments(id, from, to uint64,
-	amt lnwire.MilliSatoshi) []blob.BreachHint {
+	amt lnwire.MilliBronees) []blob.BreachHint {
 
 	h.t.Helper()
 
@@ -799,7 +799,7 @@ func (h *testHarness) addTower(addr *lnwire.NetAddress) {
 
 // removeTower removes a tower from the client. If `addr` is specified, then the
 // only said address is removed from the tower.
-func (h *testHarness) removeTower(pubKey *btcec.PublicKey, addr net.Addr) {
+func (h *testHarness) removeTower(pubKey *bronec.PublicKey, addr net.Addr) {
 	h.t.Helper()
 
 	if err := h.client.RemoveTower(pubKey, addr); err != nil {
@@ -808,8 +808,8 @@ func (h *testHarness) removeTower(pubKey *btcec.PublicKey, addr net.Addr) {
 }
 
 const (
-	localBalance  = lnwire.MilliSatoshi(100000000)
-	remoteBalance = lnwire.MilliSatoshi(200000000)
+	localBalance  = lnwire.MilliBronees(100000000)
+	remoteBalance = lnwire.MilliBronees(200000000)
 )
 
 type clientTest struct {
@@ -1114,7 +1114,7 @@ var clientTests = []clientTest{
 		fn: func(h *testHarness) {
 			var (
 				capacity   = h.cfg.localBalance + h.cfg.remoteBalance
-				paymentAmt = lnwire.MilliSatoshi(2000000)
+				paymentAmt = lnwire.MilliBronees(2000000)
 				numSends   = uint64(h.cfg.localBalance / paymentAmt)
 				numRecvs   = uint64(capacity / paymentAmt)
 				numUpdates = numSends + numRecvs // 200 updates

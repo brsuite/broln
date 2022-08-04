@@ -12,10 +12,10 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/walletrpc"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
 	"github.com/urfave/cli"
 )
 
@@ -581,7 +581,7 @@ var fundPsbtCommand = cli.Command{
 	The 'outputs' flag decodes addresses and the amount to send respectively
 	in the following JSON format:
 
-	    --outputs='{"ExampleAddr": NumCoinsInSatoshis, "SecondAddr": Sats}'
+	    --outputs='{"ExampleAddr": NumCoinsInBroneess, "SecondAddr": Sats}'
 
 	The optional 'inputs' flag decodes a JSON list of UTXO outpoints as
 	returned by the listunspent command for example:

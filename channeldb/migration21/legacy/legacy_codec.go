@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
 	"github.com/brsuite/broln/channeldb/migration21/common"
 	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 var (
@@ -147,12 +147,12 @@ func WriteElement(w io.Writer, element interface{}) error {
 			return err
 		}
 
-	case lnwire.MilliSatoshi:
+	case lnwire.MilliBronees:
 		if err := binary.Write(w, byteOrder, uint64(e)); err != nil {
 			return err
 		}
 
-	case *btcec.PublicKey:
+	case *bronec.PublicKey:
 		b := e.SerializeCompressed()
 		if _, err := w.Write(b); err != nil {
 			return err
@@ -262,21 +262,21 @@ func ReadElement(r io.Reader, element interface{}) error {
 
 		*e = bronutil.Amount(a)
 
-	case *lnwire.MilliSatoshi:
+	case *lnwire.MilliBronees:
 		var a uint64
 		if err := binary.Read(r, byteOrder, &a); err != nil {
 			return err
 		}
 
-		*e = lnwire.MilliSatoshi(a)
+		*e = lnwire.MilliBronees(a)
 
-	case **btcec.PublicKey:
-		var b [btcec.PubKeyBytesLenCompressed]byte
+	case **bronec.PublicKey:
+		var b [bronec.PubKeyBytesLenCompressed]byte
 		if _, err := io.ReadFull(r, b[:]); err != nil {
 			return err
 		}
 
-		pubKey, err := btcec.ParsePubKey(b[:], btcec.S256())
+		pubKey, err := bronec.ParsePubKey(b[:], bronec.S256())
 		if err != nil {
 			return err
 		}

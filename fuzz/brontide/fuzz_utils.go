@@ -7,10 +7,10 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/brontide"
 	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/davecgh/go-spew/spew"
 )
 
 var (
@@ -29,7 +29,7 @@ var (
 	}
 
 	// Returns the initiator's ephemeral private key.
-	initEphemeral = brontide.EphemeralGenerator(func() (*btcec.PrivateKey, error) {
+	initEphemeral = brontide.EphemeralGenerator(func() (*bronec.PrivateKey, error) {
 		e := "121212121212121212121212121212121212121212121212121212" +
 			"1212121212"
 		eBytes, err := hex.DecodeString(e)
@@ -37,12 +37,12 @@ var (
 			return nil, err
 		}
 
-		priv, _ := btcec.PrivKeyFromBytes(btcec.S256(), eBytes)
+		priv, _ := bronec.PrivKeyFromBytes(bronec.S256(), eBytes)
 		return priv, nil
 	})
 
 	// Returns the responder's ephemeral private key.
-	respEphemeral = brontide.EphemeralGenerator(func() (*btcec.PrivateKey, error) {
+	respEphemeral = brontide.EphemeralGenerator(func() (*bronec.PrivateKey, error) {
 		e := "222222222222222222222222222222222222222222222222222" +
 			"2222222222222"
 		eBytes, err := hex.DecodeString(e)
@@ -50,7 +50,7 @@ var (
 			return nil, err
 		}
 
-		priv, _ := btcec.PrivKeyFromBytes(btcec.S256(), eBytes)
+		priv, _ := bronec.PrivKeyFromBytes(bronec.S256(), eBytes)
 		return priv, nil
 	})
 )
@@ -112,9 +112,9 @@ func nilAndPanic(initiator, responder *brontide.Machine, err error) {
 // getBrontideMachines returns two brontide machines that use random keys
 // everywhere.
 func getBrontideMachines() (*brontide.Machine, *brontide.Machine) {
-	initPriv, _ := btcec.NewPrivateKey(btcec.S256())
-	respPriv, _ := btcec.NewPrivateKey(btcec.S256())
-	respPub := (*btcec.PublicKey)(&respPriv.PublicKey)
+	initPriv, _ := bronec.NewPrivateKey(bronec.S256())
+	respPriv, _ := bronec.NewPrivateKey(bronec.S256())
+	respPub := (*bronec.PublicKey)(&respPriv.PublicKey)
 
 	initPrivECDH := &keychain.PrivKeyECDH{PrivKey: initPriv}
 	respPrivECDH := &keychain.PrivKeyECDH{PrivKey: respPriv}
@@ -128,8 +128,8 @@ func getBrontideMachines() (*brontide.Machine, *brontide.Machine) {
 // getStaticBrontideMachines returns two brontide machines that use static keys
 // everywhere.
 func getStaticBrontideMachines() (*brontide.Machine, *brontide.Machine) {
-	initPriv, _ := btcec.PrivKeyFromBytes(btcec.S256(), initBytes)
-	respPriv, respPub := btcec.PrivKeyFromBytes(btcec.S256(), respBytes)
+	initPriv, _ := bronec.PrivKeyFromBytes(bronec.S256(), initBytes)
+	respPriv, respPub := bronec.PrivKeyFromBytes(bronec.S256(), respBytes)
 
 	initPrivECDH := &keychain.PrivKeyECDH{PrivKey: initPriv}
 	respPrivECDH := &keychain.PrivKeyECDH{PrivKey: respPriv}

@@ -28,8 +28,8 @@ type UpdateAddHTLC struct {
 	// with each offered HTLC.
 	ID uint64
 
-	// Amount is the amount of millisatoshis this HTLC is worth.
-	Amount MilliSatoshi
+	// Amount is the amount of millibroneess this HTLC is worth.
+	Amount MilliBronees
 
 	// PaymentHash is the payment hash to be included in the HTLC this
 	// request creates. The pre-image to this HTLC must be revealed by the

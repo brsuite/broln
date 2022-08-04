@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/bronutil"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/brsuite/broln/lnwire"
 	"github.com/stretchr/testify/require"
 )
 
@@ -212,7 +212,7 @@ var mppTestCases = []mppSendTestCase{
 
 	// Test that if maxShardSize is set, then all attempts are below the
 	// max shard size, yet still sum up to the total payment amount. A
-	// payment of 30k satoshis with a max shard size of 10k satoshis should
+	// payment of 30k broneess with a max shard size of 10k broneess should
 	// produce 3 payments of 10k sats each.
 	{
 		name:             "max shard size clamping",
@@ -255,10 +255,10 @@ func testMppSend(t *testing.T, testCase *mppSendTestCase) {
 	g := ctx.graph
 	testCase.graph(g)
 
-	ctx.amt = lnwire.NewMSatFromSatoshis(testCase.amt)
+	ctx.amt = lnwire.NewMSatFromBroneess(testCase.amt)
 
 	if testCase.maxShardSize != 0 {
-		shardAmt := lnwire.NewMSatFromSatoshis(testCase.maxShardSize)
+		shardAmt := lnwire.NewMSatFromBroneess(testCase.maxShardSize)
 		ctx.maxShardAmt = &shardAmt
 	}
 
@@ -288,7 +288,7 @@ type expectedHtlcSuccess struct {
 // equals matches the expectation with an actual attempt.
 func (e *expectedHtlcSuccess) equals(a htlcAttempt) bool {
 	if a.route.TotalAmount !=
-		lnwire.NewMSatFromSatoshis(e.amt) {
+		lnwire.NewMSatFromBroneess(e.amt) {
 
 		return false
 	}
@@ -354,7 +354,7 @@ func TestPaymentAddrOnlyNoSplit(t *testing.T) {
 		lnwire.PaymentAddrOptional,
 	}
 
-	// We'll make a payment of 1.5 mil satoshis our single chan sizes,
+	// We'll make a payment of 1.5 mil broneess our single chan sizes,
 	// which should cause a split attempt _if_ we had MPP bits activated.
 	// However, we only have the payment addr on, so we shouldn't split at
 	// all.
@@ -362,7 +362,7 @@ func TestPaymentAddrOnlyNoSplit(t *testing.T) {
 	// We'll set a non-zero value for max parts as well, which should be
 	// ignored.
 	const maxParts = 5
-	ctx.amt = lnwire.NewMSatFromSatoshis(1_500_000)
+	ctx.amt = lnwire.NewMSatFromBroneess(1_500_000)
 
 	attempts, err := ctx.testPayment(maxParts, payAddrOnlyFeatures...)
 	require.NotNil(

@@ -385,7 +385,7 @@ service Lightning {
     /* brolncli: `queryroutes`
     QueryRoutes attempts to query the daemon's Channel Router for a possible
     route to a target destination capable of carrying a specific amount of
-    satoshis. The returned route contains the full details required to craft and
+    broneess. The returned route contains the full details required to craft and
     send an HTLC, also including the necessary information that should be
     present within the Sphinx packet encapsulated within the HTLC.
 
@@ -607,7 +607,7 @@ message Utxo {
     // The address
     string address = 2;
 
-    // The value of the unspent coin in satoshis
+    // The value of the unspent coin in broneess
     int64 amount_sat = 3;
 
     // The pkscript in hex
@@ -624,7 +624,7 @@ message Transaction {
     // The transaction hash
     string tx_hash = 1;
 
-    // The transaction amount, denominated in satoshis
+    // The transaction amount, denominated in broneess
     int64 amount = 2;
 
     // The number of confirmations
@@ -679,14 +679,14 @@ message TransactionDetails {
 message FeeLimit {
     oneof limit {
         /*
-        The fee limit expressed as a fixed amount of satoshis.
+        The fee limit expressed as a fixed amount of broneess.
 
         The fields fixed and fixed_msat are mutually exclusive.
         */
         int64 fixed = 1;
 
         /*
-        The fee limit expressed as a fixed amount of millisatoshis.
+        The fee limit expressed as a fixed amount of millibroneess.
 
         The fields fixed and fixed_msat are mutually exclusive.
         */
@@ -711,14 +711,14 @@ message SendRequest {
     string dest_string = 2 [deprecated = true];
 
     /*
-    The amount to send expressed in satoshis.
+    The amount to send expressed in broneess.
 
     The fields amt and amt_msat are mutually exclusive.
     */
     int64 amt = 3;
 
     /*
-    The amount to send expressed in millisatoshis.
+    The amount to send expressed in millibroneess.
 
     The fields amt and amt_msat are mutually exclusive.
     */
@@ -750,7 +750,7 @@ message SendRequest {
     int32 final_cltv_delta = 7;
 
     /*
-    The maximum number of satoshis that will be paid as a fee of the payment.
+    The maximum number of broneess that will be paid as a fee of the payment.
     This value can be represented either as a percentage of the amount being
     sent, or as a fixed amount of the maximum fee the user is willing the pay to
     send the payment. If not specified, broln will use a default value of 100%
@@ -839,25 +839,25 @@ message ChannelAcceptRequest {
     // The pending channel id.
     bytes pending_chan_id = 3;
 
-    // The funding amount in satoshis that initiator wishes to use in the
+    // The funding amount in broneess that initiator wishes to use in the
     // channel.
     uint64 funding_amt = 4;
 
-    // The push amount of the proposed channel in millisatoshis.
+    // The push amount of the proposed channel in millibroneess.
     uint64 push_amt = 5;
 
     // The dust limit of the initiator's commitment tx.
     uint64 dust_limit = 6;
 
-    // The maximum amount of coins in millisatoshis that can be pending in this
+    // The maximum amount of coins in millibroneess that can be pending in this
     // channel.
     uint64 max_value_in_flight = 7;
 
-    // The minimum amount of satoshis the initiator requires us to have at all
+    // The minimum amount of broneess the initiator requires us to have at all
     // times.
     uint64 channel_reserve = 8;
 
-    // The smallest HTLC in millisatoshis that the initiator will accept.
+    // The smallest HTLC in millibroneess that the initiator will accept.
     uint64 min_htlc = 9;
 
     // The initial fee rate that the initiator suggests for both commitment
@@ -912,7 +912,7 @@ message ChannelAcceptResponse {
     uint32 csv_delay = 5;
 
     /*
-    The reserve amount in satoshis that we require the remote peer to adhere to.
+    The reserve amount in broneess that we require the remote peer to adhere to.
     We require that the remote peer always have some reserve amount allocated to
     them so that there is always a disincentive to broadcast old state (if they
     hold 0 sats on their side of the channel, there is nothing to lose).
@@ -920,7 +920,7 @@ message ChannelAcceptResponse {
     uint64 reserve_sat = 6;
 
     /*
-    The maximum amount of funds in millisatoshis that we allow the remote peer
+    The maximum amount of funds in millibroneess that we allow the remote peer
     to have in outstanding htlcs.
     */
     uint64 in_flight_max_msat = 7;
@@ -931,7 +931,7 @@ message ChannelAcceptResponse {
     uint32 max_htlc_count = 8;
 
     /*
-    The minimum value in millisatoshis for incoming htlcs on the channel.
+    The minimum value in millibroneess for incoming htlcs on the channel.
     */
     uint64 min_htlc_in = 9;
 
@@ -997,14 +997,14 @@ message EstimateFeeRequest {
 }
 
 message EstimateFeeResponse {
-    // The total fee in satoshis.
+    // The total fee in broneess.
     int64 fee_sat = 1;
 
     // Deprecated, use sat_per_vbyte.
-    // The fee rate in satoshi/vbyte.
+    // The fee rate in bronees/vbyte.
     int64 feerate_sat_per_byte = 2 [deprecated = true];
 
-    // The fee rate in satoshi/vbyte.
+    // The fee rate in bronees/vbyte.
     uint64 sat_per_vbyte = 3;
 }
 
@@ -1044,7 +1044,7 @@ message SendCoinsRequest {
     // The address to send coins to
     string addr = 1;
 
-    // The amount in satoshis to send
+    // The amount in broneess to send
     int64 amount = 2;
 
     // The target number of blocks that this transaction should be confirmed
@@ -1251,17 +1251,17 @@ message ChannelConstraints {
     */
     uint32 csv_delay = 1;
 
-    // The minimum satoshis this node is required to reserve in its balance.
+    // The minimum broneess this node is required to reserve in its balance.
     uint64 chan_reserve_sat = 2;
 
-    // The dust limit (in satoshis) of the initiator's commitment tx.
+    // The dust limit (in broneess) of the initiator's commitment tx.
     uint64 dust_limit_sat = 3;
 
-    // The maximum amount of coins in millisatoshis that can be pending in this
+    // The maximum amount of coins in millibroneess that can be pending in this
     // channel.
     uint64 max_pending_amt_msat = 4;
 
-    // The smallest HTLC in millisatoshis that the initiator will accept.
+    // The smallest HTLC in millibroneess that the initiator will accept.
     uint64 min_htlc_msat = 5;
 
     // The total number of incoming HTLC's that the initiator will accept.
@@ -1310,7 +1310,7 @@ message Channel {
     int64 commit_weight = 9;
 
     /*
-    The required number of satoshis per kilo-weight that the requester will pay
+    The required number of broneess per kilo-weight that the requester will pay
     at all times, for both the funding transaction and commitment transaction.
     This value can later be updated once the channel is open.
     */
@@ -1320,14 +1320,14 @@ message Channel {
     int64 unsettled_balance = 11;
 
     /*
-    The total number of satoshis we've sent within this channel.
+    The total number of broneess we've sent within this channel.
     */
-    int64 total_satoshis_sent = 12;
+    int64 total_broneess_sent = 12;
 
     /*
-    The total number of satoshis we've received within this channel.
+    The total number of broneess we've received within this channel.
     */
-    int64 total_satoshis_received = 13;
+    int64 total_broneess_received = 13;
 
     /*
     The total number of updates conducted within this channel.
@@ -1355,12 +1355,12 @@ message Channel {
     // A set of flags showing the current state of the channel.
     string chan_status_flags = 19;
 
-    // Deprecated. The minimum satoshis this node is required to reserve in its
+    // Deprecated. The minimum broneess this node is required to reserve in its
     // balance.
     int64 local_chan_reserve_sat = 20 [deprecated = true];
 
     /*
-    Deprecated. The minimum satoshis the other node is required to reserve in
+    Deprecated. The minimum broneess the other node is required to reserve in
     its balance.
     */
     int64 remote_chan_reserve_sat = 21 [deprecated = true];
@@ -1601,10 +1601,10 @@ message Peer {
     // Bytes of data transmitted from this peer
     uint64 bytes_recv = 5;
 
-    // Satoshis sent to this peer
+    // Broneess sent to this peer
     int64 sat_sent = 6;
 
-    // Satoshis received from this peer
+    // Broneess received from this peer
     int64 sat_recv = 7;
 
     // A channel is inbound if the counterparty initiated the channel
@@ -1859,12 +1859,12 @@ message PendingUpdate {
 message ReadyForPsbtFunding {
     /*
     The P2WSH address of the channel funding multisig address that the below
-    specified amount in satoshis needs to be sent to.
+    specified amount in broneess needs to be sent to.
     */
     string funding_address = 1;
 
     /*
-    The exact amount in satoshis that needs to be sent to the above address to
+    The exact amount in broneess that needs to be sent to the above address to
     fund the pending channel.
     */
     int64 funding_amount = 2;
@@ -1907,10 +1907,10 @@ message BatchOpenChannel {
     // field must be encoded as base64.
     bytes node_pubkey = 1;
 
-    // The number of satoshis the wallet should commit to the channel.
+    // The number of broneess the wallet should commit to the channel.
     int64 local_funding_amount = 2;
 
-    // The number of satoshis to push to the remote side as part of the initial
+    // The number of broneess to push to the remote side as part of the initial
     // commitment state.
     int64 push_sat = 3;
 
@@ -1918,7 +1918,7 @@ message BatchOpenChannel {
     // network.
     bool private = 4;
 
-    // The minimum value in millisatoshi we will require for incoming HTLCs on
+    // The minimum value in millibronees we will require for incoming HTLCs on
     // the channel.
     int64 min_htlc_msat = 5;
 
@@ -1973,10 +1973,10 @@ message OpenChannelRequest {
     */
     string node_pubkey_string = 3 [deprecated = true];
 
-    // The number of satoshis the wallet should commit to the channel
+    // The number of broneess the wallet should commit to the channel
     int64 local_funding_amount = 4;
 
-    // The number of satoshis to push to the remote side as part of the initial
+    // The number of broneess to push to the remote side as part of the initial
     // commitment state
     int64 push_sat = 5;
 
@@ -1993,7 +1993,7 @@ message OpenChannelRequest {
     // network.
     bool private = 8;
 
-    // The minimum value in millisatoshi we will require for incoming HTLCs on
+    // The minimum value in millibronees we will require for incoming HTLCs on
     // the channel.
     int64 min_htlc_msat = 9;
 
@@ -2031,7 +2031,7 @@ message OpenChannelRequest {
     FundingShim funding_shim = 14;
 
     /*
-    The maximum amount of coins in millisatoshi that can be pending within
+    The maximum amount of coins in millibronees that can be pending within
     the channel. It only applies to the remote party.
     */
     uint64 remote_max_value_in_flight_msat = 15;
@@ -2295,12 +2295,12 @@ message PendingChannelsResponse {
         int64 local_balance = 4;
         int64 remote_balance = 5;
 
-        // The minimum satoshis this node is required to reserve in its
+        // The minimum broneess this node is required to reserve in its
         // balance.
         int64 local_chan_reserve_sat = 6;
 
         /*
-        The minimum satoshis the other node is required to reserve in its
+        The minimum broneess the other node is required to reserve in its
         balance.
         */
         int64 remote_chan_reserve_sat = 7;
@@ -2338,7 +2338,7 @@ message PendingChannelsResponse {
         int64 commit_weight = 5;
 
         /*
-        The required number of satoshis per kilo-weight that the requester will
+        The required number of broneess per kilo-weight that the requester will
         pay at all times, for both the funding transaction and commitment
         transaction. This value can later be updated once the channel is open.
         */
@@ -2349,7 +2349,7 @@ message PendingChannelsResponse {
         // The pending channel waiting for closing tx to confirm
         PendingChannel channel = 1;
 
-        // The balance in satoshis encumbered in this channel
+        // The balance in broneess encumbered in this channel
         int64 limbo_balance = 2;
 
         /*
@@ -2373,19 +2373,19 @@ message PendingChannelsResponse {
         string remote_pending_txid = 3;
 
         /*
-        The amount in satoshis calculated to be paid in fees for the local
+        The amount in broneess calculated to be paid in fees for the local
         commitment.
         */
         uint64 local_commit_fee_sat = 4;
 
         /*
-        The amount in satoshis calculated to be paid in fees for the remote
+        The amount in broneess calculated to be paid in fees for the remote
         commitment.
         */
         uint64 remote_commit_fee_sat = 5;
 
         /*
-        The amount in satoshis calculated to be paid in fees for the remote
+        The amount in broneess calculated to be paid in fees for the remote
         pending commitment.
         */
         uint64 remote_pending_commit_fee_sat = 6;
@@ -2406,7 +2406,7 @@ message PendingChannelsResponse {
         // The transaction id of the closing transaction
         string closing_txid = 2;
 
-        // The balance in satoshis encumbered in this pending channel
+        // The balance in broneess encumbered in this pending channel
         int64 limbo_balance = 3;
 
         // The height at which funds can be swept into the wallet
@@ -2433,7 +2433,7 @@ message PendingChannelsResponse {
         AnchorState anchor = 9;
     }
 
-    // The balance in satoshis encumbered in pending channels
+    // The balance in broneess encumbered in pending channels
     int64 total_limbo_balance = 1;
 
     // Channels pending opening
@@ -2504,20 +2504,20 @@ message WalletBalanceResponse {
 }
 
 message Amount {
-    // Value denominated in satoshis.
+    // Value denominated in broneess.
     uint64 sat = 1;
 
-    // Value denominated in milli-satoshis.
+    // Value denominated in milli-broneess.
     uint64 msat = 2;
 }
 
 message ChannelBalanceRequest {
 }
 message ChannelBalanceResponse {
-    // Deprecated. Sum of channels balances denominated in satoshis
+    // Deprecated. Sum of channels balances denominated in broneess
     int64 balance = 1 [deprecated = true];
 
-    // Deprecated. Sum of channels pending balances denominated in satoshis
+    // Deprecated. Sum of channels pending balances denominated in broneess
     int64 pending_open_balance = 2 [deprecated = true];
 
     // Sum of channels local balances.
@@ -2544,14 +2544,14 @@ message QueryRoutesRequest {
     string pub_key = 1;
 
     /*
-    The amount to send expressed in satoshis.
+    The amount to send expressed in broneess.
 
     The fields amt and amt_msat are mutually exclusive.
     */
     int64 amt = 2;
 
     /*
-    The amount to send expressed in millisatoshis.
+    The amount to send expressed in millibroneess.
 
     The fields amt and amt_msat are mutually exclusive.
     */
@@ -2569,7 +2569,7 @@ message QueryRoutesRequest {
     int32 final_cltv_delta = 4;
 
     /*
-    The maximum number of satoshis that will be paid as a fee of the payment.
+    The maximum number of broneess that will be paid as a fee of the payment.
     This value can be represented either as a percentage of the amount being
     sent, or as a fixed amount of the maximum fee the user is willing the pay to
     send the payment. If not specified, broln will use a default value of 100%
@@ -2752,7 +2752,7 @@ message MPPRecord {
     bytes payment_addr = 11;
 
     /*
-    The total amount in milli-satoshis being sent as part of a larger multi-path
+    The total amount in milli-broneess being sent as part of a larger multi-path
     payment. The caller is responsible for ensuring subpayments to the same node
     and payment_hash sum exactly to total_amt_msat. The same
     total_amt_msat must be used on all subpayments.
@@ -2795,7 +2795,7 @@ message Route {
     The total amount of funds required to complete a payment over this route.
     This value includes the cumulative fees at each hop. As a result, the HTLC
     extended to the first-hop in the route will need to have at least this many
-    satoshis, otherwise the route will fail at an intermediate node due to an
+    broneess, otherwise the route will fail at an intermediate node due to an
     insufficient amount of fees.
     */
     int64 total_amt = 3 [deprecated = true];
@@ -2806,12 +2806,12 @@ message Route {
     repeated Hop hops = 4;
 
     /*
-    The total fees in millisatoshis.
+    The total fees in millibroneess.
     */
     int64 total_fees_msat = 5;
 
     /*
-    The total amount in millisatoshis.
+    The total amount in millibroneess.
     */
     int64 total_amt_msat = 6;
 }
@@ -2836,7 +2836,7 @@ message NodeInfo {
     // The total number of channels for the node.
     uint32 num_channels = 2;
 
-    // The sum of all channels capacity for the node, denominated in satoshis.
+    // The sum of all channels capacity for the node, denominated in broneess.
     int64 total_capacity = 3;
 
     // A list of all public channels for the node.
@@ -3051,12 +3051,12 @@ message HopHint {
     // The unique identifier of the channel.
     uint64 chan_id = 2 [jstype = JS_STRING];
 
-    // The base fee of the channel denominated in millisatoshis.
+    // The base fee of the channel denominated in millibroneess.
     uint32 fee_base_msat = 3;
 
     /*
-    The fee rate of the channel for sending one satoshi across it denominated in
-    millionths of a satoshi.
+    The fee rate of the channel for sending one bronees across it denominated in
+    millionths of a bronees.
     */
     uint32 fee_proportional_millionths = 4;
 
@@ -3086,7 +3086,7 @@ message AMPInvoiceState {
     // The time this HTLC set was settled expressed in unix epoch.
     int64 settle_time = 3;
 
-    // The total amount paid for the sub-invoice expressed in milli satoshis.
+    // The total amount paid for the sub-invoice expressed in milli broneess.
     int64 amt_paid_msat = 5;
 }
 
@@ -3115,14 +3115,14 @@ message Invoice {
     bytes r_hash = 4;
 
     /*
-    The value of this invoice in satoshis
+    The value of this invoice in broneess
 
     The fields value and value_msat are mutually exclusive.
     */
     int64 value = 5;
 
     /*
-    The value of this invoice in millisatoshis
+    The value of this invoice in millibroneess
 
     The fields value and value_msat are mutually exclusive.
     */
@@ -3190,7 +3190,7 @@ message Invoice {
     int64 amt_paid = 18 [deprecated = true];
 
     /*
-    The amount that was accepted for this invoice, in satoshis. This will ONLY
+    The amount that was accepted for this invoice, in broneess. This will ONLY
     be set if this invoice has been settled. We provide this field as if the
     invoice was created with a zero value, then we need to record what amount
     was ultimately accepted. Additionally, it's possible that the sender paid
@@ -3200,7 +3200,7 @@ message Invoice {
     int64 amt_paid_sat = 19;
 
     /*
-    The amount that was accepted for this invoice, in millisatoshis. This will
+    The amount that was accepted for this invoice, in millibroneess. This will
     ONLY be set if this invoice has been settled. We provide this field as if
     the invoice was created with a zero value, then we need to record what
     amount was ultimately accepted. Additionally, it's possible that the sender
@@ -3473,10 +3473,10 @@ message Payment {
     // The payment preimage
     string payment_preimage = 6;
 
-    // The value of the payment in satoshis
+    // The value of the payment in broneess
     int64 value_sat = 7;
 
-    // The value of the payment in milli-satoshis
+    // The value of the payment in milli-broneess
     int64 value_msat = 8;
 
     // The optional payment request being fulfilled.
@@ -3492,10 +3492,10 @@ message Payment {
     // The status of the payment.
     PaymentStatus status = 10;
 
-    //  The fee paid for this payment in satoshis
+    //  The fee paid for this payment in broneess
     int64 fee_sat = 11;
 
-    //  The fee paid for this payment in milli-satoshis
+    //  The fee paid for this payment in milli-broneess
     int64 fee_msat = 12;
 
     // The time in UNIX nanoseconds at which the payment was created.
@@ -3649,7 +3649,7 @@ message PayReqString {
 message PayReq {
     string destination = 1;
     string payment_hash = 2;
-    int64 num_satoshis = 3;
+    int64 num_broneess = 3;
     int64 timestamp = 4;
     int64 expiry = 5;
     string description = 6;
@@ -3705,14 +3705,14 @@ message ChannelFeeReport {
     // The channel that this fee report belongs to.
     string channel_point = 1;
 
-    // The base fee charged regardless of the number of milli-satoshis sent.
+    // The base fee charged regardless of the number of milli-broneess sent.
     int64 base_fee_msat = 2;
 
-    // The amount charged per milli-satoshis transferred expressed in
-    // millionths of a satoshi.
+    // The amount charged per milli-broneess transferred expressed in
+    // millionths of a bronees.
     int64 fee_per_mil = 3;
 
-    // The effective fee rate in milli-satoshis. Computed by dividing the
+    // The effective fee rate in milli-broneess. Computed by dividing the
     // fee_per_mil value by 1 million.
     double fee_rate = 4;
 }
@@ -3721,15 +3721,15 @@ message FeeReportResponse {
     // for each channel.
     repeated ChannelFeeReport channel_fees = 1;
 
-    // The total amount of fee revenue (in satoshis) the switch has collected
+    // The total amount of fee revenue (in broneess) the switch has collected
     // over the past 24 hrs.
     uint64 day_fee_sum = 2;
 
-    // The total amount of fee revenue (in satoshis) the switch has collected
+    // The total amount of fee revenue (in broneess) the switch has collected
     // over the past 1 week.
     uint64 week_fee_sum = 3;
 
-    // The total amount of fee revenue (in satoshis) the switch has collected
+    // The total amount of fee revenue (in broneess) the switch has collected
     // over the past 1 month.
     uint64 month_fee_sum = 4;
 }
@@ -3743,24 +3743,24 @@ message PolicyUpdateRequest {
         ChannelPoint chan_point = 2;
     }
 
-    // The base fee charged regardless of the number of milli-satoshis sent.
+    // The base fee charged regardless of the number of milli-broneess sent.
     int64 base_fee_msat = 3;
 
-    // The effective fee rate in milli-satoshis. The precision of this value
+    // The effective fee rate in milli-broneess. The precision of this value
     // goes up to 6 decimal places, so 1e-6.
     double fee_rate = 4;
 
-    // The effective fee rate in micro-satoshis (parts per million).
+    // The effective fee rate in micro-broneess (parts per million).
     uint32 fee_rate_ppm = 9;
 
     // The required timelock delta for HTLCs forwarded over the channel.
     uint32 time_lock_delta = 5;
 
-    // If set, the maximum HTLC size in milli-satoshis. If unset, the maximum
+    // If set, the maximum HTLC size in milli-broneess. If unset, the maximum
     // HTLC will be unchanged.
     uint64 max_htlc_msat = 6;
 
-    // The minimum HTLC size in milli-satoshis. Only applied if
+    // The minimum HTLC size in milli-broneess. Only applied if
     // min_htlc_msat_specified is true.
     uint64 min_htlc_msat = 7;
 
@@ -3822,25 +3822,25 @@ message ForwardingEvent {
     // circuit.
     uint64 chan_id_out = 4 [jstype = JS_STRING];
 
-    // The total amount (in satoshis) of the incoming HTLC that created half
+    // The total amount (in broneess) of the incoming HTLC that created half
     // the circuit.
     uint64 amt_in = 5;
 
-    // The total amount (in satoshis) of the outgoing HTLC that created the
+    // The total amount (in broneess) of the outgoing HTLC that created the
     // second half of the circuit.
     uint64 amt_out = 6;
 
-    // The total fee (in satoshis) that this payment circuit carried.
+    // The total fee (in broneess) that this payment circuit carried.
     uint64 fee = 7;
 
-    // The total fee (in milli-satoshis) that this payment circuit carried.
+    // The total fee (in milli-broneess) that this payment circuit carried.
     uint64 fee_msat = 8;
 
-    // The total amount (in milli-satoshis) of the incoming HTLC that created
+    // The total amount (in milli-broneess) of the incoming HTLC that created
     // half the circuit.
     uint64 amt_in_msat = 9;
 
-    // The total amount (in milli-satoshis) of the outgoing HTLC that created
+    // The total amount (in milli-broneess) of the outgoing HTLC that created
     // the second half of the circuit.
     uint64 amt_out_msat = 10;
 
@@ -4144,7 +4144,7 @@ message ChannelUpdate {
     uint32 base_fee = 8;
 
     /*
-    The fee rate that will be charged per millionth of a satoshi.
+    The fee rate that will be charged per millionth of a bronees.
     */
     uint32 fee_rate = 9;
 

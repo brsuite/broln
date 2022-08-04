@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/bronutil"
-	"github.com/brsuite/broln/lnwire"
 )
 
 const (
-	// mSatPerBtc is the number of millisatoshis in 1 BTC.
-	mSatPerBtc = 100000000000
+	// mSatPerBron is the number of millibroneess in 1 BRON.
+	mSatPerBron = 100000000000
 
 	// signatureBase32Len is the number of 5-bit groups needed to encode
 	// the 512 bit signature + 8 bit recovery ID.
@@ -103,7 +103,7 @@ type MessageSigner struct {
 	// SignCompact signs the hash of the passed msg with the node's privkey.
 	// The returned signature should be 65 bytes, where the last 64 are the
 	// compact signature, and the first one is a header byte. This is the
-	// format returned by btcec.SignCompact.
+	// format returned by bronec.SignCompact.
 	SignCompact func(msg []byte) ([]byte, error)
 }
 
@@ -115,9 +115,9 @@ type Invoice struct {
 	// Net specifies what network this Lightning invoice is meant for.
 	Net *chaincfg.Params
 
-	// MilliSat specifies the amount of this invoice in millisatoshi.
+	// MilliSat specifies the amount of this invoice in millibronees.
 	// Optional.
-	MilliSat *lnwire.MilliSatoshi
+	MilliSat *lnwire.MilliBronees
 
 	// Timestamp specifies the time this invoice was created.
 	// Mandatory
@@ -136,7 +136,7 @@ type Invoice struct {
 	// include the pubkey as an 'n' field. If this is not set before
 	// encoding then the destination pubkey won't be added as an 'n' field,
 	// and the pubkey will be extracted from the signature during decoding.
-	Destination *btcec.PublicKey
+	Destination *bronec.PublicKey
 
 	// minFinalCLTVExpiry is the value that the creator of the invoice
 	// expects to be used for the CLTV expiry of the HTLC extended to it in
@@ -186,8 +186,8 @@ type Invoice struct {
 }
 
 // Amount is a functional option that allows callers of NewInvoice to set the
-// amount in millisatoshis that the Invoice should encode.
-func Amount(milliSat lnwire.MilliSatoshi) func(*Invoice) {
+// amount in millibroneess that the Invoice should encode.
+func Amount(milliSat lnwire.MilliBronees) func(*Invoice) {
 	return func(i *Invoice) {
 		i.MilliSat = &milliSat
 	}
@@ -195,7 +195,7 @@ func Amount(milliSat lnwire.MilliSatoshi) func(*Invoice) {
 
 // Destination is a functional option that allows callers of NewInvoice to
 // explicitly set the pubkey of the Invoice's destination node.
-func Destination(destination *btcec.PublicKey) func(*Invoice) {
+func Destination(destination *bronec.PublicKey) func(*Invoice) {
 	return func(i *Invoice) {
 		i.Destination = destination
 	}

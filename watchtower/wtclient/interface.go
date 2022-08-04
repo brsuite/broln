@@ -3,13 +3,13 @@ package wtclient
 import (
 	"net"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/tor"
 	"github.com/brsuite/broln/watchtower/blob"
 	"github.com/brsuite/broln/watchtower/wtdb"
 	"github.com/brsuite/broln/watchtower/wtserver"
+	"github.com/brsuite/brond/bronec"
 )
 
 // DB abstracts the required database operations required by the watchtower
@@ -32,10 +32,10 @@ type DB interface {
 	// completely removed from the database.
 	//
 	// NOTE: An error is not returned if the tower doesn't exist.
-	RemoveTower(*btcec.PublicKey, net.Addr) error
+	RemoveTower(*bronec.PublicKey, net.Addr) error
 
 	// LoadTower retrieves a tower by its public key.
-	LoadTower(*btcec.PublicKey) (*wtdb.Tower, error)
+	LoadTower(*bronec.PublicKey) (*wtdb.Tower, error)
 
 	// LoadTowerByID retrieves a tower by its tower ID.
 	LoadTowerByID(wtdb.TowerID) (*wtdb.Tower, error)

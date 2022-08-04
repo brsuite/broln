@@ -3,7 +3,6 @@ package contractcourt
 import (
 	"io"
 
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/htlcswitch/hop"
 	"github.com/brsuite/broln/input"
@@ -12,6 +11,7 @@ import (
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/sweep"
+	"github.com/brsuite/brond/wire"
 )
 
 // Registry is an interface which represents the invoice registry.
@@ -25,7 +25,7 @@ type Registry interface {
 	// invoices are never fully settled. The return value describes how the
 	// htlc should be resolved. If the htlc cannot be resolved immediately,
 	// the resolution is sent on the passed in hodlChan later.
-	NotifyExitHopHtlc(payHash lntypes.Hash, paidAmount lnwire.MilliSatoshi,
+	NotifyExitHopHtlc(payHash lntypes.Hash, paidAmount lnwire.MilliBronees,
 		expiry uint32, currentHeight int32,
 		circuitKey channeldb.CircuitKey, hodlChan chan<- interface{},
 		payload invoices.Payload) (invoices.HtlcResolution, error)

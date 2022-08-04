@@ -14,13 +14,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/go-errors/errors"
-	sphinx "github.com/brsuite/lightning-onion"
 	"github.com/brsuite/broln/build"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/contractcourt"
@@ -35,6 +28,13 @@ import (
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/ticker"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	sphinx "github.com/brsuite/lightning-onion"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/go-errors/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -884,7 +884,7 @@ func TestLinkForwardTimelockPolicyMismatch(t *testing.T) {
 	}
 	defer n.stop()
 
-	// We'll be sending 1 BTC over a 2-hop (3 vertex) route.
+	// We'll be sending 1 BRON over a 2-hop (3 vertex) route.
 	amount := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
 
 	// Generate the route over two hops, ignoring the total time lock that
@@ -942,8 +942,8 @@ func TestLinkForwardFeePolicyMismatch(t *testing.T) {
 	}
 	defer n.stop()
 
-	// We'll be sending 1 BTC over a 2-hop (3 vertex) route. Given the
-	// current default fee of 1 SAT, if we just send a single BTC over in
+	// We'll be sending 1 BRON over a 2-hop (3 vertex) route. Given the
+	// current default fee of 1 SAT, if we just send a single BRON over in
 	// an HTLC, it should be rejected.
 	amountNoFee := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
 
@@ -1253,7 +1253,7 @@ func TestUpdateForwardingPolicy(t *testing.T) {
 }
 
 // TestChannelLinkMultiHopInsufficientPayment checks that we receive error if
-// bob<->alice channel has insufficient BTC capacity/bandwidth. In this test we
+// bob<->alice channel has insufficient BRON capacity/bandwidth. In this test we
 // send the payment from Carol to Alice over Bob peer. (Carol -> Bob -> Alice)
 func TestChannelLinkMultiHopInsufficientPayment(t *testing.T) {
 	t.Parallel()
@@ -1278,8 +1278,8 @@ func TestChannelLinkMultiHopInsufficientPayment(t *testing.T) {
 	secondBobBandwidthBefore := n.secondBobChannelLink.Bandwidth()
 	aliceBandwidthBefore := n.aliceChannelLink.Bandwidth()
 
-	// We'll attempt to send 4 BTC although the alice-to-bob channel only
-	// has 3 BTC total capacity. As a result, this payment should be
+	// We'll attempt to send 4 BRON although the alice-to-bob channel only
+	// has 3 BRON total capacity. As a result, this payment should be
 	// rejected.
 	amount := lnwire.NewMSatFromSatoshis(4 * bronutil.SatoshiPerBrocoin)
 	htlcAmt, totalTimelock, hops := generateHops(amount, testStartingHeight,
@@ -1576,7 +1576,7 @@ func TestChannelLinkMultiHopDecodeError(t *testing.T) {
 
 	// Replace decode function with another which throws an error.
 	n.carolChannelLink.cfg.ExtractErrorEncrypter = func(
-		*btcec.PublicKey) (hop.ErrorEncrypter, lnwire.FailCode) {
+		*bronec.PublicKey) (hop.ErrorEncrypter, lnwire.FailCode) {
 		return nil, lnwire.CodeInvalidOnionVersion
 	}
 
@@ -1887,7 +1887,7 @@ func (m *mockPeer) WipeChannel(*wire.OutPoint) {}
 func (m *mockPeer) PubKey() [33]byte {
 	return [33]byte{}
 }
-func (m *mockPeer) IdentityKey() *btcec.PublicKey {
+func (m *mockPeer) IdentityKey() *bronec.PublicKey {
 	return nil
 }
 func (m *mockPeer) Address() net.Addr {
@@ -1955,7 +1955,7 @@ func newSingleLinkTestHarness(chanAmt, chanReserve bronutil.Amount) (
 		Circuits:           aliceSwitch.CircuitModifier(),
 		ForwardPackets:     aliceSwitch.ForwardPackets,
 		DecodeHopIterators: decoder.DecodeHopIterators,
-		ExtractErrorEncrypter: func(*btcec.PublicKey) (
+		ExtractErrorEncrypter: func(*bronec.PublicKey) (
 			hop.ErrorEncrypter, lnwire.FailCode) {
 			return obfuscator, lnwire.CodeNone
 		},
@@ -2223,7 +2223,7 @@ func TestChannelLinkBandwidthConsistency(t *testing.T) {
 	) - htlcFee
 	assertLinkBandwidth(t, aliceLink, expectedBandwidth)
 
-	// Next, we'll create an HTLC worth 1 BTC, and send it into the link as
+	// Next, we'll create an HTLC worth 1 BRON, and send it into the link as
 	// a switch initiated payment.  The resulting bandwidth should
 	// now be decremented to reflect the new HTLC.
 	htlcAmt := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
@@ -2639,7 +2639,7 @@ func TestChannelLinkTrimCircuitsPending(t *testing.T) {
 		halfHtlcs = numHtlcs / 2
 	)
 
-	// We'll start by creating a new link with our chanAmt (5 BTC). We will
+	// We'll start by creating a new link with our chanAmt (5 BRON). We will
 	// only be testing Alice's behavior, so the reference to Bob's channel
 	// state is unnecessary.
 	aliceLink, _, batchTicker, start, cleanUp, restore, err :=
@@ -2682,7 +2682,7 @@ func TestChannelLinkTrimCircuitsPending(t *testing.T) {
 	// bandwidth assertions.
 	aliceStartingBandwidth := alice.link.Bandwidth()
 
-	// Next, we'll create an HTLC worth 1 BTC that will be used as a dummy
+	// Next, we'll create an HTLC worth 1 BRON that will be used as a dummy
 	// message for the test.
 	var mockBlob [lnwire.OnionPacketSize]byte
 	htlcAmt := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
@@ -2915,7 +2915,7 @@ func TestChannelLinkTrimCircuitsNoCommit(t *testing.T) {
 		halfHtlcs = numHtlcs / 2
 	)
 
-	// We'll start by creating a new link with our chanAmt (5 BTC). We will
+	// We'll start by creating a new link with our chanAmt (5 BRON). We will
 	// only be testing Alice's behavior, so the reference to Bob's channel
 	// state is unnecessary.
 	aliceLink, _, batchTicker, start, cleanUp, restore, err :=
@@ -2963,7 +2963,7 @@ func TestChannelLinkTrimCircuitsNoCommit(t *testing.T) {
 	// bandwidth assertions.
 	aliceStartingBandwidth := alice.link.Bandwidth()
 
-	// Next, we'll create an HTLC worth 1 BTC that will be used as a dummy
+	// Next, we'll create an HTLC worth 1 BRON that will be used as a dummy
 	// message for the test.
 	var mockBlob [lnwire.OnionPacketSize]byte
 	htlcAmt := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
@@ -3181,7 +3181,7 @@ func TestChannelLinkTrimCircuitsRemoteCommit(t *testing.T) {
 		numHtlcs = 2
 	)
 
-	// We'll start by creating a new link with our chanAmt (5 BTC).
+	// We'll start by creating a new link with our chanAmt (5 BRON).
 	aliceLink, bobChan, batchTicker, start, cleanUp, restore, err :=
 		newSingleLinkTestHarness(chanAmt, 0)
 	if err != nil {
@@ -3222,7 +3222,7 @@ func TestChannelLinkTrimCircuitsRemoteCommit(t *testing.T) {
 	// bandwidth assertions.
 	aliceStartingBandwidth := alice.link.Bandwidth()
 
-	// Next, we'll create an HTLC worth 1 BTC that will be used as a dummy
+	// Next, we'll create an HTLC worth 1 BRON that will be used as a dummy
 	// message for the test.
 	var mockBlob [lnwire.OnionPacketSize]byte
 	htlcAmt := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
@@ -3371,7 +3371,7 @@ func TestChannelLinkBandwidthChanReserve(t *testing.T) {
 		chanAmt-defaultCommitFee-chanReserve) - htlcFee
 	assertLinkBandwidth(t, aliceLink, expectedBandwidth)
 
-	// Next, we'll create an HTLC worth 3 BTC, and send it into the link as
+	// Next, we'll create an HTLC worth 3 BRON, and send it into the link as
 	// a switch initiated payment.  The resulting bandwidth should
 	// now be decremented to reflect the new HTLC.
 	htlcAmt := lnwire.NewMSatFromSatoshis(3 * bronutil.SatoshiPerBrocoin)
@@ -4493,7 +4493,7 @@ func (h *persistentLinkHarness) restartLink(
 		Circuits:           aliceSwitch.CircuitModifier(),
 		ForwardPackets:     aliceSwitch.ForwardPackets,
 		DecodeHopIterators: decoder.DecodeHopIterators,
-		ExtractErrorEncrypter: func(*btcec.PublicKey) (
+		ExtractErrorEncrypter: func(*bronec.PublicKey) (
 			hop.ErrorEncrypter, lnwire.FailCode) {
 			return obfuscator, lnwire.CodeNone
 		},
@@ -6080,7 +6080,7 @@ func TestChannelLinkHoldInvoiceRestart(t *testing.T) {
 		chanAmt = bronutil.SatoshiPerBrocoin * 5
 	)
 
-	// We'll start by creating a new link with our chanAmt (5 BTC). We will
+	// We'll start by creating a new link with our chanAmt (5 BRON). We will
 	// only be testing Alice's behavior, so the reference to Bob's channel
 	// state is unnecessary.
 	aliceLink, bobChannel, _, start, cleanUp, restore, err :=
@@ -6181,7 +6181,7 @@ func TestChannelLinkRevocationWindowRegular(t *testing.T) {
 		chanAmt = bronutil.SatoshiPerBrocoin * 5
 	)
 
-	// We'll start by creating a new link with our chanAmt (5 BTC). We will
+	// We'll start by creating a new link with our chanAmt (5 BRON). We will
 	// only be testing Alice's behavior, so the reference to Bob's channel
 	// state is unnecessary.
 	aliceLink, bobChannel, _, start, cleanUp, _, err :=
@@ -6270,7 +6270,7 @@ func TestChannelLinkRevocationWindowHodl(t *testing.T) {
 		chanAmt = bronutil.SatoshiPerBrocoin * 5
 	)
 
-	// We'll start by creating a new link with our chanAmt (5 BTC). We will
+	// We'll start by creating a new link with our chanAmt (5 BRON). We will
 	// only be testing Alice's behavior, so the reference to Bob's channel
 	// state is unnecessary.
 	aliceLink, bobChannel, batchTicker, start, cleanUp, _, err :=

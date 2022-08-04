@@ -8,11 +8,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/watchtower/blob"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/txscript"
 	"github.com/stretchr/testify/require"
 )
 
@@ -218,7 +218,7 @@ func testBlobJusticeKitEncryptDecrypt(t *testing.T, test descriptorTest) {
 type remoteWitnessTest struct {
 	name             string
 	blobType         blob.Type
-	expWitnessScript func(pk *btcec.PublicKey) []byte
+	expWitnessScript func(pk *bronec.PublicKey) []byte
 }
 
 // TestJusticeKitRemoteWitnessConstruction tests that a JusticeKit returns the
@@ -229,7 +229,7 @@ func TestJusticeKitRemoteWitnessConstruction(t *testing.T) {
 		{
 			name:     "legacy commitment",
 			blobType: blob.Type(blob.FlagCommitOutputs),
-			expWitnessScript: func(pk *btcec.PublicKey) []byte {
+			expWitnessScript: func(pk *bronec.PublicKey) []byte {
 				return pk.SerializeCompressed()
 			},
 		},
@@ -237,7 +237,7 @@ func TestJusticeKitRemoteWitnessConstruction(t *testing.T) {
 			name: "anchor commitment",
 			blobType: blob.Type(blob.FlagCommitOutputs |
 				blob.FlagAnchorChannel),
-			expWitnessScript: func(pk *btcec.PublicKey) []byte {
+			expWitnessScript: func(pk *bronec.PublicKey) []byte {
 				script, _ := input.CommitScriptToRemoteConfirmed(pk)
 				return script
 			},
@@ -255,7 +255,7 @@ func testJusticeKitRemoteWitnessConstruction(
 	t *testing.T, test remoteWitnessTest) {
 
 	// Generate the to-remote pubkey.
-	toRemotePrivKey, err := btcec.NewPrivateKey(btcec.S256())
+	toRemotePrivKey, err := bronec.NewPrivateKey(bronec.S256())
 	require.Nil(t, err)
 
 	// Copy the to-remote pubkey into the format expected by our justice
@@ -323,10 +323,10 @@ func TestJusticeKitToLocalWitnessConstruction(t *testing.T) {
 	csvDelay := uint32(144)
 
 	// Generate the revocation and delay private keys.
-	revPrivKey, err := btcec.NewPrivateKey(btcec.S256())
+	revPrivKey, err := bronec.NewPrivateKey(bronec.S256())
 	require.Nil(t, err)
 
-	delayPrivKey, err := btcec.NewPrivateKey(btcec.S256())
+	delayPrivKey, err := bronec.NewPrivateKey(bronec.S256())
 	require.Nil(t, err)
 
 	// Copy the revocation and delay pubkeys into the format expected by our

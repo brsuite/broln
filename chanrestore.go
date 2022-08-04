@@ -5,15 +5,15 @@ import (
 	"math"
 	"net"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/broln/chanbackup"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/contractcourt"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/shachain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/brond/chaincfg/chainhash"
 )
 
 const (
@@ -295,7 +295,7 @@ var _ chanbackup.ChannelRestorer = (*chanDBRestorer)(nil)
 // as a persistent attempt.
 //
 // NOTE: Part of the chanbackup.PeerConnector interface.
-func (s *server) ConnectPeer(nodePub *btcec.PublicKey, addrs []net.Addr) error {
+func (s *server) ConnectPeer(nodePub *bronec.PublicKey, addrs []net.Addr) error {
 	// Before we connect to the remote peer, we'll remove any connections
 	// to ensure the new connection is created after this new link/channel
 	// is known.

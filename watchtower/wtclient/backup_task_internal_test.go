@@ -7,12 +7,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
@@ -23,6 +17,12 @@ import (
 	"github.com/brsuite/broln/watchtower/wtdb"
 	"github.com/brsuite/broln/watchtower/wtmock"
 	"github.com/brsuite/broln/watchtower/wtpolicy"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/davecgh/go-spew/spew"
 )
 
 const csvDelay uint32 = 144
@@ -102,14 +102,14 @@ func genTaskTest(
 	}
 
 	// Parse the key pairs for all keys used in the test.
-	revSK, revPK := btcec.PrivKeyFromBytes(
-		btcec.S256(), revPrivBytes,
+	revSK, revPK := bronec.PrivKeyFromBytes(
+		bronec.S256(), revPrivBytes,
 	)
-	_, toLocalPK := btcec.PrivKeyFromBytes(
-		btcec.S256(), toLocalPrivBytes,
+	_, toLocalPK := bronec.PrivKeyFromBytes(
+		bronec.S256(), toLocalPrivBytes,
 	)
-	toRemoteSK, toRemotePK := btcec.PrivKeyFromBytes(
-		btcec.S256(), toRemotePrivBytes,
+	toRemoteSK, toRemotePK := bronec.PrivKeyFromBytes(
+		bronec.S256(), toRemotePrivBytes,
 	)
 
 	// Create the signer, and add the revocation and to-remote privkeys.

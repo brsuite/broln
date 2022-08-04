@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/brsuite/brond/wire"
-	"github.com/btcsuite/btclog"
 	"github.com/brsuite/broln/build"
 	"github.com/brsuite/broln/channeldb"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronlog"
 )
 
 var (
@@ -106,7 +106,7 @@ type ResolverConfig struct {
 type contractResolverKit struct {
 	ResolverConfig
 
-	log btclog.Logger
+	log bronlog.Logger
 
 	quit chan struct{}
 }

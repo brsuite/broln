@@ -1,15 +1,15 @@
 package chainreg
 
 import (
-	"github.com/btcsuite/btclog"
 	"github.com/brsuite/broln/build"
+	"github.com/brsuite/bronlog"
 )
 
 // Subsystem defines the logging code for this subsystem.
 const Subsystem = "CHRE"
 
-// log is a logger that is initialized with the btclog.Disabled logger.
-var log btclog.Logger
+// log is a logger that is initialized with the bronlog.Disabled logger.
+var log bronlog.Logger
 
 // The default amount of logging is none.
 func init() {
@@ -18,10 +18,10 @@ func init() {
 
 // DisableLog disables all logging output.
 func DisableLog() {
-	UseLogger(btclog.Disabled)
+	UseLogger(bronlog.Disabled)
 }
 
 // UseLogger uses a specified Logger to output package logging info.
-func UseLogger(logger btclog.Logger) {
+func UseLogger(logger bronlog.Logger) {
 	log = logger
 }

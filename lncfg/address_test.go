@@ -9,7 +9,7 @@ import (
 	"net"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/stretchr/testify/require"
 )
 
@@ -140,12 +140,12 @@ var (
 
 	pubKeyHex = hex.EncodeToString(pubKeyBytes)
 
-	pubKey, _ = btcec.ParsePubKey(pubKeyBytes, btcec.S256())
+	pubKey, _ = bronec.ParsePubKey(pubKeyBytes, bronec.S256())
 )
 
 type lnAddressCase struct {
 	lnAddress      string
-	expectedPubKey *btcec.PublicKey
+	expectedPubKey *bronec.PublicKey
 
 	addressTest
 }

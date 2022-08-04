@@ -5,17 +5,17 @@ import (
 	"net"
 	"sync"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/lnpeer"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/wire"
 )
 
 // mockPeer implements the lnpeer.Peer interface and is used to test the
 // gossiper's interaction with peers.
 type mockPeer struct {
-	pk       *btcec.PublicKey
+	pk       *bronec.PublicKey
 	sentMsgs chan lnwire.Message
 	quit     chan struct{}
 }
@@ -45,8 +45,8 @@ func (p *mockPeer) SendMessageLazy(sync bool, msgs ...lnwire.Message) error {
 func (p *mockPeer) AddNewChannel(_ *channeldb.OpenChannel, _ <-chan struct{}) error {
 	return nil
 }
-func (p *mockPeer) WipeChannel(_ *wire.OutPoint)  {}
-func (p *mockPeer) IdentityKey() *btcec.PublicKey { return p.pk }
+func (p *mockPeer) WipeChannel(_ *wire.OutPoint)   {}
+func (p *mockPeer) IdentityKey() *bronec.PublicKey { return p.pk }
 func (p *mockPeer) PubKey() [33]byte {
 	var pubkey [33]byte
 	copy(pubkey[:], p.pk.SerializeCompressed())

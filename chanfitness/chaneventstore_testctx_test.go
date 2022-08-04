@@ -5,9 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/channelnotifier"
 	"github.com/brsuite/broln/clock"
@@ -15,6 +12,9 @@ import (
 	"github.com/brsuite/broln/routing/route"
 	"github.com/brsuite/broln/subscribe"
 	"github.com/brsuite/broln/ticker"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
 	"github.com/stretchr/testify/require"
 )
 
@@ -140,14 +140,14 @@ func (c *chanEventStoreTestCtx) stop() {
 
 // newChannel creates a new, unique test channel. Note that this function
 // does not add it to the test event store, it just creates mocked values.
-func (c *chanEventStoreTestCtx) newChannel() (route.Vertex, *btcec.PublicKey,
+func (c *chanEventStoreTestCtx) newChannel() (route.Vertex, *bronec.PublicKey,
 	wire.OutPoint) {
 
 	// Create a pubkey for our channel peer.
-	pubKey := &btcec.PublicKey{
+	pubKey := &bronec.PublicKey{
 		X:     big.NewInt(int64(c.testVarIdx)),
 		Y:     big.NewInt(int64(c.testVarIdx)),
-		Curve: btcec.S256(),
+		Curve: bronec.S256(),
 	}
 
 	// Create vertex from our pubkey.
@@ -169,7 +169,7 @@ func (c *chanEventStoreTestCtx) newChannel() (route.Vertex, *btcec.PublicKey,
 
 // createChannel creates a new channel, notifies the event store that it has
 // been created and returns the peer vertex, pubkey and channel point.
-func (c *chanEventStoreTestCtx) createChannel() (route.Vertex, *btcec.PublicKey,
+func (c *chanEventStoreTestCtx) createChannel() (route.Vertex, *bronec.PublicKey,
 	wire.OutPoint) {
 
 	vertex, pubKey, chanPoint := c.newChannel()
@@ -180,7 +180,7 @@ func (c *chanEventStoreTestCtx) createChannel() (route.Vertex, *btcec.PublicKey,
 
 // closeChannel sends a close channel event to our subscribe server.
 func (c *chanEventStoreTestCtx) closeChannel(channel wire.OutPoint,
-	peer *btcec.PublicKey) {
+	peer *bronec.PublicKey) {
 
 	update := channelnotifier.ClosedChannelEvent{
 		CloseSummary: &channeldb.ChannelCloseSummary{
@@ -219,7 +219,7 @@ func (c *chanEventStoreTestCtx) peerEvent(peer route.Vertex, online bool) {
 
 // sendChannelOpenedUpdate notifies the test event store that a channel has
 // been opened.
-func (c *chanEventStoreTestCtx) sendChannelOpenedUpdate(pubkey *btcec.PublicKey,
+func (c *chanEventStoreTestCtx) sendChannelOpenedUpdate(pubkey *bronec.PublicKey,
 	channel wire.OutPoint) {
 
 	update := channelnotifier.OpenChannelEvent{

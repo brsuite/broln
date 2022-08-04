@@ -8,9 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/btcsuite/btclog"
 	"github.com/brsuite/broln/build"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
@@ -22,6 +19,9 @@ import (
 	"github.com/brsuite/broln/watchtower/wtpolicy"
 	"github.com/brsuite/broln/watchtower/wtserver"
 	"github.com/brsuite/broln/watchtower/wtwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/bronlog"
 )
 
 const (
@@ -79,14 +79,14 @@ type Client interface {
 	// until it's added again. If an address is provided, then this call
 	// only serves as a way of removing the address from the watchtower
 	// instead.
-	RemoveTower(*btcec.PublicKey, net.Addr) error
+	RemoveTower(*bronec.PublicKey, net.Addr) error
 
 	// RegisteredTowers retrieves the list of watchtowers registered with
 	// the client.
 	RegisteredTowers() ([]*RegisteredTower, error)
 
 	// LookupTower retrieves a registered watchtower through its public key.
-	LookupTower(*btcec.PublicKey) (*RegisteredTower, error)
+	LookupTower(*bronec.PublicKey) (*RegisteredTower, error)
 
 	// Stats returns the in-memory statistics of the client since startup.
 	Stats() ClientStats
@@ -208,7 +208,7 @@ type newTowerMsg struct {
 // signal that a tower should no longer be considered.
 type staleTowerMsg struct {
 	// pubKey is the identifying public key of the watchtower.
-	pubKey *btcec.PublicKey
+	pubKey *bronec.PublicKey
 
 	// addr is an optional field that when set signals that the address
 	// should be removed from the watchtower's set of addresses, indicating
@@ -233,7 +233,7 @@ type TowerClient struct {
 
 	cfg *Config
 
-	log btclog.Logger
+	log bronlog.Logger
 
 	pipeline *taskPipeline
 
@@ -1104,7 +1104,7 @@ func (c *TowerClient) handleNewTower(msg *newTowerMsg) error {
 // negotiations and from being used for any subsequent backups until it's added
 // again. If an address is provided, then this call only serves as a way of
 // removing the address from the watchtower instead.
-func (c *TowerClient) RemoveTower(pubKey *btcec.PublicKey, addr net.Addr) error {
+func (c *TowerClient) RemoveTower(pubKey *bronec.PublicKey, addr net.Addr) error {
 	errChan := make(chan error, 1)
 
 	select {
@@ -1222,7 +1222,7 @@ func (c *TowerClient) RegisteredTowers() ([]*RegisteredTower, error) {
 }
 
 // LookupTower retrieves a registered watchtower through its public key.
-func (c *TowerClient) LookupTower(pubKey *btcec.PublicKey) (*RegisteredTower, error) {
+func (c *TowerClient) LookupTower(pubKey *bronec.PublicKey) (*RegisteredTower, error) {
 	tower, err := c.cfg.DB.LoadTower(pubKey)
 	if err != nil {
 		return nil, err

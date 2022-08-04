@@ -7,13 +7,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lntest/mock"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/wire"
 )
 
 // TestChainWatcherRemoteUnilateralClose tests that the chain watcher is able
@@ -84,7 +84,7 @@ func TestChainWatcherRemoteUnilateralClose(t *testing.T) {
 	}
 }
 
-func addFakeHTLC(t *testing.T, htlcAmount lnwire.MilliSatoshi, id uint64,
+func addFakeHTLC(t *testing.T, htlcAmount lnwire.MilliBronees, id uint64,
 	aliceChannel, bobChannel *lnwallet.LightningChannel) {
 
 	preimage := bytes.Repeat([]byte{byte(id)}, 32)
@@ -151,7 +151,7 @@ func TestChainWatcherRemoteUnilateralClosePendingCommit(t *testing.T) {
 	// Next, we'll create a fake HTLC just so we can advance Alice's
 	// channel state to a new pending commitment on her remote commit chain
 	// for Bob.
-	htlcAmount := lnwire.NewMSatFromSatoshis(20000)
+	htlcAmount := lnwire.NewMSatFromBroneess(20000)
 	addFakeHTLC(t, htlcAmount, 0, aliceChannel, bobChannel)
 
 	// With the HTLC added, we'll now manually initiate a state transition
@@ -207,7 +207,7 @@ type dlpTestCase struct {
 // executeStateTransitions execute the given number of state transitions.
 // Copies of Alice's channel state before each transition (including initial
 // state) are returned.
-func executeStateTransitions(t *testing.T, htlcAmount lnwire.MilliSatoshi,
+func executeStateTransitions(t *testing.T, htlcAmount lnwire.MilliBronees,
 	aliceChannel, bobChannel *lnwallet.LightningChannel,
 	numUpdates uint8) ([]*channeldb.OpenChannel, func(), error) {
 

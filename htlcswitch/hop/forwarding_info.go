@@ -19,9 +19,9 @@ type ForwardingInfo struct {
 	// end-to-end route.
 	NextHop lnwire.ShortChannelID
 
-	// AmountToForward is the amount of milli-satoshis that the receiving
+	// AmountToForward is the amount of milli-broneess that the receiving
 	// node should forward to the next hop.
-	AmountToForward lnwire.MilliSatoshi
+	AmountToForward lnwire.MilliBronees
 
 	// OutgoingCTLV is the specified value of the CTLV timelock to be used
 	// in the outgoing HTLC.

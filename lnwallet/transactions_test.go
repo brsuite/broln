@@ -15,11 +15,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
@@ -27,6 +22,11 @@ import (
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/shachain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -39,12 +39,12 @@ import (
 // testContext contains the test parameters defined in Appendix B & C of the
 // BOLT 03 spec.
 type testContext struct {
-	localFundingPrivkey                *btcec.PrivateKey
-	localPaymentBasepointSecret        *btcec.PrivateKey
-	localDelayedPaymentBasepointSecret *btcec.PrivateKey
-	remoteFundingPrivkey               *btcec.PrivateKey
-	remoteRevocationBasepointSecret    *btcec.PrivateKey
-	remotePaymentBasepointSecret       *btcec.PrivateKey
+	localFundingPrivkey                *bronec.PrivateKey
+	localPaymentBasepointSecret        *bronec.PrivateKey
+	localDelayedPaymentBasepointSecret *bronec.PrivateKey
+	remoteFundingPrivkey               *bronec.PrivateKey
+	remoteRevocationBasepointSecret    *bronec.PrivateKey
+	remotePaymentBasepointSecret       *bronec.PrivateKey
 
 	localPerCommitSecret lntypes.Hash
 
@@ -63,7 +63,7 @@ type testContext struct {
 func newTestContext(t *testing.T) (tc *testContext) {
 	tc = new(testContext)
 
-	priv := func(v string) *btcec.PrivateKey {
+	priv := func(v string) *bronec.PrivateKey {
 		k, err := privkeyFromHex(v)
 		require.NoError(t, err)
 
@@ -96,7 +96,7 @@ func newTestContext(t *testing.T) (tc *testContext) {
 
 var testHtlcs = []struct {
 	incoming bool
-	amount   lnwire.MilliSatoshi
+	amount   lnwire.MilliBronees
 	expiry   uint32
 	preimage string
 }{
@@ -140,8 +140,8 @@ type htlcDesc struct {
 
 type testCase struct {
 	Name          string
-	LocalBalance  lnwire.MilliSatoshi
-	RemoteBalance lnwire.MilliSatoshi
+	LocalBalance  lnwire.MilliBronees
+	RemoteBalance lnwire.MilliBronees
 	FeePerKw      bronutil.Amount
 
 	// UseTestHtlcs defined whether the fixed set of test htlc should be
@@ -272,8 +272,8 @@ func testVectors(t *testing.T, chanType channeldb.ChannelType, test testCase) {
 	remoteChannel, localChannel, cleanUp := createTestChannelsForVectors(
 		tc,
 		chanType, test.FeePerKw,
-		remoteBalance.ToSatoshis(),
-		localBalance.ToSatoshis(),
+		remoteBalance.ToBroneess(),
+		localBalance.ToBroneess(),
 	)
 	defer cleanUp()
 
@@ -508,18 +508,18 @@ func testSpendValidation(t *testing.T, tweakless bool) {
 	const csvTimeout = 5
 
 	// We also set up set some resources for the commitment transaction.
-	// Each side currently has 1 BTC within the channel, with a total
-	// channel capacity of 2BTC.
-	aliceKeyPriv, aliceKeyPub := btcec.PrivKeyFromBytes(
-		btcec.S256(), testWalletPrivKey,
+	// Each side currently has 1 BRON within the channel, with a total
+	// channel capacity of 2BRON.
+	aliceKeyPriv, aliceKeyPub := bronec.PrivKeyFromBytes(
+		bronec.S256(), testWalletPrivKey,
 	)
-	bobKeyPriv, bobKeyPub := btcec.PrivKeyFromBytes(
-		btcec.S256(), bobsPrivKey,
+	bobKeyPriv, bobKeyPub := bronec.PrivKeyFromBytes(
+		bronec.S256(), bobsPrivKey,
 	)
 
 	revocationPreimage := testHdSeed.CloneBytes()
-	commitSecret, commitPoint := btcec.PrivKeyFromBytes(
-		btcec.S256(), revocationPreimage,
+	commitSecret, commitPoint := bronec.PrivKeyFromBytes(
+		bronec.S256(), revocationPreimage,
 	)
 	revokePubKey := input.DeriveRevocationPubkey(bobKeyPub, commitPoint)
 
@@ -539,7 +539,7 @@ func testSpendValidation(t *testing.T, tweakless bool) {
 	localCommitTweak := input.SingleTweakBytes(commitPoint, bobKeyPub)
 
 	aliceSelfOutputSigner := &input.MockSigner{
-		Privkeys: []*btcec.PrivateKey{aliceKeyPriv},
+		Privkeys: []*bronec.PrivateKey{aliceKeyPriv},
 	}
 
 	// Calculate the dust limit we'll use for the test.
@@ -636,7 +636,7 @@ func testSpendValidation(t *testing.T, tweakless bool) {
 		t.Fatalf("spend from delay output is invalid: %v", err)
 	}
 
-	localSigner := &input.MockSigner{Privkeys: []*btcec.PrivateKey{bobKeyPriv}}
+	localSigner := &input.MockSigner{Privkeys: []*bronec.PrivateKey{bobKeyPriv}}
 
 	// Next, we'll test bob spending with the derived revocation key to
 	// simulate the scenario when Alice broadcasts this commitment
@@ -776,14 +776,14 @@ func createTestChannelsForVectors(tc *testContext, chanType channeldb.ChannelTyp
 	// Generate random some keys that don't actually matter but need to be
 	// set.
 	var (
-		remoteDummy1, remoteDummy2 *btcec.PrivateKey
-		localDummy2, localDummy1   *btcec.PrivateKey
+		remoteDummy1, remoteDummy2 *bronec.PrivateKey
+		localDummy2, localDummy1   *bronec.PrivateKey
 	)
-	generateKeys := []**btcec.PrivateKey{
+	generateKeys := []**bronec.PrivateKey{
 		&remoteDummy1, &remoteDummy2, &localDummy1, &localDummy2,
 	}
 	for _, keyRef := range generateKeys {
-		privkey, err := btcec.NewPrivateKey(btcec.S256())
+		privkey, err := bronec.NewPrivateKey(bronec.S256())
 		require.NoError(t, err)
 		*keyRef = privkey
 	}
@@ -792,7 +792,7 @@ func createTestChannelsForVectors(tc *testContext, chanType channeldb.ChannelTyp
 	remoteCfg := channeldb.ChannelConfig{
 		ChannelConstraints: channeldb.ChannelConstraints{
 			DustLimit: tc.dustLimit,
-			MaxPendingAmount: lnwire.NewMSatFromSatoshis(
+			MaxPendingAmount: lnwire.NewMSatFromBroneess(
 				tc.fundingAmount,
 			),
 			ChanReserve:      0,
@@ -819,7 +819,7 @@ func createTestChannelsForVectors(tc *testContext, chanType channeldb.ChannelTyp
 	localCfg := channeldb.ChannelConfig{
 		ChannelConstraints: channeldb.ChannelConstraints{
 			DustLimit: tc.dustLimit,
-			MaxPendingAmount: lnwire.NewMSatFromSatoshis(
+			MaxPendingAmount: lnwire.NewMSatFromBroneess(
 				tc.fundingAmount,
 			),
 			ChanReserve:      0,
@@ -901,8 +901,8 @@ func createTestChannelsForVectors(tc *testContext, chanType channeldb.ChannelTyp
 
 	remoteCommit := channeldb.ChannelCommitment{
 		CommitHeight:  commitHeight,
-		LocalBalance:  lnwire.NewMSatFromSatoshis(remoteBalance),
-		RemoteBalance: lnwire.NewMSatFromSatoshis(localBalance - commitFee - anchorAmt),
+		LocalBalance:  lnwire.NewMSatFromBroneess(remoteBalance),
+		RemoteBalance: lnwire.NewMSatFromBroneess(localBalance - commitFee - anchorAmt),
 		CommitFee:     commitFee,
 		FeePerKw:      bronutil.Amount(feePerKw),
 		CommitTx:      remoteCommitTx,
@@ -910,8 +910,8 @@ func createTestChannelsForVectors(tc *testContext, chanType channeldb.ChannelTyp
 	}
 	localCommit := channeldb.ChannelCommitment{
 		CommitHeight:  commitHeight,
-		LocalBalance:  lnwire.NewMSatFromSatoshis(localBalance - commitFee - anchorAmt),
-		RemoteBalance: lnwire.NewMSatFromSatoshis(remoteBalance),
+		LocalBalance:  lnwire.NewMSatFromBroneess(localBalance - commitFee - anchorAmt),
+		RemoteBalance: lnwire.NewMSatFromBroneess(remoteBalance),
 		CommitFee:     commitFee,
 		FeePerKw:      bronutil.Amount(feePerKw),
 		CommitTx:      localCommitTx,
@@ -964,12 +964,12 @@ func createTestChannelsForVectors(tc *testContext, chanType channeldb.ChannelTyp
 	}
 
 	// Create mock signers that can sign for the keys that are used.
-	localSigner := &input.MockSigner{Privkeys: []*btcec.PrivateKey{
+	localSigner := &input.MockSigner{Privkeys: []*bronec.PrivateKey{
 		tc.localPaymentBasepointSecret, tc.localDelayedPaymentBasepointSecret,
 		tc.localFundingPrivkey, localDummy1, localDummy2,
 	}}
 
-	remoteSigner := &input.MockSigner{Privkeys: []*btcec.PrivateKey{
+	remoteSigner := &input.MockSigner{Privkeys: []*bronec.PrivateKey{
 		tc.remoteFundingPrivkey, tc.remoteRevocationBasepointSecret,
 		tc.remotePaymentBasepointSecret, remoteDummy1, remoteDummy2,
 	}}

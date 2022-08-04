@@ -9,11 +9,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/brsuite/brond/btcec"
-	sphinx "github.com/brsuite/lightning-onion"
 	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
 	"github.com/brsuite/broln/record"
 	"github.com/brsuite/broln/tlv"
+	"github.com/brsuite/brond/bronec"
+	sphinx "github.com/brsuite/lightning-onion"
 )
 
 // VertexSize is the size of the array to store a vertex.
@@ -28,7 +28,7 @@ var ErrNoRouteHopsProvided = fmt.Errorf("empty route hops provided")
 type Vertex [VertexSize]byte
 
 // NewVertex returns a new Vertex given a public key.
-func NewVertex(pub *btcec.PublicKey) Vertex {
+func NewVertex(pub *bronec.PublicKey) Vertex {
 	var v Vertex
 	copy(v[:], pub.SerializeCompressed())
 	return v
@@ -92,7 +92,7 @@ type Hop struct {
 	// AmtToForward is the amount that this hop will forward to the next
 	// hop. This value is less than the value that the incoming HTLC
 	// carries as a fee will be subtracted by the hop.
-	AmtToForward lnwire.MilliSatoshi
+	AmtToForward lnwire.MilliBronees
 
 	// TLVRecords if non-nil are a set of additional TLV records that
 	// should be included in the forwarding instructions for this node.
@@ -172,10 +172,10 @@ type Route struct {
 	// TotalAmount is the total amount of funds required to complete a
 	// payment over this route. This value includes the cumulative fees at
 	// each hop. As a result, the HTLC extended to the first-hop in the
-	// route will need to have at least this many satoshis, otherwise the
+	// route will need to have at least this many broneess, otherwise the
 	// route will fail at an intermediate node due to an insufficient
 	// amount of fees.
-	TotalAmount lnwire.MilliSatoshi
+	TotalAmount lnwire.MilliBronees
 
 	// SourcePubKey is the pubkey of the node where this route originates
 	// from.
@@ -187,8 +187,8 @@ type Route struct {
 }
 
 // HopFee returns the fee charged by the route hop indicated by hopIndex.
-func (r *Route) HopFee(hopIndex int) lnwire.MilliSatoshi {
-	var incomingAmt lnwire.MilliSatoshi
+func (r *Route) HopFee(hopIndex int) lnwire.MilliBronees {
+	var incomingAmt lnwire.MilliBronees
 	if hopIndex == 0 {
 		incomingAmt = r.TotalAmount
 	} else {
@@ -202,7 +202,7 @@ func (r *Route) HopFee(hopIndex int) lnwire.MilliSatoshi {
 // TotalFees is the sum of the fees paid at each hop within the final route. In
 // the case of a one-hop payment, this value will be zero as we don't need to
 // pay a fee to ourself.
-func (r *Route) TotalFees() lnwire.MilliSatoshi {
+func (r *Route) TotalFees() lnwire.MilliBronees {
 	if len(r.Hops) == 0 {
 		return 0
 	}
@@ -213,7 +213,7 @@ func (r *Route) TotalFees() lnwire.MilliSatoshi {
 // NewRouteFromHops creates a new Route structure from the minimally required
 // information to perform the payment. It infers fee amounts and populates the
 // node, chan and prev/next hop maps.
-func NewRouteFromHops(amtToSend lnwire.MilliSatoshi, timeLock uint32,
+func NewRouteFromHops(amtToSend lnwire.MilliBronees, timeLock uint32,
 	sourceVertex Vertex, hops []*Hop) (*Route, error) {
 
 	if len(hops) == 0 {
@@ -246,8 +246,8 @@ func (r *Route) ToSphinxPath() (*sphinx.PaymentPath, error) {
 	// to an OnionHop with matching per-hop payload within the path as used
 	// by the sphinx package.
 	for i, hop := range r.Hops {
-		pub, err := btcec.ParsePubKey(
-			hop.PubKeyBytes[:], btcec.S256(),
+		pub, err := bronec.ParsePubKey(
+			hop.PubKeyBytes[:], bronec.S256(),
 		)
 		if err != nil {
 			return nil, err

@@ -730,7 +730,7 @@
         "amount": {
           "type": "string",
           "format": "int64",
-          "title": "The transaction amount, denominated in satoshis"
+          "title": "The transaction amount, denominated in broneess"
         },
         "num_confirmations": {
           "type": "integer",
@@ -799,7 +799,7 @@
         "amount_sat": {
           "type": "string",
           "format": "int64",
-          "title": "The value of the unspent coin in satoshis"
+          "title": "The value of the unspent coin in broneess"
         },
         "pk_script": {
           "type": "string",
@@ -1003,7 +1003,7 @@
         "sat_per_kw": {
           "type": "string",
           "format": "int64",
-          "description": "The amount of satoshis per kw that should be used in order to reach the\nconfirmation target in the request."
+          "description": "The amount of broneess per kw that should be used in order to reach the\nconfirmation target in the request."
         }
       }
     },
@@ -1392,7 +1392,7 @@
         "sat_per_kw": {
           "type": "string",
           "format": "int64",
-          "description": "The number of satoshis per kilo weight that should be used when crafting\nthis transaction."
+          "description": "The number of broneess per kilo weight that should be used when crafting\nthis transaction."
         },
         "outputs": {
           "type": "array",

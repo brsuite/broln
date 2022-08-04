@@ -6,8 +6,8 @@ import (
 
 	prand "math/rand"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/bronutil"
 )
 
 func TestConstraintsChannelBudget(t *testing.T) {
@@ -17,7 +17,7 @@ func TestConstraintsChannelBudget(t *testing.T) {
 
 	const (
 		minChanSize = 0
-		maxChanSize = bronutil.Amount(bronutil.SatoshiPerBrocoin)
+		maxChanSize = bronutil.Amount(bronutil.BroneesPerBrocoin)
 
 		chanLimit = 3
 
@@ -61,7 +61,7 @@ func TestConstraintsChannelBudget(t *testing.T) {
 					Balance: bronutil.Amount(prand.Int31()),
 				},
 			},
-			bronutil.Amount(bronutil.SatoshiPerBrocoin * 10),
+			bronutil.Amount(bronutil.BroneesPerBrocoin * 10),
 			false,
 			0,
 			0,
@@ -73,59 +73,59 @@ func TestConstraintsChannelBudget(t *testing.T) {
 			[]LocalChannel{
 				{
 					ChanID:  randChanID(),
-					Balance: bronutil.Amount(bronutil.SatoshiPerBrocoin),
+					Balance: bronutil.Amount(bronutil.BroneesPerBrocoin),
 				},
 				{
 					ChanID:  randChanID(),
-					Balance: bronutil.Amount(bronutil.SatoshiPerBrocoin),
+					Balance: bronutil.Amount(bronutil.BroneesPerBrocoin),
 				},
 			},
-			bronutil.Amount(bronutil.SatoshiPerBrocoin * 2),
+			bronutil.Amount(bronutil.BroneesPerBrocoin * 2),
 			false,
 			0,
 			0,
 		},
 
 		// Ratio of funds in channels and total funds is below the
-		// threshold. We have 10 BTC allocated amongst channels and
-		// funds, atm. We're targeting 50%, so 5 BTC should be
-		// allocated. Only 1 BTC is atm, so 4 BTC should be
+		// threshold. We have 10 BRON allocated amongst channels and
+		// funds, atm. We're targeting 50%, so 5 BRON should be
+		// allocated. Only 1 BRON is atm, so 4 BRON should be
 		// recommended. We should also request 2 more channels as the
 		// limit is 3.
 		{
 			[]LocalChannel{
 				{
 					ChanID:  randChanID(),
-					Balance: bronutil.Amount(bronutil.SatoshiPerBrocoin),
+					Balance: bronutil.Amount(bronutil.BroneesPerBrocoin),
 				},
 			},
-			bronutil.Amount(bronutil.SatoshiPerBrocoin * 9),
+			bronutil.Amount(bronutil.BroneesPerBrocoin * 9),
 			true,
-			bronutil.Amount(bronutil.SatoshiPerBrocoin * 4),
+			bronutil.Amount(bronutil.BroneesPerBrocoin * 4),
 			2,
 		},
 
 		// Ratio of funds in channels and total funds is below the
-		// threshold. We have 14 BTC total amongst the wallet's
+		// threshold. We have 14 BRON total amongst the wallet's
 		// balance, and our currently opened channels. Since we're
-		// targeting a 50% allocation, we should commit 7 BTC. The
-		// current channels commit 4 BTC, so we should expected 3 BTC
+		// targeting a 50% allocation, we should commit 7 BRON. The
+		// current channels commit 4 BRON, so we should expected 3 BRON
 		// to be committed. We should only request a single additional
 		// channel as the limit is 3.
 		{
 			[]LocalChannel{
 				{
 					ChanID:  randChanID(),
-					Balance: bronutil.Amount(bronutil.SatoshiPerBrocoin),
+					Balance: bronutil.Amount(bronutil.BroneesPerBrocoin),
 				},
 				{
 					ChanID:  randChanID(),
-					Balance: bronutil.Amount(bronutil.SatoshiPerBrocoin * 3),
+					Balance: bronutil.Amount(bronutil.BroneesPerBrocoin * 3),
 				},
 			},
-			bronutil.Amount(bronutil.SatoshiPerBrocoin * 10),
+			bronutil.Amount(bronutil.BroneesPerBrocoin * 10),
 			true,
-			bronutil.Amount(bronutil.SatoshiPerBrocoin * 3),
+			bronutil.Amount(bronutil.BroneesPerBrocoin * 3),
 			1,
 		},
 
@@ -135,14 +135,14 @@ func TestConstraintsChannelBudget(t *testing.T) {
 			[]LocalChannel{
 				{
 					ChanID:  randChanID(),
-					Balance: bronutil.Amount(bronutil.SatoshiPerBrocoin),
+					Balance: bronutil.Amount(bronutil.BroneesPerBrocoin),
 				},
 				{
 					ChanID:  randChanID(),
-					Balance: bronutil.Amount(bronutil.SatoshiPerBrocoin),
+					Balance: bronutil.Amount(bronutil.BroneesPerBrocoin),
 				},
 			},
-			bronutil.Amount(bronutil.SatoshiPerBrocoin),
+			bronutil.Amount(bronutil.BroneesPerBrocoin),
 			false,
 			0,
 			0,

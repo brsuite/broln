@@ -8,16 +8,16 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/bronutil"
 )
 
 var (
-	testSig = &btcec.Signature{
+	testSig = &bronec.Signature{
 		R: new(big.Int),
 		S: new(big.Int),
 	}
@@ -136,10 +136,10 @@ func (d *databaseChannelGraph) ForEachNode(cb func(Node) error) error {
 // addRandChannel creates a new channel two target nodes. This function is
 // meant to aide in the generation of random graphs for use within test cases
 // the exercise the autopilot package.
-func (d *databaseChannelGraph) addRandChannel(node1, node2 *btcec.PublicKey,
+func (d *databaseChannelGraph) addRandChannel(node1, node2 *bronec.PublicKey,
 	capacity bronutil.Amount) (*ChannelEdge, *ChannelEdge, error) {
 
-	fetchNode := func(pub *btcec.PublicKey) (*channeldb.LightningNode, error) {
+	fetchNode := func(pub *bronec.PublicKey) (*channeldb.LightningNode, error) {
 		if pub != nil {
 			vertex, err := route.NewVertexFromBytes(
 				pub.SerializeCompressed(),
@@ -210,7 +210,7 @@ func (d *databaseChannelGraph) addRandChannel(node1, node2 *btcec.PublicKey,
 		return nil, nil, err
 	}
 
-	var lnNode1, lnNode2 *btcec.PublicKey
+	var lnNode1, lnNode2 *bronec.PublicKey
 	if bytes.Compare(vertex1.PubKeyBytes[:], vertex2.PubKeyBytes[:]) == -1 {
 		lnNode1, _ = vertex1.PubKey()
 		lnNode2, _ = vertex2.PubKey()
@@ -234,7 +234,7 @@ func (d *databaseChannelGraph) addRandChannel(node1, node2 *btcec.PublicKey,
 		LastUpdate:                time.Now(),
 		TimeLockDelta:             10,
 		MinHTLC:                   1,
-		MaxHTLC:                   lnwire.NewMSatFromSatoshis(capacity),
+		MaxHTLC:                   lnwire.NewMSatFromBroneess(capacity),
 		FeeBaseMSat:               10,
 		FeeProportionalMillionths: 10000,
 		MessageFlags:              1,
@@ -250,7 +250,7 @@ func (d *databaseChannelGraph) addRandChannel(node1, node2 *btcec.PublicKey,
 		LastUpdate:                time.Now(),
 		TimeLockDelta:             10,
 		MinHTLC:                   1,
-		MaxHTLC:                   lnwire.NewMSatFromSatoshis(capacity),
+		MaxHTLC:                   lnwire.NewMSatFromBroneess(capacity),
 		FeeBaseMSat:               10,
 		FeeProportionalMillionths: 10000,
 		MessageFlags:              1,
@@ -277,7 +277,7 @@ func (d *databaseChannelGraph) addRandChannel(node1, node2 *btcec.PublicKey,
 		nil
 }
 
-func (d *databaseChannelGraph) addRandNode() (*btcec.PublicKey, error) {
+func (d *databaseChannelGraph) addRandNode() (*bronec.PublicKey, error) {
 	nodeKey, err := randKey()
 	if err != nil {
 		return nil, err
@@ -343,8 +343,8 @@ func randChanID() lnwire.ShortChannelID {
 }
 
 // randKey returns a random public key.
-func randKey() (*btcec.PublicKey, error) {
-	priv, err := btcec.NewPrivateKey(btcec.S256())
+func randKey() (*bronec.PublicKey, error) {
+	priv, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -355,7 +355,7 @@ func randKey() (*btcec.PublicKey, error) {
 // addRandChannel creates a new channel two target nodes. This function is
 // meant to aide in the generation of random graphs for use within test cases
 // the exercise the autopilot package.
-func (m *memChannelGraph) addRandChannel(node1, node2 *btcec.PublicKey,
+func (m *memChannelGraph) addRandChannel(node1, node2 *bronec.PublicKey,
 	capacity bronutil.Amount) (*ChannelEdge, *ChannelEdge, error) {
 
 	var (
@@ -437,7 +437,7 @@ func (m *memChannelGraph) addRandChannel(node1, node2 *btcec.PublicKey,
 	return &edge1, &edge2, nil
 }
 
-func (m *memChannelGraph) addRandNode() (*btcec.PublicKey, error) {
+func (m *memChannelGraph) addRandNode() (*bronec.PublicKey, error) {
 	newPub, err := randKey()
 	if err != nil {
 		return nil, err
@@ -458,7 +458,7 @@ func (m *memChannelGraph) addRandNode() (*btcec.PublicKey, error) {
 // memNode is a purely in-memory implementation of the autopilot.Node
 // interface.
 type memNode struct {
-	pub *btcec.PublicKey
+	pub *bronec.PublicKey
 
 	chans []ChannelEdge
 

@@ -15,17 +15,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln"
 	"github.com/brsuite/broln/kvdb/etcd"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lntest/wait"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc/grpclog"
@@ -101,17 +101,17 @@ func NewNetworkHarness(m *HarnessMiner, b BackendConfig, brolnBinary string,
 	ctxt, cancel := context.WithCancel(context.Background())
 
 	n := NetworkHarness{
-		activeNodes:  make(map[int]*HarnessNode),
-		nodesByPub:   make(map[string]*HarnessNode),
+		activeNodes:    make(map[int]*HarnessNode),
+		nodesByPub:     make(map[string]*HarnessNode),
 		brolnErrorChan: make(chan error),
-		netParams:    m.ActiveNet,
-		Miner:        m,
-		BackendCfg:   b,
-		feeService:   feeService,
-		runCtx:       ctxt,
-		cancel:       cancel,
+		netParams:      m.ActiveNet,
+		Miner:          m,
+		BackendCfg:     b,
+		feeService:     feeService,
+		runCtx:         ctxt,
+		cancel:         cancel,
 		brolnBinary:    brolnBinary,
-		dbBackend:    dbBackend,
+		dbBackend:      dbBackend,
 	}
 	return &n, nil
 }
@@ -139,7 +139,7 @@ func (n *NetworkHarness) ProcessErrors() <-chan error {
 }
 
 // SetUp starts the initial seeder nodes within the test harness. The initial
-// node's wallets will be funded wallets with ten 1 BTC outputs each. Finally
+// node's wallets will be funded wallets with ten 1 BRON outputs each. Finally
 // rpc clients capable of communicating with the initial seeder nodes are
 // created. Nodes are initialized with the given extra command line flags, which
 // should be formatted properly - "--arg=value".
@@ -176,7 +176,7 @@ func (n *NetworkHarness) SetUp(t *testing.T,
 	// the server.Started() flag that waits for all subsystems to be ready.
 	n.ConnectNodes(t, n.Alice, n.Bob)
 
-	// Load up the wallets of the seeder nodes with 10 outputs of 1 BTC
+	// Load up the wallets of the seeder nodes with 10 outputs of 1 BRON
 	// each.
 	addrReq := &lnrpc.NewAddressRequest{
 		Type: lnrpc.AddressType_WITNESS_PUBKEY_HASH,
@@ -199,7 +199,7 @@ func (n *NetworkHarness) SetUp(t *testing.T,
 
 			output := &wire.TxOut{
 				PkScript: addrScript,
-				Value:    bronutil.SatoshiPerBrocoin,
+				Value:    bronutil.BroneesPerBrocoin,
 			}
 			_, err = n.Miner.SendOutputs([]*wire.TxOut{output}, 7500)
 			if err != nil {
@@ -223,7 +223,7 @@ func (n *NetworkHarness) SetUp(t *testing.T,
 	}
 
 	// Now block until both wallets have fully synced up.
-	expectedBalance := int64(bronutil.SatoshiPerBrocoin * 10)
+	expectedBalance := int64(bronutil.BroneesPerBrocoin * 10)
 	balReq := &lnrpc.WalletBalanceRequest{}
 	balanceTicker := time.NewTicker(time.Millisecond * 200)
 	defer balanceTicker.Stop()
@@ -966,7 +966,7 @@ type OpenChannelParams struct {
 	SpendUnconfirmed bool
 
 	// MinHtlc is the htlc_minimum_msat value set when opening the channel.
-	MinHtlc lnwire.MilliSatoshi
+	MinHtlc lnwire.MilliBronees
 
 	// RemoteMaxHtlcs is the remote_max_htlcs value set when opening the
 	// channel, restricting the number of concurrent HTLCs the remote party
@@ -977,7 +977,7 @@ type OpenChannelParams struct {
 	// in order to modify the channel funding workflow.
 	FundingShim *lnrpc.FundingShim
 
-	// SatPerVByte is the amount of satoshis to spend in chain fees per virtual
+	// SatPerVByte is the amount of broneess to spend in chain fees per virtual
 	// byte of the transaction.
 	SatPerVByte bronutil.Amount
 
@@ -1407,7 +1407,7 @@ func (n *NetworkHarness) DumpLogs(node *HarnessNode) (string, error) {
 	return string(buf), nil
 }
 
-// SendCoins attempts to send amt satoshis from the internal mining node to the
+// SendCoins attempts to send amt broneess from the internal mining node to the
 // targeted lightning node using a P2WKH address. 6 blocks are mined after in
 // order to confirm the transaction.
 func (n *NetworkHarness) SendCoins(t *testing.T, amt bronutil.Amount,
@@ -1434,7 +1434,7 @@ func (n *NetworkHarness) SendCoinsUnconfirmed(t *testing.T, amt bronutil.Amount,
 	)
 }
 
-// SendCoinsNP2WKH attempts to send amt satoshis from the internal mining node
+// SendCoinsNP2WKH attempts to send amt broneess from the internal mining node
 // to the targeted lightning node using a NP2WKH address.
 func (n *NetworkHarness) SendCoinsNP2WKH(t *testing.T, amt bronutil.Amount,
 	target *HarnessNode) {
@@ -1448,7 +1448,7 @@ func (n *NetworkHarness) SendCoinsNP2WKH(t *testing.T, amt bronutil.Amount,
 	)
 }
 
-// sendCoins attempts to send amt satoshis from the internal mining node to the
+// sendCoins attempts to send amt broneess from the internal mining node to the
 // targeted lightning node. The confirmed boolean indicates whether the
 // transaction that pays to the target should confirm.
 func (n *NetworkHarness) sendCoins(amt bronutil.Amount, target *HarnessNode,

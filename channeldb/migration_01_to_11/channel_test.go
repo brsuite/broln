@@ -6,14 +6,14 @@ import (
 	"math/rand"
 	"os"
 
-	"github.com/brsuite/brond/btcec"
+	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
+	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/broln/shachain"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	_ "github.com/brsuite/bronwallet/walletdb/bdb"
-	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
-	"github.com/brsuite/broln/keychain"
-	"github.com/brsuite/broln/shachain"
 )
 
 var (
@@ -60,7 +60,7 @@ var (
 		},
 		LockTime: 5,
 	}
-	privKey, pubKey = btcec.PrivKeyFromBytes(btcec.S256(), key[:])
+	privKey, pubKey = bronec.PrivKeyFromBytes(bronec.S256(), key[:])
 )
 
 // makeTestDB creates a new instance of the ChannelDB for testing purposes. A
@@ -109,9 +109,9 @@ func createTestChannelState(cdb *DB) (*OpenChannel, error) {
 	localCfg := ChannelConfig{
 		ChannelConstraints: ChannelConstraints{
 			DustLimit:        bronutil.Amount(rand.Int63()),
-			MaxPendingAmount: lnwire.MilliSatoshi(rand.Int63()),
+			MaxPendingAmount: lnwire.MilliBronees(rand.Int63()),
 			ChanReserve:      bronutil.Amount(rand.Int63()),
-			MinHTLC:          lnwire.MilliSatoshi(rand.Int63()),
+			MinHTLC:          lnwire.MilliBronees(rand.Int63()),
 			MaxAcceptedHtlcs: uint16(rand.Int31()),
 			CsvDelay:         uint16(rand.Int31()),
 		},
@@ -134,9 +134,9 @@ func createTestChannelState(cdb *DB) (*OpenChannel, error) {
 	remoteCfg := ChannelConfig{
 		ChannelConstraints: ChannelConstraints{
 			DustLimit:        bronutil.Amount(rand.Int63()),
-			MaxPendingAmount: lnwire.MilliSatoshi(rand.Int63()),
+			MaxPendingAmount: lnwire.MilliBronees(rand.Int63()),
 			ChanReserve:      bronutil.Amount(rand.Int63()),
-			MinHTLC:          lnwire.MilliSatoshi(rand.Int63()),
+			MinHTLC:          lnwire.MilliBronees(rand.Int63()),
 			MaxAcceptedHtlcs: uint16(rand.Int31()),
 			CsvDelay:         uint16(rand.Int31()),
 		},
@@ -194,8 +194,8 @@ func createTestChannelState(cdb *DB) (*OpenChannel, error) {
 		TotalMSatReceived: 2,
 		LocalCommitment: ChannelCommitment{
 			CommitHeight:  0,
-			LocalBalance:  lnwire.MilliSatoshi(9000),
-			RemoteBalance: lnwire.MilliSatoshi(3000),
+			LocalBalance:  lnwire.MilliBronees(9000),
+			RemoteBalance: lnwire.MilliBronees(3000),
 			CommitFee:     bronutil.Amount(rand.Int63()),
 			FeePerKw:      bronutil.Amount(5000),
 			CommitTx:      testTx,
@@ -203,8 +203,8 @@ func createTestChannelState(cdb *DB) (*OpenChannel, error) {
 		},
 		RemoteCommitment: ChannelCommitment{
 			CommitHeight:  0,
-			LocalBalance:  lnwire.MilliSatoshi(3000),
-			RemoteBalance: lnwire.MilliSatoshi(9000),
+			LocalBalance:  lnwire.MilliBronees(3000),
+			RemoteBalance: lnwire.MilliBronees(9000),
 			CommitFee:     bronutil.Amount(rand.Int63()),
 			FeePerKw:      bronutil.Amount(5000),
 			CommitTx:      testTx,

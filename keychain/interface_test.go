@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/bronwallet/snacl"
@@ -376,8 +376,8 @@ func TestSecretKeyRingDerivation(t *testing.T) {
 
 				// We'll try again, but this time with an
 				// unknown public key.
-				_, pub := btcec.PrivKeyFromBytes(
-					btcec.S256(), testHDSeed[:],
+				_, pub := bronec.PrivKeyFromBytes(
+					bronec.S256(), testHDSeed[:],
 				)
 				keyDesc.PubKey = pub
 

@@ -77,8 +77,8 @@ func TestMergeResponse(t *testing.T) {
 				InFlightTotal: 2,
 			},
 			err: fieldMismatchError(
-				fieldInFlightTotal, lnwire.MilliSatoshi(1),
-				lnwire.MilliSatoshi(2),
+				fieldInFlightTotal, lnwire.MilliBronees(1),
+				lnwire.MilliBronees(2),
 			),
 		},
 		{
@@ -100,8 +100,8 @@ func TestMergeResponse(t *testing.T) {
 				MinHtlcIn: 2,
 			},
 			err: fieldMismatchError(
-				fieldMinIn, lnwire.MilliSatoshi(1),
-				lnwire.MilliSatoshi(2),
+				fieldMinIn, lnwire.MilliBronees(1),
+				lnwire.MilliBronees(2),
 			),
 		},
 		{

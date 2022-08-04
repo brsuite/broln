@@ -11,11 +11,6 @@ import (
 
 	prand "math/rand"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/go-errors/errors"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lnwallet"
@@ -23,6 +18,11 @@ import (
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/chainview"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/go-errors/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -42,10 +42,10 @@ var (
 
 	testTime = time.Date(2018, time.January, 9, 14, 00, 00, 0, time.UTC)
 
-	priv1, _    = btcec.NewPrivateKey(btcec.S256())
+	priv1, _    = bronec.NewPrivateKey(bronec.S256())
 	brocoinKey1 = priv1.PubKey()
 
-	priv2, _    = btcec.NewPrivateKey(btcec.S256())
+	priv2, _    = bronec.NewPrivateKey(bronec.S256())
 	brocoinKey2 = priv2.PubKey()
 
 	timeout = time.Second * 5
@@ -54,7 +54,7 @@ var (
 func createTestNode() (*channeldb.LightningNode, error) {
 	updateTime := prand.Int63()
 
-	priv, err := btcec.NewPrivateKey(btcec.S256())
+	priv, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		return nil, errors.Errorf("unable create private key: %v", err)
 	}

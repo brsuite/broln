@@ -17,21 +17,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/btcjson"
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/integration/rpctest"
-	"github.com/brsuite/brond/mempool"
-	"github.com/brsuite/brond/rpcclient"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/brsuite/bronwallet/chain"
-	"github.com/brsuite/bronwallet/walletdb"
-	_ "github.com/brsuite/bronwallet/walletdb/bdb"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/brsuite/neutrino"
 	"github.com/brsuite/broln/blockcache"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/chainntnfs/brondnotify"
@@ -46,6 +31,21 @@ import (
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwallet/chanfunding"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/bronjson"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/integration/rpctest"
+	"github.com/brsuite/brond/mempool"
+	"github.com/brsuite/brond/rpcclient"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/brsuite/bronwallet/chain"
+	"github.com/brsuite/bronwallet/walletdb"
+	_ "github.com/brsuite/bronwallet/walletdb/bdb"
+	"github.com/brsuite/neutrino"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
 )
 
@@ -81,8 +81,8 @@ var (
 	netParams = &chaincfg.RegressionNetParams
 	chainHash = netParams.GenesisHash
 
-	_, alicePub = btcec.PrivKeyFromBytes(btcec.S256(), testHdSeed[:])
-	_, bobPub   = btcec.PrivKeyFromBytes(btcec.S256(), bobsPrivKey)
+	_, alicePub = bronec.PrivKeyFromBytes(bronec.S256(), testHdSeed[:])
+	_, bobPub   = bronec.PrivKeyFromBytes(bronec.S256(), bobsPrivKey)
 
 	// The number of confirmations required to consider any created channel
 	// open.
@@ -106,8 +106,8 @@ func assertProperBalance(t *testing.T, lw *lnwallet.LightningWallet,
 	if err != nil {
 		t.Fatalf("unable to query for balance: %v", err)
 	}
-	if balance.ToBTC() != amount {
-		t.Fatalf("wallet credits not properly loaded, should have 40BTC, "+
+	if balance.ToBRON() != amount {
+		t.Fatalf("wallet credits not properly loaded, should have 40BRON, "+
 			"instead have %v", balance)
 	}
 }
@@ -235,7 +235,7 @@ func assertTxInWallet(t *testing.T, w *lnwallet.LightningWallet,
 }
 
 func loadTestCredits(miner *rpctest.Harness, w *lnwallet.LightningWallet,
-	numOutputs int, btcPerOutput float64) error {
+	numOutputs int, bronPerOutput float64) error {
 
 	// For initial neutrino connection, wait a second.
 	// TODO(aakselrod): Eliminate the need for this.
@@ -244,8 +244,8 @@ func loadTestCredits(miner *rpctest.Harness, w *lnwallet.LightningWallet,
 		time.Sleep(time.Second)
 	}
 	// Using the mining node, spend from a coinbase output numOutputs to
-	// give us btcPerOutput with each output.
-	satoshiPerOutput, err := bronutil.NewAmount(btcPerOutput)
+	// give us bronPerOutput with each output.
+	broneesPerOutput, err := bronutil.NewAmount(bronPerOutput)
 	if err != nil {
 		return fmt.Errorf("unable to create amt: %v", err)
 	}
@@ -253,7 +253,7 @@ func loadTestCredits(miner *rpctest.Harness, w *lnwallet.LightningWallet,
 	if err != nil {
 		return err
 	}
-	expectedBalance += bronutil.Amount(int64(satoshiPerOutput) * int64(numOutputs))
+	expectedBalance += bronutil.Amount(int64(broneesPerOutput) * int64(numOutputs))
 	addrs := make([]bronutil.Address, 0, numOutputs)
 	for i := 0; i < numOutputs; i++ {
 		// Grab a fresh address from the wallet to house this output.
@@ -273,7 +273,7 @@ func loadTestCredits(miner *rpctest.Harness, w *lnwallet.LightningWallet,
 		addrs = append(addrs, walletAddr)
 
 		output := &wire.TxOut{
-			Value:    int64(satoshiPerOutput),
+			Value:    int64(broneesPerOutput),
 			PkScript: script,
 		}
 		if _, err := miner.SendOutputs([]*wire.TxOut{output}, 2500); err != nil {
@@ -319,7 +319,7 @@ func loadTestCredits(miner *rpctest.Harness, w *lnwallet.LightningWallet,
 	return nil
 }
 
-// createTestWallet creates a test LightningWallet will a total of 20BTC
+// createTestWallet creates a test LightningWallet will a total of 20BRON
 // available for funding channels.
 func createTestWallet(tempTestDir string, miningNode *rpctest.Harness,
 	netParams *chaincfg.Params, notifier chainntnfs.ChainNotifier,
@@ -342,7 +342,7 @@ func createTestWallet(tempTestDir string, miningNode *rpctest.Harness,
 		FeeEstimator:     chainfee.NewStaticEstimator(2500, 0),
 		DefaultConstraints: channeldb.ChannelConstraints{
 			DustLimit:        500,
-			MaxPendingAmount: lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin) * 100,
+			MaxPendingAmount: lnwire.NewMSatFromBroneess(bronutil.BroneesPerBrocoin) * 100,
 			ChanReserve:      100,
 			MinHTLC:          400,
 			MaxAcceptedHtlcs: 900,
@@ -359,7 +359,7 @@ func createTestWallet(tempTestDir string, miningNode *rpctest.Harness,
 		return nil, err
 	}
 
-	// Load our test wallet with 20 outputs each holding 4BTC.
+	// Load our test wallet with 20 outputs each holding 4BRON.
 	if err := loadTestCredits(miningNode, wallet, 20, 4); err != nil {
 		return nil, err
 	}
@@ -421,10 +421,10 @@ func testDualFundingReservationWorkflow(miner *rpctest.Harness,
 	}
 
 	// In this scenario, we'll test a dual funder reservation, with each
-	// side putting in 10 BTC.
+	// side putting in 10 BRON.
 
-	// Alice initiates a channel funded with 5 BTC for each side, so 10 BTC
-	// total. She also generates 2 BTC in change.
+	// Alice initiates a channel funded with 5 BRON for each side, so 10 BRON
+	// total. She also generates 2 BRON in change.
 	feePerKw, err := alice.Cfg.FeeEstimator.EstimateFeePerKW(1)
 	if err != nil {
 		t.Fatalf("unable to query fee estimator: %v", err)
@@ -448,7 +448,7 @@ func testDualFundingReservationWorkflow(miner *rpctest.Harness,
 	channelConstraints := &channeldb.ChannelConstraints{
 		DustLimit:        alice.Cfg.DefaultConstraints.DustLimit,
 		ChanReserve:      fundingAmount / 100,
-		MaxPendingAmount: lnwire.NewMSatFromSatoshis(fundingAmount),
+		MaxPendingAmount: lnwire.NewMSatFromBroneess(fundingAmount),
 		MinHTLC:          1,
 		MaxAcceptedHtlcs: input.MaxHTLCNumber / 2,
 		CsvDelay:         csvDelay,
@@ -461,8 +461,8 @@ func testDualFundingReservationWorkflow(miner *rpctest.Harness,
 	}
 
 	// The channel reservation should now be populated with a multi-sig key
-	// from our HD chain, a change output with 3 BTC, and 2 outputs
-	// selected of 4 BTC each. Additionally, the rest of the items needed
+	// from our HD chain, a change output with 3 BRON, and 2 outputs
+	// selected of 4 BRON each. Additionally, the rest of the items needed
 	// to fulfill a funding contribution should also have been filled in.
 	aliceContribution := aliceChanReservation.OurContribution()
 	if len(aliceContribution.Inputs) != 2 {
@@ -628,7 +628,7 @@ func testDualFundingReservationWorkflow(miner *rpctest.Harness,
 func testFundingTransactionLockedOutputs(miner *rpctest.Harness,
 	alice, _ *lnwallet.LightningWallet, t *testing.T) {
 
-	// Create a single channel asking for 16 BTC total.
+	// Create a single channel asking for 16 BRON total.
 	fundingAmount, err := bronutil.NewAmount(8)
 	if err != nil {
 		t.Fatalf("unable to create amt: %v", err)
@@ -654,7 +654,7 @@ func testFundingTransactionLockedOutputs(miner *rpctest.Harness,
 	}
 
 	// Now attempt to reserve funds for another channel, this time
-	// requesting 900 BTC. We only have around 64BTC worth of outpoints
+	// requesting 900 BRON. We only have around 64BRON worth of outpoints
 	// that aren't locked, so this should fail.
 	amt, err := bronutil.NewAmount(900)
 	if err != nil {
@@ -692,7 +692,7 @@ func testFundingCancellationNotEnoughFunds(miner *rpctest.Harness,
 		t.Fatalf("unable to query fee estimator: %v", err)
 	}
 
-	// Create a reservation for 44 BTC.
+	// Create a reservation for 44 BRON.
 	fundingAmount, err := bronutil.NewAmount(44)
 	if err != nil {
 		t.Fatalf("unable to create amt: %v", err)
@@ -714,7 +714,7 @@ func testFundingCancellationNotEnoughFunds(miner *rpctest.Harness,
 		t.Fatalf("unable to initialize funding reservation: %v", err)
 	}
 
-	// Attempt to create another channel with 44 BTC, this should fail.
+	// Attempt to create another channel with 44 BRON, this should fail.
 	req.PendingChanID = [32]byte{3, 4, 5, 6}
 	_, err = alice.InitChannelReservation(req)
 	if _, ok := err.(*chanfunding.ErrInsufficientFunds); !ok {
@@ -782,14 +782,14 @@ func testReservationInitiatorBalanceBelowDustCancel(miner *rpctest.Harness,
 	// We'll attempt to create a new reservation with an extremely high
 	// commitment fee rate. This should push our balance into the negative
 	// and result in a failure to create the reservation.
-	const numBTC = 4
-	fundingAmount, err := bronutil.NewAmount(numBTC)
+	const numBRON = 4
+	fundingAmount, err := bronutil.NewAmount(numBRON)
 	if err != nil {
 		t.Fatalf("unable to create amt: %v", err)
 	}
 
 	feePerKw := chainfee.SatPerKWeight(
-		numBTC * numBTC * bronutil.SatoshiPerBrocoin,
+		numBRON * numBRON * bronutil.BroneesPerBrocoin,
 	)
 	req := &lnwallet.InitFundingReserveMsg{
 		ChainHash:        chainHash,
@@ -864,14 +864,14 @@ func testSingleFunderReservationWorkflow(miner *rpctest.Harness,
 	// For this scenario, Alice will be the channel initiator while bob
 	// will act as the responder to the workflow.
 
-	// First, Alice will Initialize a reservation for a channel with 4 BTC
-	// funded solely by us. We'll also initially push 1 BTC of the channel
+	// First, Alice will Initialize a reservation for a channel with 4 BRON
+	// funded solely by us. We'll also initially push 1 BRON of the channel
 	// towards Bob's side.
 	fundingAmt, err := bronutil.NewAmount(4)
 	if err != nil {
 		t.Fatalf("unable to create amt: %v", err)
 	}
-	pushAmt := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
+	pushAmt := lnwire.NewMSatFromBroneess(bronutil.BroneesPerBrocoin)
 	feePerKw, err := alice.Cfg.FeeEstimator.EstimateFeePerKW(1)
 	if err != nil {
 		t.Fatalf("unable to query fee estimator: %v", err)
@@ -898,7 +898,7 @@ func testSingleFunderReservationWorkflow(miner *rpctest.Harness,
 	channelConstraints := &channeldb.ChannelConstraints{
 		DustLimit:        alice.Cfg.DefaultConstraints.DustLimit,
 		ChanReserve:      fundingAmt / 100,
-		MaxPendingAmount: lnwire.NewMSatFromSatoshis(fundingAmt),
+		MaxPendingAmount: lnwire.NewMSatFromBroneess(fundingAmt),
 		MinHTLC:          1,
 		MaxAcceptedHtlcs: input.MaxHTLCNumber / 2,
 		CsvDelay:         csvDelay,
@@ -1139,7 +1139,7 @@ func testListTransactionDetails(miner *rpctest.Harness,
 
 	// Create 5 new outputs spendable by the wallet.
 	const numTxns = 5
-	const outputAmt = bronutil.SatoshiPerBrocoin
+	const outputAmt = bronutil.BroneesPerBrocoin
 	txids := make(map[chainhash.Hash]struct{})
 	for i := 0; i < numTxns; i++ {
 		addr, err := alice.NewAddress(
@@ -1392,7 +1392,7 @@ func testListTransactionDetails(miner *rpctest.Harness,
 		}
 	}
 	if !burnTxFound {
-		t.Fatal("tx burning btc not found")
+		t.Fatal("tx burning bron not found")
 	}
 
 	// Generate a block which has no wallet transactions in it.
@@ -1431,7 +1431,7 @@ func testTransactionSubscriptions(miner *rpctest.Harness,
 	defer txClient.Cancel()
 
 	const (
-		outputAmt = bronutil.SatoshiPerBrocoin
+		outputAmt = bronutil.BroneesPerBrocoin
 		numTxns   = 3
 	)
 	errCh1 := make(chan error, 1)
@@ -1589,7 +1589,7 @@ func testTransactionSubscriptions(miner *rpctest.Harness,
 }
 
 // scriptFromKey creates a P2WKH script from the given pubkey.
-func scriptFromKey(pubkey *btcec.PublicKey) ([]byte, error) {
+func scriptFromKey(pubkey *bronec.PublicKey) ([]byte, error) {
 	pubkeyHash := bronutil.Hash160(pubkey.SerializeCompressed())
 	keyAddr, err := bronutil.NewAddressWitnessPubKeyHash(
 		pubkeyHash, &chaincfg.RegressionNetParams,
@@ -1642,7 +1642,7 @@ func mineAndAssert(r *rpctest.Harness, tx *wire.MsgTx) error {
 // txFromOutput takes a tx paying to fromPubKey, and creates a new tx that
 // spends the output from this tx, to an address derived from payToPubKey.
 func txFromOutput(tx *wire.MsgTx, signer input.Signer, fromPubKey,
-	payToPubKey *btcec.PublicKey, txFee bronutil.Amount,
+	payToPubKey *bronec.PublicKey, txFee bronutil.Amount,
 	rbf bool) (*wire.MsgTx, error) {
 
 	// Generate the script we want to spend from.
@@ -1733,7 +1733,7 @@ func txFromOutput(tx *wire.MsgTx, signer input.Signer, fromPubKey,
 
 // newTx sends coins from Alice's wallet, mines this transaction, and creates a
 // new, unconfirmed tx that spends this output to pubKey.
-func newTx(t *testing.T, r *rpctest.Harness, pubKey *btcec.PublicKey,
+func newTx(t *testing.T, r *rpctest.Harness, pubKey *bronec.PublicKey,
 	alice *lnwallet.LightningWallet, rbf bool) *wire.MsgTx {
 	t.Helper()
 
@@ -1745,7 +1745,7 @@ func newTx(t *testing.T, r *rpctest.Harness, pubKey *btcec.PublicKey,
 	// Instruct the wallet to fund the output with a newly created
 	// transaction.
 	newOutput := &wire.TxOut{
-		Value:    bronutil.SatoshiPerBrocoin,
+		Value:    bronutil.BroneesPerBrocoin,
 		PkScript: keyScript,
 	}
 	tx, err := alice.SendOutputs(
@@ -1762,7 +1762,7 @@ func newTx(t *testing.T, r *rpctest.Harness, pubKey *btcec.PublicKey,
 	}
 
 	// Create a new unconfirmed tx that spends this output.
-	txFee := bronutil.Amount(0.001 * bronutil.SatoshiPerBrocoin)
+	txFee := bronutil.Amount(0.001 * bronutil.BroneesPerBrocoin)
 	tx1, err := txFromOutput(
 		tx, alice.Cfg.Signer, pubKey, pubKey, txFee, rbf,
 	)
@@ -1843,7 +1843,7 @@ func testPublishTransaction(r *rpctest.Harness,
 	// We'll do the next mempool check on both RBF and non-RBF enabled
 	// transactions.
 	var (
-		txFee         = bronutil.Amount(0.005 * bronutil.SatoshiPerBrocoin)
+		txFee         = bronutil.Amount(0.005 * bronutil.BroneesPerBrocoin)
 		tx3, tx3Spend *wire.MsgTx
 	)
 
@@ -2000,7 +2000,7 @@ func testSignOutputUsingTweaks(r *rpctest.Harness,
 	// we'll generate a commitment pre-image, then derive a revocation key
 	// and single tweak from that.
 	commitPreimage := bytes.Repeat([]byte{2}, 32)
-	commitSecret, commitPoint := btcec.PrivKeyFromBytes(btcec.S256(),
+	commitSecret, commitPoint := bronec.PrivKeyFromBytes(bronec.S256(),
 		commitPreimage)
 
 	revocationKey := input.DeriveRevocationPubkey(pubKey.PubKey, commitPoint)
@@ -2013,7 +2013,7 @@ func testSignOutputUsingTweaks(r *rpctest.Harness,
 	// and the second will use a double tweak.
 	baseKey := pubKey
 	for i := 0; i < 2; i++ {
-		var tweakedKey *btcec.PublicKey
+		var tweakedKey *bronec.PublicKey
 		if i == 0 {
 			tweakedKey = tweakedPub
 		} else {
@@ -2036,7 +2036,7 @@ func testSignOutputUsingTweaks(r *rpctest.Harness,
 		// With the script fully assembled, instruct the wallet to fund
 		// the output with a newly created transaction.
 		newOutput := &wire.TxOut{
-			Value:    bronutil.SatoshiPerBrocoin,
+			Value:    bronutil.BroneesPerBrocoin,
 			PkScript: keyScript,
 		}
 		tx, err := alice.SendOutputs(
@@ -2114,7 +2114,7 @@ func testSignOutputUsingTweaks(r *rpctest.Harness,
 		// the proper private key.
 		vm, err := txscript.NewEngine(keyScript,
 			sweepTx, 0, txscript.StandardVerifyFlags, nil,
-			nil, int64(bronutil.SatoshiPerBrocoin))
+			nil, int64(bronutil.BroneesPerBrocoin))
 		if err != nil {
 			t.Fatalf("unable to create engine: %v", err)
 		}
@@ -2229,7 +2229,7 @@ func testReorgWalletBalance(r *rpctest.Harness, w *lnwallet.LightningWallet,
 		// Wait for disconnection
 		timeout := time.After(30 * time.Second)
 		stillConnected := true
-		var peers []btcjson.GetPeerInfoResult
+		var peers []bronjson.GetPeerInfoResult
 		for stillConnected {
 			// Allow for timeout
 			time.Sleep(100 * time.Millisecond)
@@ -2270,7 +2270,7 @@ func testReorgWalletBalance(r *rpctest.Harness, w *lnwallet.LightningWallet,
 		err = r2.Client.AddNode(r.P2PAddress(), rpcclient.ANAdd)
 		if err != nil {
 			switch err := err.(type) {
-			case *btcjson.RPCError:
+			case *bronjson.RPCError:
 				if err.Code != -8 {
 					t.Fatalf("unable to connect mining "+
 						"nodes together: %v", err)
@@ -2314,7 +2314,7 @@ func testChangeOutputSpendConfirmation(r *rpctest.Harness,
 	// spends an output created by SendOutputs, we'll start by emptying
 	// Alice's wallet so that no other UTXOs can be picked. To do so, we'll
 	// generate an address for Bob, who will receive all the coins.
-	// Assuming a balance of 80 BTC and a transaction fee of 2500 sat/kw,
+	// Assuming a balance of 80 BRON and a transaction fee of 2500 sat/kw,
 	// we'll craft the following transaction so that Alice doesn't have any
 	// UTXOs left.
 	aliceBalance, err := alice.ConfirmedBalance(0, lnwallet.DefaultAccountName)
@@ -2323,7 +2323,7 @@ func testChangeOutputSpendConfirmation(r *rpctest.Harness,
 	}
 	bobPkScript := newPkScript(t, bob, lnwallet.WitnessPubKey)
 
-	// We'll use a transaction fee of 14380 satoshis, which will allow us to
+	// We'll use a transaction fee of 14380 broneess, which will allow us to
 	// sweep all of Alice's balance in one transaction containing 1 input
 	// and 1 output.
 	//
@@ -2347,14 +2347,14 @@ func testChangeOutputSpendConfirmation(r *rpctest.Harness,
 		t.Fatalf("unable to retrieve alice's balance: %v", err)
 	}
 	if aliceBalance != 0 {
-		t.Fatalf("expected alice's balance to be 0 BTC, found %v",
+		t.Fatalf("expected alice's balance to be 0 BRON, found %v",
 			aliceBalance)
 	}
 
-	// Now, we'll send an output back to Alice from Bob of 1 BTC.
+	// Now, we'll send an output back to Alice from Bob of 1 BRON.
 	alicePkScript := newPkScript(t, alice, lnwallet.WitnessPubKey)
 	output = &wire.TxOut{
-		Value:    bronutil.SatoshiPerBrocoin,
+		Value:    bronutil.BroneesPerBrocoin,
 		PkScript: alicePkScript,
 	}
 	tx = sendCoins(t, r, bob, alice, output, txFeeRate, true, 1)
@@ -2366,7 +2366,7 @@ func testChangeOutputSpendConfirmation(r *rpctest.Harness,
 	// output, which is what the test expects. Therefore, we'll generate one
 	// by sending Bob back some coins.
 	output = &wire.TxOut{
-		Value:    bronutil.SatoshiPerBitcent,
+		Value:    bronutil.BroneesPerBitcent,
 		PkScript: bobPkScript,
 	}
 	tx = sendCoins(t, r, alice, bob, output, txFeeRate, true, 1)
@@ -2414,7 +2414,7 @@ func testSpendUnconfirmed(miner *rpctest.Harness,
 
 	// Verify that bob doesn't have enough balance to send coins.
 	output = &wire.TxOut{
-		Value:    bronutil.SatoshiPerBrocoin * 0.5,
+		Value:    bronutil.BroneesPerBrocoin * 0.5,
 		PkScript: alicePkScript,
 	}
 	_, err = bob.SendOutputs(
@@ -2427,7 +2427,7 @@ func testSpendUnconfirmed(miner *rpctest.Harness,
 	// Next we will send a transaction to bob but leave it in an
 	// unconfirmed state.
 	output = &wire.TxOut{
-		Value:    bronutil.SatoshiPerBrocoin,
+		Value:    bronutil.BroneesPerBrocoin,
 		PkScript: bobPkScript,
 	}
 	tx = sendCoins(t, miner, alice, bob, output, txFeeRate, false, 1)
@@ -2437,7 +2437,7 @@ func testSpendUnconfirmed(miner *rpctest.Harness,
 
 	// Now, try to spend some of the unconfirmed funds from bob's wallet.
 	output = &wire.TxOut{
-		Value:    bronutil.SatoshiPerBrocoin * 0.5,
+		Value:    bronutil.BroneesPerBrocoin * 0.5,
 		PkScript: alicePkScript,
 	}
 
@@ -2474,7 +2474,7 @@ func testSpendUnconfirmed(miner *rpctest.Harness,
 	// Finally, send the remainder of bob's wallet balance back to him so
 	// that these money movements dont mess up later tests.
 	output = &wire.TxOut{
-		Value:    int64(bobBalance) - (bronutil.SatoshiPerBrocoin * 0.4),
+		Value:    int64(bobBalance) - (bronutil.BroneesPerBrocoin * 0.4),
 		PkScript: bobPkScript,
 	}
 	tx = sendCoins(t, miner, alice, bob, output, txFeeRate, true, 1)
@@ -2969,8 +2969,8 @@ func waitForMempoolTx(r *rpctest.Harness, txid *chainhash.Hash) error {
 		tx, err = r.Client.GetRawTransaction(txid)
 		if err != nil {
 			switch e := err.(type) {
-			case *btcjson.RPCError:
-				if e.Code == btcjson.ErrRPCNoTxInfo {
+			case *bronjson.RPCError:
+				if e.Code == bronjson.ErrRPCNoTxInfo {
 					continue
 				}
 			default:
@@ -3045,9 +3045,9 @@ func testSingleFunderExternalFundingTx(miner *rpctest.Harness,
 		t.Fatalf("unable to obtain bob funding key: %v", err)
 	}
 
-	// We'll now set up for them to open a 4 BTC channel, with 1 BTC pushed
+	// We'll now set up for them to open a 4 BRON channel, with 1 BRON pushed
 	// to Bob's side.
-	chanAmt := 4 * bronutil.SatoshiPerBrocoin
+	chanAmt := 4 * bronutil.BroneesPerBrocoin
 
 	// Simulating external funding negotiation, we'll now create the
 	// funding transaction for both parties. Utilizing existing tools,
@@ -3168,7 +3168,7 @@ func TestLightningWallet(t *testing.T, targetBackEnd string) {
 
 	// Initialize the harness around a brond node which will serve as our
 	// dedicated miner to generate blocks, cause re-orgs, etc. We'll set
-	// up this node with a chain length of 125, so we have plenty of BTC
+	// up this node with a chain length of 125, so we have plenty of BRON
 	// to play around with.
 	miningNode, err := rpctest.New(
 		netParams, nil, []string{"--txindex"}, "",
@@ -3485,7 +3485,7 @@ func runTests(t *testing.T, walletDriver *lnwallet.WalletDriver,
 		t.Fatalf("unknown wallet driver: %v", walletType)
 	}
 
-	// Funding via 20 outputs with 4BTC each.
+	// Funding via 20 outputs with 4BRON each.
 	alice, err := createTestWallet(
 		tempTestDirAlice, miningNode, netParams,
 		chainNotifier, aliceWalletController, aliceKeyRing,
@@ -3505,7 +3505,7 @@ func runTests(t *testing.T, walletDriver *lnwallet.WalletDriver,
 	}
 	defer bob.Shutdown()
 
-	// Both wallets should now have 80BTC available for
+	// Both wallets should now have 80BRON available for
 	// spending.
 	assertProperBalance(t, alice, 1, 80)
 	assertProperBalance(t, bob, 1, 80)

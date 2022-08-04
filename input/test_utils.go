@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/txscript"
@@ -44,7 +44,7 @@ var (
 // a set of private keys in a slice and can sign messages using the appropriate
 // one.
 type MockSigner struct {
-	Privkeys  []*btcec.PrivateKey
+	Privkeys  []*bronec.PrivateKey
 	NetParams *chaincfg.Params
 }
 
@@ -74,7 +74,7 @@ func (m *MockSigner) SignOutputRaw(tx *wire.MsgTx,
 		return nil, err
 	}
 
-	return btcec.ParseDERSignature(sig[:len(sig)-1], btcec.S256())
+	return bronec.ParseDERSignature(sig[:len(sig)-1], bronec.S256())
 }
 
 // ComputeInputScript generates a complete InputIndex for the passed transaction
@@ -134,7 +134,7 @@ func (m *MockSigner) ComputeInputScript(tx *wire.MsgTx, signDesc *SignDescriptor
 // either correspond directly to the private key or to the private key with a
 // tweak applied.
 func (m *MockSigner) findKey(needleHash160 []byte, singleTweak []byte,
-	doubleTweak *btcec.PrivateKey) *btcec.PrivateKey {
+	doubleTweak *bronec.PrivateKey) *bronec.PrivateKey {
 
 	for _, privkey := range m.Privkeys {
 		// First check whether public key is directly derived from private key.
@@ -161,31 +161,31 @@ func (m *MockSigner) findKey(needleHash160 []byte, singleTweak []byte,
 }
 
 // pubkeyFromHex parses a Brocoin public key from a hex encoded string.
-func pubkeyFromHex(keyHex string) (*btcec.PublicKey, error) {
+func pubkeyFromHex(keyHex string) (*bronec.PublicKey, error) {
 	bytes, err := hex.DecodeString(keyHex)
 	if err != nil {
 		return nil, err
 	}
-	return btcec.ParsePubKey(bytes, btcec.S256())
+	return bronec.ParsePubKey(bytes, bronec.S256())
 }
 
 // privkeyFromHex parses a Brocoin private key from a hex encoded string.
-func privkeyFromHex(keyHex string) (*btcec.PrivateKey, error) {
+func privkeyFromHex(keyHex string) (*bronec.PrivateKey, error) {
 	bytes, err := hex.DecodeString(keyHex)
 	if err != nil {
 		return nil, err
 	}
-	key, _ := btcec.PrivKeyFromBytes(btcec.S256(), bytes)
+	key, _ := bronec.PrivKeyFromBytes(bronec.S256(), bytes)
 	return key, nil
 
 }
 
 // pubkeyToHex serializes a Brocoin public key to a hex encoded string.
-func pubkeyToHex(key *btcec.PublicKey) string {
+func pubkeyToHex(key *bronec.PublicKey) string {
 	return hex.EncodeToString(key.SerializeCompressed())
 }
 
 // privkeyFromHex serializes a Brocoin private key to a hex encoded string.
-func privkeyToHex(key *btcec.PrivateKey) string {
+func privkeyToHex(key *bronec.PrivateKey) string {
 	return hex.EncodeToString(key.Serialize())
 }

@@ -7,13 +7,13 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/brsuite/brond/btcjson"
+	"github.com/brsuite/broln/blockcache"
+	"github.com/brsuite/broln/channeldb"
+	"github.com/brsuite/brond/bronjson"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronwallet/chain"
 	"github.com/brsuite/bronwallet/wtxmgr"
-	"github.com/brsuite/broln/blockcache"
-	"github.com/brsuite/broln/channeldb"
 )
 
 // BrocoindFilteredChainView is an implementation of the FilteredChainView
@@ -272,7 +272,7 @@ func (b *BrocoindFilteredChainView) chainFilterer() {
 		return filteredTxns
 	}
 
-	decodeJSONBlock := func(block *btcjson.RescannedBlock,
+	decodeJSONBlock := func(block *bronjson.RescannedBlock,
 		height uint32) (*FilteredBlock, error) {
 		hash, err := chainhash.NewHashFromStr(block.Hash)
 		if err != nil {

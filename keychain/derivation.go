@@ -3,7 +3,7 @@ package keychain
 import (
 	"fmt"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 )
 
 const (
@@ -161,7 +161,7 @@ type KeyDescriptor struct {
 
 	// PubKey is an optional public key that fully describes a target key.
 	// If this is nil, the KeyLocator MUST NOT be empty.
-	PubKey *btcec.PublicKey
+	PubKey *bronec.PublicKey
 }
 
 // KeyRing is the primary interface that will be used to perform public
@@ -200,7 +200,7 @@ type SecretKeyRing interface {
 	// method will perform an in-order scan over the key set, with a max of
 	// MaxKeyRangeScan keys. In order for this to work, the caller MUST set
 	// the KeyFamily within the partially populated KeyLocator.
-	DerivePrivKey(keyDesc KeyDescriptor) (*btcec.PrivateKey, error)
+	DerivePrivKey(keyDesc KeyDescriptor) (*bronec.PrivateKey, error)
 }
 
 // MessageSignerRing is an interface that abstracts away basic low-level ECDSA
@@ -209,7 +209,7 @@ type MessageSignerRing interface {
 	// SignMessage signs the given message, single or double SHA256 hashing
 	// it first, with the private key described in the key locator.
 	SignMessage(keyLoc KeyLocator, msg []byte,
-		doubleHash bool) (*btcec.Signature, error)
+		doubleHash bool) (*bronec.Signature, error)
 
 	// SignMessageCompact signs the given message, single or double SHA256
 	// hashing it first, with the private key described in the key locator
@@ -224,7 +224,7 @@ type MessageSignerRing interface {
 // single, specific private key.
 type SingleKeyMessageSigner interface {
 	// PubKey returns the public key of the wrapped private key.
-	PubKey() *btcec.PublicKey
+	PubKey() *bronec.PublicKey
 
 	// KeyLocator returns the locator that describes the wrapped private
 	// key.
@@ -232,7 +232,7 @@ type SingleKeyMessageSigner interface {
 
 	// SignMessage signs the given message, single or double SHA256 hashing
 	// it first, with the wrapped private key.
-	SignMessage(message []byte, doubleHash bool) (*btcec.Signature, error)
+	SignMessage(message []byte, doubleHash bool) (*bronec.Signature, error)
 
 	// SignMessageCompact signs the given message, single or double SHA256
 	// hashing it first, with the wrapped private key and returns the
@@ -251,20 +251,20 @@ type ECDHRing interface {
 	//
 	//  sx := k*P
 	//  s := sha256(sx.SerializeCompressed())
-	ECDH(keyDesc KeyDescriptor, pubKey *btcec.PublicKey) ([32]byte, error)
+	ECDH(keyDesc KeyDescriptor, pubKey *bronec.PublicKey) ([32]byte, error)
 }
 
 // SingleKeyECDH is an abstraction interface that hides the implementation of an
 // ECDH operation by wrapping a single, specific private key.
 type SingleKeyECDH interface {
 	// PubKey returns the public key of the wrapped private key.
-	PubKey() *btcec.PublicKey
+	PubKey() *bronec.PublicKey
 
 	// ECDH performs a scalar multiplication (ECDH-like operation) between
 	// the wrapped private key and remote public key. The output returned
 	// will be the sha256 of the resulting shared point serialized in
 	// compressed format.
-	ECDH(pubKey *btcec.PublicKey) ([32]byte, error)
+	ECDH(pubKey *bronec.PublicKey) ([32]byte, error)
 }
 
 // TODO(roasbeef): extend to actually support scalar mult of key?

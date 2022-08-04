@@ -6,10 +6,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
@@ -17,9 +13,13 @@ import (
 	"github.com/brsuite/broln/lntest/mock"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/davecgh/go-spew/spew"
 )
 
-var testHtlcAmt = lnwire.MilliSatoshi(200000)
+var testHtlcAmt = lnwire.MilliBronees(200000)
 
 type htlcResolverTestContext struct {
 	resolver ContractResolver
@@ -228,7 +228,7 @@ func TestHtlcSuccessSecondStageResolution(t *testing.T) {
 	successTx := twoStageResolution.SignedSuccessTx.TxHash()
 	firstStage := &channeldb.ResolverReport{
 		OutPoint:        commitOutpoint,
-		Amount:          testHtlcAmt.ToSatoshis(),
+		Amount:          testHtlcAmt.ToBroneess(),
 		ResolverType:    channeldb.ResolverTypeIncomingHtlc,
 		ResolverOutcome: channeldb.ResolverOutcomeFirstStage,
 		SpendTxID:       &successTx,
@@ -352,7 +352,7 @@ func TestHtlcSuccessSecondStageResolutionSweeper(t *testing.T) {
 
 	firstStage := &channeldb.ResolverReport{
 		OutPoint:        commitOutpoint,
-		Amount:          testHtlcAmt.ToSatoshis(),
+		Amount:          testHtlcAmt.ToBroneess(),
 		ResolverType:    channeldb.ResolverTypeIncomingHtlc,
 		ResolverOutcome: channeldb.ResolverOutcomeFirstStage,
 		SpendTxID:       &reSignedHash,

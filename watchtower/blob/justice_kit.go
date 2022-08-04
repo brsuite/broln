@@ -10,10 +10,10 @@ import (
 
 	"golang.org/x/crypto/chacha20poly1305"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/txscript"
 )
 
 const (
@@ -153,15 +153,15 @@ type JusticeKit struct {
 // CommitToLocalWitnessScript returns the serialized witness script for the
 // commitment to-local output.
 func (b *JusticeKit) CommitToLocalWitnessScript() ([]byte, error) {
-	revocationPubKey, err := btcec.ParsePubKey(
-		b.RevocationPubKey[:], btcec.S256(),
+	revocationPubKey, err := bronec.ParsePubKey(
+		b.RevocationPubKey[:], bronec.S256(),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	localDelayedPubKey, err := btcec.ParsePubKey(
-		b.LocalDelayPubKey[:], btcec.S256(),
+	localDelayedPubKey, err := bronec.ParsePubKey(
+		b.LocalDelayPubKey[:], bronec.S256(),
 	)
 	if err != nil {
 		return nil, err
@@ -192,7 +192,7 @@ func (b *JusticeKit) CommitToLocalRevokeWitnessStack() ([][]byte, error) {
 // HasCommitToRemoteOutput returns true if the blob contains a to-remote p2wkh
 // pubkey.
 func (b *JusticeKit) HasCommitToRemoteOutput() bool {
-	return btcec.IsCompressedPubKey(b.CommitToRemotePubKey[:])
+	return bronec.IsCompressedPubKey(b.CommitToRemotePubKey[:])
 }
 
 // CommitToRemoteWitnessScript returns the witness script for the commitment
@@ -200,15 +200,15 @@ func (b *JusticeKit) HasCommitToRemoteOutput() bool {
 // a p2wpkh to-remote output or an p2wsh anchor to-remote output which includes
 // a CSV delay.
 func (b *JusticeKit) CommitToRemoteWitnessScript() ([]byte, error) {
-	if !btcec.IsCompressedPubKey(b.CommitToRemotePubKey[:]) {
+	if !bronec.IsCompressedPubKey(b.CommitToRemotePubKey[:]) {
 		return nil, ErrNoCommitToRemoteOutput
 	}
 
 	// If this is a blob for an anchor channel, we'll return the p2wsh
 	// output containing a CSV delay of 1.
 	if b.BlobType.IsAnchorChannel() {
-		pk, err := btcec.ParsePubKey(
-			b.CommitToRemotePubKey[:], btcec.S256(),
+		pk, err := bronec.ParsePubKey(
+			b.CommitToRemotePubKey[:], bronec.S256(),
 		)
 		if err != nil {
 			return nil, err
@@ -494,7 +494,7 @@ func (b *JusticeKit) decodeV0(r io.Reader) error {
 
 	// Only populate the commit to-remote fields in the decoded blob if a
 	// valid compressed public key was read from the reader.
-	if btcec.IsCompressedPubKey(commitToRemotePubkey[:]) {
+	if bronec.IsCompressedPubKey(commitToRemotePubkey[:]) {
 		b.CommitToRemotePubKey = commitToRemotePubkey
 		b.CommitToRemoteSig = commitToRemoteSig
 	}

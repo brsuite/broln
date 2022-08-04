@@ -1554,7 +1554,7 @@ same
 sample
 sand
 satisfy
-satoshi
+bronees
 sauce
 sausage
 save

@@ -7,13 +7,13 @@ import (
 	"io"
 	"net"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/shachain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 // writeOutpoint writes an outpoint to the passed writer using the minimal
@@ -142,18 +142,18 @@ func WriteElement(w io.Writer, element interface{}) error {
 			return err
 		}
 
-	case lnwire.MilliSatoshi:
+	case lnwire.MilliBronees:
 		if err := binary.Write(w, byteOrder, uint64(e)); err != nil {
 			return err
 		}
 
-	case *btcec.PrivateKey:
+	case *bronec.PrivateKey:
 		b := e.Serialize()
 		if _, err := w.Write(b); err != nil {
 			return err
 		}
 
-	case *btcec.PublicKey:
+	case *bronec.PublicKey:
 		b := e.SerializeCompressed()
 		if _, err := w.Write(b); err != nil {
 			return err
@@ -332,30 +332,30 @@ func ReadElement(r io.Reader, element interface{}) error {
 
 		*e = bronutil.Amount(a)
 
-	case *lnwire.MilliSatoshi:
+	case *lnwire.MilliBronees:
 		var a uint64
 		if err := binary.Read(r, byteOrder, &a); err != nil {
 			return err
 		}
 
-		*e = lnwire.MilliSatoshi(a)
+		*e = lnwire.MilliBronees(a)
 
-	case **btcec.PrivateKey:
-		var b [btcec.PrivKeyBytesLen]byte
+	case **bronec.PrivateKey:
+		var b [bronec.PrivKeyBytesLen]byte
 		if _, err := io.ReadFull(r, b[:]); err != nil {
 			return err
 		}
 
-		priv, _ := btcec.PrivKeyFromBytes(btcec.S256(), b[:])
+		priv, _ := bronec.PrivKeyFromBytes(bronec.S256(), b[:])
 		*e = priv
 
-	case **btcec.PublicKey:
-		var b [btcec.PubKeyBytesLenCompressed]byte
+	case **bronec.PublicKey:
+		var b [bronec.PubKeyBytesLenCompressed]byte
 		if _, err := io.ReadFull(r, b[:]); err != nil {
 			return err
 		}
 
-		pubKey, err := btcec.ParsePubKey(b[:], btcec.S256())
+		pubKey, err := bronec.ParsePubKey(b[:], bronec.S256())
 		if err != nil {
 			return err
 		}

@@ -6,9 +6,9 @@ import (
 	"io"
 	"sync"
 
-	"github.com/brsuite/brond/btcec"
-	sphinx "github.com/brsuite/lightning-onion"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	sphinx "github.com/brsuite/lightning-onion"
 )
 
 // Iterator is an interface that abstracts away the routing information
@@ -379,7 +379,7 @@ func (p *OnionProcessor) DecodeHopIterators(id []byte,
 // ErrorEncrypter instance using the derived shared secret. In the case that en
 // error occurs, a lnwire failure code detailing the parsing failure will be
 // returned.
-func (p *OnionProcessor) ExtractErrorEncrypter(ephemeralKey *btcec.PublicKey) (
+func (p *OnionProcessor) ExtractErrorEncrypter(ephemeralKey *bronec.PublicKey) (
 	ErrorEncrypter, lnwire.FailCode) {
 
 	onionObfuscator, err := sphinx.NewOnionErrorEncrypter(

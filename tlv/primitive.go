@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 )
 
 // ErrTypeForEncoding signals that an incorrect type was passed to an Encoder.
@@ -255,27 +255,27 @@ func DBytes64(r io.Reader, val interface{}, _ *[8]byte, l uint64) error {
 	return NewTypeForDecodingErr(val, "[64]byte", l, 64)
 }
 
-// EPubKey is an Encoder for *btcec.PublicKey values. An error is returned if
-// val is not a **btcec.PublicKey.
+// EPubKey is an Encoder for *bronec.PublicKey values. An error is returned if
+// val is not a **bronec.PublicKey.
 func EPubKey(w io.Writer, val interface{}, _ *[8]byte) error {
-	if pk, ok := val.(**btcec.PublicKey); ok {
+	if pk, ok := val.(**bronec.PublicKey); ok {
 		_, err := w.Write((*pk).SerializeCompressed())
 		return err
 	}
-	return NewTypeForEncodingErr(val, "*btcec.PublicKey")
+	return NewTypeForEncodingErr(val, "*bronec.PublicKey")
 }
 
-// DPubKey is a Decoder for *btcec.PublicKey values. An error is returned if val
-// is not a **btcec.PublicKey.
+// DPubKey is a Decoder for *bronec.PublicKey values. An error is returned if val
+// is not a **bronec.PublicKey.
 func DPubKey(r io.Reader, val interface{}, _ *[8]byte, l uint64) error {
-	if pk, ok := val.(**btcec.PublicKey); ok && l == 33 {
+	if pk, ok := val.(**bronec.PublicKey); ok && l == 33 {
 		var b [33]byte
 		_, err := io.ReadFull(r, b[:])
 		if err != nil {
 			return err
 		}
 
-		p, err := btcec.ParsePubKey(b[:], btcec.S256())
+		p, err := bronec.ParsePubKey(b[:], bronec.S256())
 		if err != nil {
 			return err
 		}
@@ -284,7 +284,7 @@ func DPubKey(r io.Reader, val interface{}, _ *[8]byte, l uint64) error {
 
 		return nil
 	}
-	return NewTypeForDecodingErr(val, "*btcec.PublicKey", l, 33)
+	return NewTypeForDecodingErr(val, "*bronec.PublicKey", l, 33)
 }
 
 // EVarBytes is an Encoder for variable byte slices. An error is returned if val

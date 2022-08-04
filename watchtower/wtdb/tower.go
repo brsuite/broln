@@ -6,8 +6,8 @@ import (
 	"io"
 	"net"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
 )
 
 // TowerID is a unique 64-bit identifier allocated to each unique watchtower.
@@ -38,7 +38,7 @@ type Tower struct {
 
 	// IdentityKey is the public key of the remote node, used to
 	// authenticate the brontide transport.
-	IdentityKey *btcec.PublicKey
+	IdentityKey *bronec.PublicKey
 
 	// Addresses is a list of possible addresses to reach the tower.
 	Addresses []net.Addr

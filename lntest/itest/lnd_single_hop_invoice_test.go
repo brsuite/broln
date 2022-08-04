@@ -6,8 +6,6 @@ import (
 	"encoding/hex"
 	"time"
 
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/routerrpc"
 	"github.com/brsuite/broln/lntest"
@@ -15,13 +13,15 @@ import (
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/record"
+	"github.com/brsuite/bronutil"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
 )
 
 func testSingleHopInvoice(net *lntest.NetworkHarness, t *harnessTest) {
 	ctxb := context.Background()
 
-	// Open a channel with 100k satoshis between Alice and Bob with Alice being
+	// Open a channel with 100k broneess between Alice and Bob with Alice being
 	// the sole funder of the channel.
 	chanAmt := bronutil.Amount(100000)
 	chanPoint := openChannelAndAssert(
@@ -32,7 +32,7 @@ func testSingleHopInvoice(net *lntest.NetworkHarness, t *harnessTest) {
 	)
 
 	// Now that the channel is open, create an invoice for Bob which
-	// expects a payment of 1000 satoshis from Alice paid via a particular
+	// expects a payment of 1000 broneess from Alice paid via a particular
 	// preimage.
 	const paymentAmt = 1000
 	preimage := bytes.Repeat([]byte("A"), 32)

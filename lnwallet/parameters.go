@@ -1,17 +1,17 @@
 package lnwallet
 
 import (
+	"github.com/brsuite/broln/input"
+	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/brond/mempool"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/brsuite/broln/input"
-	"github.com/brsuite/broln/lnwire"
 )
 
 var (
 	// RoutingFee100PercentUpTo is the cut-off amount we allow 100% fees to
 	// be charged up to.
-	RoutingFee100PercentUpTo = lnwire.NewMSatFromSatoshis(1_000)
+	RoutingFee100PercentUpTo = lnwire.NewMSatFromBroneess(1_000)
 )
 
 const (
@@ -19,16 +19,16 @@ const (
 	// DefaultRoutingFeePercentage is the default off-chain routing fee we
 	// allow to be charged for a payment over the RoutingFee100PercentUpTo
 	// size.
-	DefaultRoutingFeePercentage lnwire.MilliSatoshi = 5
+	DefaultRoutingFeePercentage lnwire.MilliBronees = 5
 )
 
 // DefaultRoutingFeeLimitForAmount returns the default off-chain routing fee
 // limit broln uses if the user does not specify a limit manually. The fee is
 // amount dependent because of the base routing fee that is set on many
-// channels. For example the default base fee is 1 satoshi. So sending a payment
-// of one satoshi will cost 1 satoshi in fees over most channels, which comes to
+// channels. For example the default base fee is 1 bronees. So sending a payment
+// of one bronees will cost 1 bronees in fees over most channels, which comes to
 // a fee of 100%. That's why for very small amounts we allow 100% fee.
-func DefaultRoutingFeeLimitForAmount(a lnwire.MilliSatoshi) lnwire.MilliSatoshi {
+func DefaultRoutingFeeLimitForAmount(a lnwire.MilliBronees) lnwire.MilliBronees {
 	// Allow 100% fees up to a certain amount to accommodate for base fees.
 	if a <= RoutingFee100PercentUpTo {
 		return a

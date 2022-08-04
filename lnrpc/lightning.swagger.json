@@ -1220,7 +1220,7 @@
     },
     "/v1/graph/routes/{pub_key}/{amt}": {
       "get": {
-        "summary": "brolncli: `queryroutes`\nQueryRoutes attempts to query the daemon's Channel Router for a possible\nroute to a target destination capable of carrying a specific amount of\nsatoshis. The returned route contains the full details required to craft and\nsend an HTLC, also including the necessary information that should be\npresent within the Sphinx packet encapsulated within the HTLC.",
+        "summary": "brolncli: `queryroutes`\nQueryRoutes attempts to query the daemon's Channel Router for a possible\nroute to a target destination capable of carrying a specific amount of\nbroneess. The returned route contains the full details required to craft and\nsend an HTLC, also including the necessary information that should be\npresent within the Sphinx packet encapsulated within the HTLC.",
         "description": "When using REST, the `dest_custom_records` map type can be set by appending\n`\u0026dest_custom_records[\u003crecord_number\u003e]=\u003crecord_data_base64_url_encoded\u003e`\nto the URL. Unfortunately this map type doesn't appear in the REST API\ndocumentation because of a bug in the grpc-gateway library.",
         "operationId": "Lightning_QueryRoutes",
         "responses": {
@@ -1247,7 +1247,7 @@
           },
           {
             "name": "amt",
-            "description": "The amount to send expressed in satoshis.\n\nThe fields amt and amt_msat are mutually exclusive.",
+            "description": "The amount to send expressed in broneess.\n\nThe fields amt and amt_msat are mutually exclusive.",
             "in": "path",
             "required": true,
             "type": "string",
@@ -1255,7 +1255,7 @@
           },
           {
             "name": "amt_msat",
-            "description": "The amount to send expressed in millisatoshis.\n\nThe fields amt and amt_msat are mutually exclusive.",
+            "description": "The amount to send expressed in millibroneess.\n\nThe fields amt and amt_msat are mutually exclusive.",
             "in": "query",
             "required": false,
             "type": "string",
@@ -1271,7 +1271,7 @@
           },
           {
             "name": "fee_limit.fixed",
-            "description": "The fee limit expressed as a fixed amount of satoshis.\n\nThe fields fixed and fixed_msat are mutually exclusive.",
+            "description": "The fee limit expressed as a fixed amount of broneess.\n\nThe fields fixed and fixed_msat are mutually exclusive.",
             "in": "query",
             "required": false,
             "type": "string",
@@ -1279,7 +1279,7 @@
           },
           {
             "name": "fee_limit.fixed_msat",
-            "description": "The fee limit expressed as a fixed amount of millisatoshis.\n\nThe fields fixed and fixed_msat are mutually exclusive.",
+            "description": "The fee limit expressed as a fixed amount of millibroneess.\n\nThe fields fixed and fixed_msat are mutually exclusive.",
             "in": "query",
             "required": false,
             "type": "string",
@@ -2658,17 +2658,17 @@
         "local_commit_fee_sat": {
           "type": "string",
           "format": "uint64",
-          "description": "The amount in satoshis calculated to be paid in fees for the local\ncommitment."
+          "description": "The amount in broneess calculated to be paid in fees for the local\ncommitment."
         },
         "remote_commit_fee_sat": {
           "type": "string",
           "format": "uint64",
-          "description": "The amount in satoshis calculated to be paid in fees for the remote\ncommitment."
+          "description": "The amount in broneess calculated to be paid in fees for the remote\ncommitment."
         },
         "remote_pending_commit_fee_sat": {
           "type": "string",
           "format": "uint64",
-          "description": "The amount in satoshis calculated to be paid in fees for the remote\npending commitment."
+          "description": "The amount in broneess calculated to be paid in fees for the remote\npending commitment."
         }
       }
     },
@@ -2686,7 +2686,7 @@
         "limbo_balance": {
           "type": "string",
           "format": "int64",
-          "title": "The balance in satoshis encumbered in this pending channel"
+          "title": "The balance in broneess encumbered in this pending channel"
         },
         "maturity_height": {
           "type": "integer",
@@ -2738,12 +2738,12 @@
         "local_chan_reserve_sat": {
           "type": "string",
           "format": "int64",
-          "description": "The minimum satoshis this node is required to reserve in its\nbalance."
+          "description": "The minimum broneess this node is required to reserve in its\nbalance."
         },
         "remote_chan_reserve_sat": {
           "type": "string",
           "format": "int64",
-          "description": "The minimum satoshis the other node is required to reserve in its\nbalance."
+          "description": "The minimum broneess the other node is required to reserve in its\nbalance."
         },
         "initiator": {
           "$ref": "#/definitions/lnrpcInitiator",
@@ -2789,7 +2789,7 @@
         "fee_per_kw": {
           "type": "string",
           "format": "int64",
-          "description": "The required number of satoshis per kilo-weight that the requester will\npay at all times, for both the funding transaction and commitment\ntransaction. This value can later be updated once the channel is open."
+          "description": "The required number of broneess per kilo-weight that the requester will\npay at all times, for both the funding transaction and commitment\ntransaction. This value can later be updated once the channel is open."
         }
       }
     },
@@ -2803,7 +2803,7 @@
         "limbo_balance": {
           "type": "string",
           "format": "int64",
-          "title": "The balance in satoshis encumbered in this channel"
+          "title": "The balance in broneess encumbered in this channel"
         },
         "commitments": {
           "$ref": "#/definitions/PendingChannelsResponseCommitments",
@@ -2866,7 +2866,7 @@
         "amt_paid_msat": {
           "type": "string",
           "format": "int64",
-          "description": "The total amount paid for the sub-invoice expressed in milli satoshis."
+          "description": "The total amount paid for the sub-invoice expressed in milli broneess."
         }
       }
     },
@@ -2931,12 +2931,12 @@
         "sat": {
           "type": "string",
           "format": "uint64",
-          "description": "Value denominated in satoshis."
+          "description": "Value denominated in broneess."
         },
         "msat": {
           "type": "string",
           "format": "uint64",
-          "description": "Value denominated in milli-satoshis."
+          "description": "Value denominated in milli-broneess."
         }
       }
     },
@@ -2981,12 +2981,12 @@
         "local_funding_amount": {
           "type": "string",
           "format": "int64",
-          "description": "The number of satoshis the wallet should commit to the channel."
+          "description": "The number of broneess the wallet should commit to the channel."
         },
         "push_sat": {
           "type": "string",
           "format": "int64",
-          "description": "The number of satoshis to push to the remote side as part of the initial\ncommitment state."
+          "description": "The number of broneess to push to the remote side as part of the initial\ncommitment state."
         },
         "private": {
           "type": "boolean",
@@ -2995,7 +2995,7 @@
         "min_htlc_msat": {
           "type": "string",
           "format": "int64",
-          "description": "The minimum value in millisatoshi we will require for incoming HTLCs on\nthe channel."
+          "description": "The minimum value in millibronees we will require for incoming HTLCs on\nthe channel."
         },
         "remote_csv_delay": {
           "type": "integer",
@@ -3170,22 +3170,22 @@
         "fee_per_kw": {
           "type": "string",
           "format": "int64",
-          "description": "The required number of satoshis per kilo-weight that the requester will pay\nat all times, for both the funding transaction and commitment transaction.\nThis value can later be updated once the channel is open."
+          "description": "The required number of broneess per kilo-weight that the requester will pay\nat all times, for both the funding transaction and commitment transaction.\nThis value can later be updated once the channel is open."
         },
         "unsettled_balance": {
           "type": "string",
           "format": "int64",
           "title": "The unsettled balance in this channel"
         },
-        "total_satoshis_sent": {
+        "total_broneess_sent": {
           "type": "string",
           "format": "int64",
-          "description": "The total number of satoshis we've sent within this channel."
+          "description": "The total number of broneess we've sent within this channel."
         },
-        "total_satoshis_received": {
+        "total_broneess_received": {
           "type": "string",
           "format": "int64",
-          "description": "The total number of satoshis we've received within this channel."
+          "description": "The total number of broneess we've received within this channel."
         },
         "num_updates": {
           "type": "string",
@@ -3219,12 +3219,12 @@
         "local_chan_reserve_sat": {
           "type": "string",
           "format": "int64",
-          "description": "Deprecated. The minimum satoshis this node is required to reserve in its\nbalance."
+          "description": "Deprecated. The minimum broneess this node is required to reserve in its\nbalance."
         },
         "remote_chan_reserve_sat": {
           "type": "string",
           "format": "int64",
-          "description": "Deprecated. The minimum satoshis the other node is required to reserve in\nits balance."
+          "description": "Deprecated. The minimum broneess the other node is required to reserve in\nits balance."
         },
         "static_remote_key": {
           "type": "boolean",
@@ -3289,12 +3289,12 @@
         "funding_amt": {
           "type": "string",
           "format": "uint64",
-          "description": "The funding amount in satoshis that initiator wishes to use in the\nchannel."
+          "description": "The funding amount in broneess that initiator wishes to use in the\nchannel."
         },
         "push_amt": {
           "type": "string",
           "format": "uint64",
-          "description": "The push amount of the proposed channel in millisatoshis."
+          "description": "The push amount of the proposed channel in millibroneess."
         },
         "dust_limit": {
           "type": "string",
@@ -3304,17 +3304,17 @@
         "max_value_in_flight": {
           "type": "string",
           "format": "uint64",
-          "description": "The maximum amount of coins in millisatoshis that can be pending in this\nchannel."
+          "description": "The maximum amount of coins in millibroneess that can be pending in this\nchannel."
         },
         "channel_reserve": {
           "type": "string",
           "format": "uint64",
-          "description": "The minimum amount of satoshis the initiator requires us to have at all\ntimes."
+          "description": "The minimum amount of broneess the initiator requires us to have at all\ntimes."
         },
         "min_htlc": {
           "type": "string",
           "format": "uint64",
-          "description": "The smallest HTLC in millisatoshis that the initiator will accept."
+          "description": "The smallest HTLC in millibroneess that the initiator will accept."
         },
         "fee_per_kw": {
           "type": "string",
@@ -3370,12 +3370,12 @@
         "reserve_sat": {
           "type": "string",
           "format": "uint64",
-          "description": "The reserve amount in satoshis that we require the remote peer to adhere to.\nWe require that the remote peer always have some reserve amount allocated to\nthem so that there is always a disincentive to broadcast old state (if they\nhold 0 sats on their side of the channel, there is nothing to lose)."
+          "description": "The reserve amount in broneess that we require the remote peer to adhere to.\nWe require that the remote peer always have some reserve amount allocated to\nthem so that there is always a disincentive to broadcast old state (if they\nhold 0 sats on their side of the channel, there is nothing to lose)."
         },
         "in_flight_max_msat": {
           "type": "string",
           "format": "uint64",
-          "description": "The maximum amount of funds in millisatoshis that we allow the remote peer\nto have in outstanding htlcs."
+          "description": "The maximum amount of funds in millibroneess that we allow the remote peer\nto have in outstanding htlcs."
         },
         "max_htlc_count": {
           "type": "integer",
@@ -3385,7 +3385,7 @@
         "min_htlc_in": {
           "type": "string",
           "format": "uint64",
-          "description": "The minimum value in millisatoshis for incoming htlcs on the channel."
+          "description": "The minimum value in millibroneess for incoming htlcs on the channel."
         },
         "min_accept_depth": {
           "type": "integer",
@@ -3426,12 +3426,12 @@
         "balance": {
           "type": "string",
           "format": "int64",
-          "title": "Deprecated. Sum of channels balances denominated in satoshis"
+          "title": "Deprecated. Sum of channels balances denominated in broneess"
         },
         "pending_open_balance": {
           "type": "string",
           "format": "int64",
-          "title": "Deprecated. Sum of channels pending balances denominated in satoshis"
+          "title": "Deprecated. Sum of channels pending balances denominated in broneess"
         },
         "local_balance": {
           "$ref": "#/definitions/lnrpcAmount",
@@ -3546,22 +3546,22 @@
         "chan_reserve_sat": {
           "type": "string",
           "format": "uint64",
-          "description": "The minimum satoshis this node is required to reserve in its balance."
+          "description": "The minimum broneess this node is required to reserve in its balance."
         },
         "dust_limit_sat": {
           "type": "string",
           "format": "uint64",
-          "description": "The dust limit (in satoshis) of the initiator's commitment tx."
+          "description": "The dust limit (in broneess) of the initiator's commitment tx."
         },
         "max_pending_amt_msat": {
           "type": "string",
           "format": "uint64",
-          "description": "The maximum amount of coins in millisatoshis that can be pending in this\nchannel."
+          "description": "The maximum amount of coins in millibroneess that can be pending in this\nchannel."
         },
         "min_htlc_msat": {
           "type": "string",
           "format": "uint64",
-          "description": "The smallest HTLC in millisatoshis that the initiator will accept."
+          "description": "The smallest HTLC in millibroneess that the initiator will accept."
         },
         "max_accepted_htlcs": {
           "type": "integer",
@@ -3671,17 +3671,17 @@
         "base_fee_msat": {
           "type": "string",
           "format": "int64",
-          "description": "The base fee charged regardless of the number of milli-satoshis sent."
+          "description": "The base fee charged regardless of the number of milli-broneess sent."
         },
         "fee_per_mil": {
           "type": "string",
           "format": "int64",
-          "description": "The amount charged per milli-satoshis transferred expressed in\nmillionths of a satoshi."
+          "description": "The amount charged per milli-broneess transferred expressed in\nmillionths of a bronees."
         },
         "fee_rate": {
           "type": "number",
           "format": "double",
-          "description": "The effective fee rate in milli-satoshis. Computed by dividing the\nfee_per_mil value by 1 million."
+          "description": "The effective fee rate in milli-broneess. Computed by dividing the\nfee_per_mil value by 1 million."
         }
       }
     },
@@ -3783,7 +3783,7 @@
         "fee_rate": {
           "type": "integer",
           "format": "int64",
-          "description": "The fee rate that will be charged per millionth of a satoshi."
+          "description": "The fee rate that will be charged per millionth of a bronees."
         },
         "htlc_maximum_msat": {
           "type": "string",
@@ -3976,17 +3976,17 @@
         "fee_sat": {
           "type": "string",
           "format": "int64",
-          "description": "The total fee in satoshis."
+          "description": "The total fee in broneess."
         },
         "feerate_sat_per_byte": {
           "type": "string",
           "format": "int64",
-          "description": "Deprecated, use sat_per_vbyte.\nThe fee rate in satoshi/vbyte."
+          "description": "Deprecated, use sat_per_vbyte.\nThe fee rate in bronees/vbyte."
         },
         "sat_per_vbyte": {
           "type": "string",
           "format": "uint64",
-          "description": "The fee rate in satoshi/vbyte."
+          "description": "The fee rate in bronees/vbyte."
         }
       }
     },
@@ -4101,12 +4101,12 @@
         "fixed": {
           "type": "string",
           "format": "int64",
-          "description": "The fee limit expressed as a fixed amount of satoshis.\n\nThe fields fixed and fixed_msat are mutually exclusive."
+          "description": "The fee limit expressed as a fixed amount of broneess.\n\nThe fields fixed and fixed_msat are mutually exclusive."
         },
         "fixed_msat": {
           "type": "string",
           "format": "int64",
-          "description": "The fee limit expressed as a fixed amount of millisatoshis.\n\nThe fields fixed and fixed_msat are mutually exclusive."
+          "description": "The fee limit expressed as a fixed amount of millibroneess.\n\nThe fields fixed and fixed_msat are mutually exclusive."
         },
         "percent": {
           "type": "string",
@@ -4128,17 +4128,17 @@
         "day_fee_sum": {
           "type": "string",
           "format": "uint64",
-          "description": "The total amount of fee revenue (in satoshis) the switch has collected\nover the past 24 hrs."
+          "description": "The total amount of fee revenue (in broneess) the switch has collected\nover the past 24 hrs."
         },
         "week_fee_sum": {
           "type": "string",
           "format": "uint64",
-          "description": "The total amount of fee revenue (in satoshis) the switch has collected\nover the past 1 week."
+          "description": "The total amount of fee revenue (in broneess) the switch has collected\nover the past 1 week."
         },
         "month_fee_sum": {
           "type": "string",
           "format": "uint64",
-          "description": "The total amount of fee revenue (in satoshis) the switch has collected\nover the past 1 month."
+          "description": "The total amount of fee revenue (in broneess) the switch has collected\nover the past 1 month."
         }
       }
     },
@@ -4178,32 +4178,32 @@
         "amt_in": {
           "type": "string",
           "format": "uint64",
-          "description": "The total amount (in satoshis) of the incoming HTLC that created half\nthe circuit."
+          "description": "The total amount (in broneess) of the incoming HTLC that created half\nthe circuit."
         },
         "amt_out": {
           "type": "string",
           "format": "uint64",
-          "description": "The total amount (in satoshis) of the outgoing HTLC that created the\nsecond half of the circuit."
+          "description": "The total amount (in broneess) of the outgoing HTLC that created the\nsecond half of the circuit."
         },
         "fee": {
           "type": "string",
           "format": "uint64",
-          "description": "The total fee (in satoshis) that this payment circuit carried."
+          "description": "The total fee (in broneess) that this payment circuit carried."
         },
         "fee_msat": {
           "type": "string",
           "format": "uint64",
-          "description": "The total fee (in milli-satoshis) that this payment circuit carried."
+          "description": "The total fee (in milli-broneess) that this payment circuit carried."
         },
         "amt_in_msat": {
           "type": "string",
           "format": "uint64",
-          "description": "The total amount (in milli-satoshis) of the incoming HTLC that created\nhalf the circuit."
+          "description": "The total amount (in milli-broneess) of the incoming HTLC that created\nhalf the circuit."
         },
         "amt_out_msat": {
           "type": "string",
           "format": "uint64",
-          "description": "The total amount (in milli-satoshis) of the outgoing HTLC that created\nthe second half of the circuit."
+          "description": "The total amount (in milli-broneess) of the outgoing HTLC that created\nthe second half of the circuit."
         },
         "timestamp_ns": {
           "type": "string",
@@ -4618,12 +4618,12 @@
         "fee_base_msat": {
           "type": "integer",
           "format": "int64",
-          "description": "The base fee of the channel denominated in millisatoshis."
+          "description": "The base fee of the channel denominated in millibroneess."
         },
         "fee_proportional_millionths": {
           "type": "integer",
           "format": "int64",
-          "description": "The fee rate of the channel for sending one satoshi across it denominated in\nmillionths of a satoshi."
+          "description": "The fee rate of the channel for sending one bronees across it denominated in\nmillionths of a bronees."
         },
         "cltv_expiry_delta": {
           "type": "integer",
@@ -4681,13 +4681,13 @@
           "type": "string",
           "format": "int64",
           "description": "The fields value and value_msat are mutually exclusive.",
-          "title": "The value of this invoice in satoshis"
+          "title": "The value of this invoice in broneess"
         },
         "value_msat": {
           "type": "string",
           "format": "int64",
           "description": "The fields value and value_msat are mutually exclusive.",
-          "title": "The value of this invoice in millisatoshis"
+          "title": "The value of this invoice in millibroneess"
         },
         "settled": {
           "type": "boolean",
@@ -4755,12 +4755,12 @@
         "amt_paid_sat": {
           "type": "string",
           "format": "int64",
-          "description": "The amount that was accepted for this invoice, in satoshis. This will ONLY\nbe set if this invoice has been settled. We provide this field as if the\ninvoice was created with a zero value, then we need to record what amount\nwas ultimately accepted. Additionally, it's possible that the sender paid\nMORE that was specified in the original invoice. So we'll record that here\nas well."
+          "description": "The amount that was accepted for this invoice, in broneess. This will ONLY\nbe set if this invoice has been settled. We provide this field as if the\ninvoice was created with a zero value, then we need to record what amount\nwas ultimately accepted. Additionally, it's possible that the sender paid\nMORE that was specified in the original invoice. So we'll record that here\nas well."
         },
         "amt_paid_msat": {
           "type": "string",
           "format": "int64",
-          "description": "The amount that was accepted for this invoice, in millisatoshis. This will\nONLY be set if this invoice has been settled. We provide this field as if\nthe invoice was created with a zero value, then we need to record what\namount was ultimately accepted. Additionally, it's possible that the sender\npaid MORE that was specified in the original invoice. So we'll record that\nhere as well."
+          "description": "The amount that was accepted for this invoice, in millibroneess. This will\nONLY be set if this invoice has been settled. We provide this field as if\nthe invoice was created with a zero value, then we need to record what\namount was ultimately accepted. Additionally, it's possible that the sender\npaid MORE that was specified in the original invoice. So we'll record that\nhere as well."
         },
         "state": {
           "$ref": "#/definitions/InvoiceInvoiceState",
@@ -5063,7 +5063,7 @@
         "total_amt_msat": {
           "type": "string",
           "format": "int64",
-          "description": "The total amount in milli-satoshis being sent as part of a larger multi-path\npayment. The caller is responsible for ensuring subpayments to the same node\nand payment_hash sum exactly to total_amt_msat. The same\ntotal_amt_msat must be used on all subpayments."
+          "description": "The total amount in milli-broneess being sent as part of a larger multi-path\npayment. The caller is responsible for ensuring subpayments to the same node\nand payment_hash sum exactly to total_amt_msat. The same\ntotal_amt_msat must be used on all subpayments."
         }
       }
     },
@@ -5211,7 +5211,7 @@
         "total_capacity": {
           "type": "string",
           "format": "int64",
-          "description": "The sum of all channels capacity for the node, denominated in satoshis."
+          "description": "The sum of all channels capacity for the node, denominated in broneess."
         },
         "channels": {
           "type": "array",
@@ -5316,12 +5316,12 @@
         "local_funding_amount": {
           "type": "string",
           "format": "int64",
-          "title": "The number of satoshis the wallet should commit to the channel"
+          "title": "The number of broneess the wallet should commit to the channel"
         },
         "push_sat": {
           "type": "string",
           "format": "int64",
-          "title": "The number of satoshis to push to the remote side as part of the initial\ncommitment state"
+          "title": "The number of broneess to push to the remote side as part of the initial\ncommitment state"
         },
         "target_conf": {
           "type": "integer",
@@ -5340,7 +5340,7 @@
         "min_htlc_msat": {
           "type": "string",
           "format": "int64",
-          "description": "The minimum value in millisatoshi we will require for incoming HTLCs on\nthe channel."
+          "description": "The minimum value in millibronees we will require for incoming HTLCs on\nthe channel."
         },
         "remote_csv_delay": {
           "type": "integer",
@@ -5367,7 +5367,7 @@
         "remote_max_value_in_flight_msat": {
           "type": "string",
           "format": "uint64",
-          "description": "The maximum amount of coins in millisatoshi that can be pending within\nthe channel. It only applies to the remote party."
+          "description": "The maximum amount of coins in millibronees that can be pending within\nthe channel. It only applies to the remote party."
         },
         "remote_max_htlcs": {
           "type": "integer",
@@ -5435,7 +5435,7 @@
         "payment_hash": {
           "type": "string"
         },
-        "num_satoshis": {
+        "num_broneess": {
           "type": "string",
           "format": "int64"
         },
@@ -5511,12 +5511,12 @@
         "value_sat": {
           "type": "string",
           "format": "int64",
-          "title": "The value of the payment in satoshis"
+          "title": "The value of the payment in broneess"
         },
         "value_msat": {
           "type": "string",
           "format": "int64",
-          "title": "The value of the payment in milli-satoshis"
+          "title": "The value of the payment in milli-broneess"
         },
         "payment_request": {
           "type": "string",
@@ -5529,12 +5529,12 @@
         "fee_sat": {
           "type": "string",
           "format": "int64",
-          "title": "The fee paid for this payment in satoshis"
+          "title": "The fee paid for this payment in broneess"
         },
         "fee_msat": {
           "type": "string",
           "format": "int64",
-          "title": "The fee paid for this payment in milli-satoshis"
+          "title": "The fee paid for this payment in milli-broneess"
         },
         "creation_time_ns": {
           "type": "string",
@@ -5595,12 +5595,12 @@
         "sat_sent": {
           "type": "string",
           "format": "int64",
-          "title": "Satoshis sent to this peer"
+          "title": "Broneess sent to this peer"
         },
         "sat_recv": {
           "type": "string",
           "format": "int64",
-          "title": "Satoshis received from this peer"
+          "title": "Broneess received from this peer"
         },
         "inbound": {
           "type": "boolean",
@@ -5664,7 +5664,7 @@
         "total_limbo_balance": {
           "type": "string",
           "format": "int64",
-          "title": "The balance in satoshis encumbered in pending channels"
+          "title": "The balance in broneess encumbered in pending channels"
         },
         "pending_open_channels": {
           "type": "array",
@@ -5756,17 +5756,17 @@
         "base_fee_msat": {
           "type": "string",
           "format": "int64",
-          "description": "The base fee charged regardless of the number of milli-satoshis sent."
+          "description": "The base fee charged regardless of the number of milli-broneess sent."
         },
         "fee_rate": {
           "type": "number",
           "format": "double",
-          "description": "The effective fee rate in milli-satoshis. The precision of this value\ngoes up to 6 decimal places, so 1e-6."
+          "description": "The effective fee rate in milli-broneess. The precision of this value\ngoes up to 6 decimal places, so 1e-6."
         },
         "fee_rate_ppm": {
           "type": "integer",
           "format": "int64",
-          "description": "The effective fee rate in micro-satoshis (parts per million)."
+          "description": "The effective fee rate in micro-broneess (parts per million)."
         },
         "time_lock_delta": {
           "type": "integer",
@@ -5776,12 +5776,12 @@
         "max_htlc_msat": {
           "type": "string",
           "format": "uint64",
-          "description": "If set, the maximum HTLC size in milli-satoshis. If unset, the maximum\nHTLC will be unchanged."
+          "description": "If set, the maximum HTLC size in milli-broneess. If unset, the maximum\nHTLC will be unchanged."
         },
         "min_htlc_msat": {
           "type": "string",
           "format": "uint64",
-          "description": "The minimum HTLC size in milli-satoshis. Only applied if\nmin_htlc_msat_specified is true."
+          "description": "The minimum HTLC size in milli-broneess. Only applied if\nmin_htlc_msat_specified is true."
         },
         "min_htlc_msat_specified": {
           "type": "boolean",
@@ -5900,12 +5900,12 @@
       "properties": {
         "funding_address": {
           "type": "string",
-          "description": "The P2WSH address of the channel funding multisig address that the below\nspecified amount in satoshis needs to be sent to."
+          "description": "The P2WSH address of the channel funding multisig address that the below\nspecified amount in broneess needs to be sent to."
         },
         "funding_amount": {
           "type": "string",
           "format": "int64",
-          "description": "The exact amount in satoshis that needs to be sent to the above address to\nfund the pending channel."
+          "description": "The exact amount in broneess that needs to be sent to the above address to\nfund the pending channel."
         },
         "psbt": {
           "type": "string",
@@ -5998,7 +5998,7 @@
         "total_amt": {
           "type": "string",
           "format": "int64",
-          "description": "The total amount of funds required to complete a payment over this route.\nThis value includes the cumulative fees at each hop. As a result, the HTLC\nextended to the first-hop in the route will need to have at least this many\nsatoshis, otherwise the route will fail at an intermediate node due to an\ninsufficient amount of fees."
+          "description": "The total amount of funds required to complete a payment over this route.\nThis value includes the cumulative fees at each hop. As a result, the HTLC\nextended to the first-hop in the route will need to have at least this many\nbroneess, otherwise the route will fail at an intermediate node due to an\ninsufficient amount of fees."
         },
         "hops": {
           "type": "array",
@@ -6010,12 +6010,12 @@
         "total_fees_msat": {
           "type": "string",
           "format": "int64",
-          "description": "The total fees in millisatoshis."
+          "description": "The total fees in millibroneess."
         },
         "total_amt_msat": {
           "type": "string",
           "format": "int64",
-          "description": "The total amount in millisatoshis."
+          "description": "The total amount in millibroneess."
         }
       },
       "description": "A path through the channel graph which runs over one or more channels in\nsuccession. This struct carries all the information required to craft the\nSphinx onion packet, and send the payment along the first hop in the path. A\nroute is only selected as valid if all the channels have sufficient capacity to\ncarry the initial payment amount after fees are accounted for."
@@ -6074,7 +6074,7 @@
         "amount": {
           "type": "string",
           "format": "int64",
-          "title": "The amount in satoshis to send"
+          "title": "The amount in broneess to send"
         },
         "target_conf": {
           "type": "integer",
@@ -6207,12 +6207,12 @@
         "amt": {
           "type": "string",
           "format": "int64",
-          "description": "The amount to send expressed in satoshis.\n\nThe fields amt and amt_msat are mutually exclusive."
+          "description": "The amount to send expressed in broneess.\n\nThe fields amt and amt_msat are mutually exclusive."
         },
         "amt_msat": {
           "type": "string",
           "format": "int64",
-          "description": "The amount to send expressed in millisatoshis.\n\nThe fields amt and amt_msat are mutually exclusive."
+          "description": "The amount to send expressed in millibroneess.\n\nThe fields amt and amt_msat are mutually exclusive."
         },
         "payment_hash": {
           "type": "string",
@@ -6234,7 +6234,7 @@
         },
         "fee_limit": {
           "$ref": "#/definitions/lnrpcFeeLimit",
-          "description": "The maximum number of satoshis that will be paid as a fee of the payment.\nThis value can be represented either as a percentage of the amount being\nsent, or as a fixed amount of the maximum fee the user is willing the pay to\nsend the payment. If not specified, broln will use a default value of 100%\nfees for small amounts (\u003c=1k sat) or 5% fees for larger amounts."
+          "description": "The maximum number of broneess that will be paid as a fee of the payment.\nThis value can be represented either as a percentage of the amount being\nsent, or as a fixed amount of the maximum fee the user is willing the pay to\nsend the payment. If not specified, broln will use a default value of 100%\nfees for small amounts (\u003c=1k sat) or 5% fees for larger amounts."
         },
         "outgoing_chan_id": {
           "type": "string",
@@ -6376,7 +6376,7 @@
         "amount": {
           "type": "string",
           "format": "int64",
-          "title": "The transaction amount, denominated in satoshis"
+          "title": "The transaction amount, denominated in broneess"
         },
         "num_confirmations": {
           "type": "integer",
@@ -6456,7 +6456,7 @@
         "amount_sat": {
           "type": "string",
           "format": "int64",
-          "title": "The value of the unspent coin in satoshis"
+          "title": "The value of the unspent coin in broneess"
         },
         "pk_script": {
           "type": "string",

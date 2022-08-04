@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/routerrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 // testSendToRouteMultiPath tests that we are able to successfully route a
@@ -290,7 +290,7 @@ func newMppTestContext(t *harnessTest,
 func (c *mppTestContext) openChannel(from, to *lntest.HarnessNode,
 	chanSize bronutil.Amount) {
 
-	c.net.SendCoins(c.t.t, bronutil.SatoshiPerBrocoin, from)
+	c.net.SendCoins(c.t.t, bronutil.BroneesPerBrocoin, from)
 
 	chanPoint := openChannelAndAssert(
 		c.t, c.net, from, to,

@@ -23,7 +23,7 @@ func TestAMPShardTracker(t *testing.T) {
 	_, err = rand.Read(payAddr[:])
 	require.NoError(t, err)
 
-	var totalAmt lnwire.MilliSatoshi = 1000
+	var totalAmt lnwire.MilliBronees = 1000
 
 	// Create an AMP shard tracker using the random data we just generated.
 	tracker := amp.NewShardTracker(root, setID, payAddr, totalAmt)

@@ -3,9 +3,9 @@ package chanacceptor
 import (
 	"errors"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/bronutil"
 )
 
 var (
@@ -21,7 +21,7 @@ var (
 // can each leverage their own decision-making with this information.
 type ChannelAcceptRequest struct {
 	// Node is the public key of the node requesting to open a channel.
-	Node *btcec.PublicKey
+	Node *bronec.PublicKey
 
 	// OpenChanMsg is the actual OpenChannel protocol message that the peer
 	// sent to us.
@@ -50,14 +50,14 @@ type ChannelAcceptResponse struct {
 
 	// InFlightTotal is the maximum amount that we allow the remote peer to
 	// hold in outstanding htlcs.
-	InFlightTotal lnwire.MilliSatoshi
+	InFlightTotal lnwire.MilliBronees
 
 	// HtlcLimit is the maximum number of htlcs that we allow the remote
 	// peer to offer us.
 	HtlcLimit uint16
 
 	// MinHtlcIn is the minimum incoming htlc value allowed on the channel.
-	MinHtlcIn lnwire.MilliSatoshi
+	MinHtlcIn lnwire.MilliBronees
 
 	// MinAcceptDepth is the minimum depth that the initiator of the
 	// channel should wait before considering the channel open.
@@ -72,7 +72,7 @@ type ChannelAcceptResponse struct {
 func NewChannelAcceptResponse(accept bool, acceptErr error,
 	upfrontShutdown lnwire.DeliveryAddress, csvDelay, htlcLimit,
 	minDepth uint16, reserve bronutil.Amount, inFlight,
-	minHtlcIn lnwire.MilliSatoshi) *ChannelAcceptResponse {
+	minHtlcIn lnwire.MilliBronees) *ChannelAcceptResponse {
 
 	resp := &ChannelAcceptResponse{
 		UpfrontShutdown: upfrontShutdown,

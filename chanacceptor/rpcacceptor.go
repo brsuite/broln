@@ -7,12 +7,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnwallet/chancloser"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/bronutil"
 )
 
 var (
@@ -346,8 +346,8 @@ func (r *RPCAcceptor) sendAcceptRequests(errChan chan error,
 				uint16(resp.MaxHtlcCount),
 				uint16(resp.MinAcceptDepth),
 				bronutil.Amount(resp.ReserveSat),
-				lnwire.MilliSatoshi(resp.InFlightMaxMsat),
-				lnwire.MilliSatoshi(resp.MinHtlcIn),
+				lnwire.MilliBronees(resp.InFlightMaxMsat),
+				lnwire.MilliBronees(resp.MinHtlcIn),
 			)
 
 			// Delete the channel from the acceptRequests map.

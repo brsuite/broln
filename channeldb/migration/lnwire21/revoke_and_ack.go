@@ -3,7 +3,7 @@ package lnwire
 import (
 	"io"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 )
 
 // RevokeAndAck is sent by either side once a CommitSig message has been
@@ -29,7 +29,7 @@ type RevokeAndAck struct {
 	// This, in conjunction with revocation base point will be used to
 	// create the proper revocation key used within the commitment
 	// transaction.
-	NextRevocationKey *btcec.PublicKey
+	NextRevocationKey *bronec.PublicKey
 }
 
 // NewRevokeAndAck creates a new RevokeAndAck message.

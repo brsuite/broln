@@ -9,13 +9,6 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/brsuite/bronutil/hdkeychain"
-	"github.com/brsuite/bronutil/psbt"
-	basewallet "github.com/brsuite/bronwallet/wallet"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lncfg"
@@ -26,6 +19,13 @@ import (
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/macaroons"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/brsuite/bronutil/hdkeychain"
+	"github.com/brsuite/bronutil/psbt"
+	basewallet "github.com/brsuite/bronwallet/wallet"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"gopkg.in/macaroon.v2"
@@ -379,7 +379,7 @@ func (r *RPCKeyRing) DeriveKey(
 //
 // NOTE: This method is part of the keychain.ECDHRing interface.
 func (r *RPCKeyRing) ECDH(keyDesc keychain.KeyDescriptor,
-	pubKey *btcec.PublicKey) ([32]byte, error) {
+	pubKey *bronec.PublicKey) ([32]byte, error) {
 
 	ctxt, cancel := context.WithTimeout(context.Background(), r.rpcTimeout)
 	defer cancel()
@@ -420,7 +420,7 @@ func (r *RPCKeyRing) ECDH(keyDesc keychain.KeyDescriptor,
 //
 // NOTE: This method is part of the keychain.MessageSignerRing interface.
 func (r *RPCKeyRing) SignMessage(keyLoc keychain.KeyLocator,
-	msg []byte, doubleHash bool) (*btcec.Signature, error) {
+	msg []byte, doubleHash bool) (*bronec.Signature, error) {
 
 	ctxt, cancel := context.WithTimeout(context.Background(), r.rpcTimeout)
 	defer cancel()
@@ -495,7 +495,7 @@ func (r *RPCKeyRing) SignMessageCompact(keyLoc keychain.KeyLocator,
 // partially populated KeyLocator.
 //
 // NOTE: This method is part of the keychain.SecretKeyRing interface.
-func (r *RPCKeyRing) DerivePrivKey(_ keychain.KeyDescriptor) (*btcec.PrivateKey,
+func (r *RPCKeyRing) DerivePrivKey(_ keychain.KeyDescriptor) (*bronec.PrivateKey,
 	error) {
 
 	// This operation is not supported with remote signing. There should be
@@ -687,7 +687,7 @@ func (r *RPCKeyRing) remoteSign(tx *wire.MsgTx, signDesc *input.SignDescriptor,
 
 	// The remote signer always adds the sighash type, so we need to account
 	// for that.
-	if len(sigWithSigHash.Signature) < btcec.MinSigLen+1 {
+	if len(sigWithSigHash.Signature) < bronec.MinSigLen+1 {
 		return nil, fmt.Errorf("remote signer returned invalid "+
 			"partial signature: signature too short with %d bytes",
 			len(sigWithSigHash.Signature))
@@ -696,7 +696,7 @@ func (r *RPCKeyRing) remoteSign(tx *wire.MsgTx, signDesc *input.SignDescriptor,
 	// Parse the signature, but chop off the last byte which is the sighash
 	// type.
 	sig := sigWithSigHash.Signature[0 : len(sigWithSigHash.Signature)-1]
-	return btcec.ParseDERSignature(sig, btcec.S256())
+	return bronec.ParseDERSignature(sig, bronec.S256())
 }
 
 // connectRPC tries to establish an RPC connection to the given host:port with

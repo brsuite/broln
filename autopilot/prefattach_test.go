@@ -9,9 +9,9 @@ import (
 
 	prand "math/rand"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/channeldb"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/bronutil"
 )
 
 type genGraphFunc func() (testGraph, func(), error)
@@ -19,10 +19,10 @@ type genGraphFunc func() (testGraph, func(), error)
 type testGraph interface {
 	ChannelGraph
 
-	addRandChannel(*btcec.PublicKey, *btcec.PublicKey,
+	addRandChannel(*bronec.PublicKey, *bronec.PublicKey,
 		bronutil.Amount) (*ChannelEdge, *ChannelEdge, error)
 
-	addRandNode() (*btcec.PublicKey, error)
+	addRandNode() (*bronec.PublicKey, error)
 }
 
 func newDiskChanGraph() (testGraph, func(), error) {
@@ -98,7 +98,7 @@ func TestPrefAttachmentSelectEmptyGraph(t *testing.T) {
 
 			// With the necessary state initialized, we'll now
 			// attempt to get the score for this one node.
-			const walletFunds = bronutil.SatoshiPerBrocoin
+			const walletFunds = bronutil.BroneesPerBrocoin
 			scores, err := prefAttach.NodeScores(graph, nil,
 				walletFunds, nodes)
 			if err != nil {
@@ -128,7 +128,7 @@ func TestPrefAttachmentSelectTwoVertexes(t *testing.T) {
 	prand.Seed(time.Now().Unix())
 
 	const (
-		maxChanSize = bronutil.Amount(bronutil.SatoshiPerBrocoin)
+		maxChanSize = bronutil.Amount(bronutil.BroneesPerBrocoin)
 	)
 
 	for _, graph := range chanGraphs {
@@ -145,7 +145,7 @@ func TestPrefAttachmentSelectTwoVertexes(t *testing.T) {
 
 			// For this set, we'll load the memory graph with two
 			// nodes, and a random channel connecting them.
-			const chanCapacity = bronutil.SatoshiPerBrocoin
+			const chanCapacity = bronutil.BroneesPerBrocoin
 			edge1, edge2, err := graph.addRandChannel(nil, nil, chanCapacity)
 			if err != nil {
 				t1.Fatalf("unable to generate channel: %v", err)
@@ -228,7 +228,7 @@ func TestPrefAttachmentSelectGreedyAllocation(t *testing.T) {
 	prand.Seed(time.Now().Unix())
 
 	const (
-		maxChanSize = bronutil.Amount(bronutil.SatoshiPerBrocoin)
+		maxChanSize = bronutil.Amount(bronutil.BroneesPerBrocoin)
 	)
 
 	for _, graph := range chanGraphs {
@@ -243,7 +243,7 @@ func TestPrefAttachmentSelectGreedyAllocation(t *testing.T) {
 
 			prefAttach := NewPrefAttachment()
 
-			const chanCapacity = bronutil.SatoshiPerBrocoin
+			const chanCapacity = bronutil.BroneesPerBrocoin
 
 			// Next, we'll add 3 nodes to the graph, creating an
 			// "open triangle topology".
@@ -253,8 +253,8 @@ func TestPrefAttachmentSelectGreedyAllocation(t *testing.T) {
 				t1.Fatalf("unable to create channel: %v", err)
 			}
 			peerPubBytes := edge1.Peer.PubKey()
-			peerPub, err := btcec.ParsePubKey(
-				peerPubBytes[:], btcec.S256(),
+			peerPub, err := bronec.ParsePubKey(
+				peerPubBytes[:], bronec.S256(),
 			)
 			if err != nil {
 				t.Fatalf("unable to parse pubkey: %v", err)
@@ -298,8 +298,8 @@ func TestPrefAttachmentSelectGreedyAllocation(t *testing.T) {
 			}
 
 			// We'll now begin our test, modeling the available
-			// wallet balance to be 5.5 BTC. We're shooting for a
-			// 50/50 allocation, and have 3 BTC in channels. As a
+			// wallet balance to be 5.5 BRON. We're shooting for a
+			// 50/50 allocation, and have 3 BRON in channels. As a
 			// result, the heuristic should try to greedily
 			// allocate funds to channels.
 			scores, err := prefAttach.NodeScores(graph, nil,
@@ -324,9 +324,9 @@ func TestPrefAttachmentSelectGreedyAllocation(t *testing.T) {
 			}
 
 			// Imagine a few channels are being opened, and there's
-			// only 0.5 BTC left. That should leave us with channel
+			// only 0.5 BRON left. That should leave us with channel
 			// candidates of that size.
-			const remBalance = bronutil.SatoshiPerBrocoin * 0.5
+			const remBalance = bronutil.BroneesPerBrocoin * 0.5
 			scores, err = prefAttach.NodeScores(graph, nil,
 				remBalance, nodes)
 			if err != nil {
@@ -362,7 +362,7 @@ func TestPrefAttachmentSelectSkipNodes(t *testing.T) {
 	prand.Seed(time.Now().Unix())
 
 	const (
-		maxChanSize = bronutil.Amount(bronutil.SatoshiPerBrocoin)
+		maxChanSize = bronutil.Amount(bronutil.BroneesPerBrocoin)
 	)
 
 	for _, graph := range chanGraphs {
@@ -379,7 +379,7 @@ func TestPrefAttachmentSelectSkipNodes(t *testing.T) {
 
 			// Next, we'll create a simple topology of two nodes,
 			// with a single channel connecting them.
-			const chanCapacity = bronutil.SatoshiPerBrocoin
+			const chanCapacity = bronutil.BroneesPerBrocoin
 			_, _, err = graph.addRandChannel(nil, nil,
 				chanCapacity)
 			if err != nil {

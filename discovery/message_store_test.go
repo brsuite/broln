@@ -8,11 +8,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func createTestMessageStore(t *testing.T) (*MessageStore, func()) {
@@ -42,8 +42,8 @@ func createTestMessageStore(t *testing.T) (*MessageStore, func()) {
 	return store, cleanUp
 }
 
-func randPubKey(t *testing.T) *btcec.PublicKey {
-	priv, err := btcec.NewPrivateKey(btcec.S256())
+func randPubKey(t *testing.T) *bronec.PublicKey {
+	priv, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to create private key: %v", err)
 	}

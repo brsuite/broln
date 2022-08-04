@@ -3,7 +3,7 @@ package autopilot
 import (
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
@@ -12,7 +12,7 @@ import (
 // channels creates the expected centrality score set and checks that the
 // calculated score set matches it.
 func testTopCentrality(t *testing.T, graph testGraph,
-	graphNodes map[int]*btcec.PublicKey, channelsWith []int) {
+	graphNodes map[int]*bronec.PublicKey, channelsWith []int) {
 
 	topCentrality := NewTopCentrality()
 
@@ -53,7 +53,7 @@ func testTopCentrality(t *testing.T, graph testGraph,
 			}
 		}
 
-		const chanSize = bronutil.SatoshiPerBrocoin
+		const chanSize = bronutil.BroneesPerBrocoin
 
 		// Attempt to get centrality scores and expect
 		// that the result equals with the expected set.

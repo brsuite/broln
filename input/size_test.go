@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/brsuite/brond/blockchain"
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/txscript"
@@ -28,7 +28,7 @@ const (
 	// without the trailing sighash flag.
 	maxDERSignatureSize = 72
 
-	testAmt = bronutil.MaxSatoshi
+	testAmt = bronutil.MaxBronees
 )
 
 var (
@@ -38,12 +38,12 @@ var (
 	testPreimage = make([]byte, 32)
 
 	// testPubkey is a pubkey used in script size calculation.
-	testPubkey = &btcec.PublicKey{
+	testPubkey = &bronec.PublicKey{
 		X: &big.Int{},
 		Y: &big.Int{},
 	}
 
-	testPrivkey, _ = btcec.PrivKeyFromBytes(btcec.S256(), make([]byte, 32))
+	testPrivkey, _ = bronec.PrivKeyFromBytes(bronec.S256(), make([]byte, 32))
 
 	testTx = wire.NewMsgTx(2)
 
@@ -330,7 +330,7 @@ func (s *maxDERSignature) Serialize() []byte {
 	return make([]byte, maxDERSignatureSize)
 }
 
-func (s *maxDERSignature) Verify(_ []byte, _ *btcec.PublicKey) bool {
+func (s *maxDERSignature) Verify(_ []byte, _ *bronec.PublicKey) bool {
 	return true
 }
 

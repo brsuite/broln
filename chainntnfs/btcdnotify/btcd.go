@@ -7,16 +7,16 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/brsuite/brond/btcjson"
+	"github.com/brsuite/broln/blockcache"
+	"github.com/brsuite/broln/chainntnfs"
+	"github.com/brsuite/broln/queue"
+	"github.com/brsuite/brond/bronjson"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/rpcclient"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/brsuite/broln/blockcache"
-	"github.com/brsuite/broln/chainntnfs"
-	"github.com/brsuite/broln/queue"
 )
 
 const (
@@ -42,7 +42,7 @@ type chainUpdate struct {
 // unbounded queue in order to avoid blocking the main rpc dispatch rule.
 type txUpdate struct {
 	tx      *bronutil.Tx
-	details *btcjson.BlockDetails
+	details *bronjson.BlockDetails
 }
 
 // TODO(roasbeef): generalize struct below:
@@ -292,7 +292,7 @@ func (b *BrondNotifier) onBlockDisconnected(hash *chainhash.Hash, height int32, 
 }
 
 // onRedeemingTx implements on OnRedeemingTx callback for rpcclient.
-func (b *BrondNotifier) onRedeemingTx(tx *bronutil.Tx, details *btcjson.BlockDetails) {
+func (b *BrondNotifier) onRedeemingTx(tx *bronutil.Tx, details *bronjson.BlockDetails) {
 	// Append this new transaction update to the end of the queue of new
 	// chain updates.
 	select {
@@ -831,8 +831,8 @@ func (b *BrondNotifier) RegisterSpendNtfn(outpoint *wire.OutPoint,
 	if err != nil {
 		// Avoid returning an error if the transaction was not found to
 		// proceed with fallback methods.
-		jsonErr, ok := err.(*btcjson.RPCError)
-		if !ok || jsonErr.Code != btcjson.ErrRPCNoTxInfo {
+		jsonErr, ok := err.(*bronjson.RPCError)
+		if !ok || jsonErr.Code != bronjson.ErrRPCNoTxInfo {
 			return nil, fmt.Errorf("unable to query for txid %v: %v",
 				outpoint.Hash, err)
 		}

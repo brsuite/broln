@@ -1,11 +1,11 @@
 package routing
 
 import (
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/route"
 	"github.com/brsuite/broln/zpay32"
+	"github.com/brsuite/brond/bronec"
 )
 
 // A compile time assertion to ensure MissionControl meets the
@@ -114,8 +114,8 @@ func RouteHintsToEdges(routeHints [][]zpay32.HopHint, target route.Vertex) (
 			if i != len(routeHint)-1 {
 				endNode.AddPubKey(routeHint[i+1].NodeID)
 			} else {
-				targetPubKey, err := btcec.ParsePubKey(
-					target[:], btcec.S256(),
+				targetPubKey, err := bronec.ParsePubKey(
+					target[:], bronec.S256(),
 				)
 				if err != nil {
 					return nil, err
@@ -132,10 +132,10 @@ func RouteHintsToEdges(routeHints [][]zpay32.HopHint, target route.Vertex) (
 				},
 				ToNodeFeatures: lnwire.EmptyFeatureVector(),
 				ChannelID:      hopHint.ChannelID,
-				FeeBaseMSat: lnwire.MilliSatoshi(
+				FeeBaseMSat: lnwire.MilliBronees(
 					hopHint.FeeBaseMSat,
 				),
-				FeeProportionalMillionths: lnwire.MilliSatoshi(
+				FeeProportionalMillionths: lnwire.MilliBronees(
 					hopHint.FeeProportionalMillionths,
 				),
 				TimeLockDelta: hopHint.CLTVExpiryDelta,

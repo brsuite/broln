@@ -9,13 +9,13 @@ import (
 	"sort"
 	"time"
 
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/record"
 	"github.com/brsuite/broln/routing/route"
 	"github.com/brsuite/broln/tlv"
+	"github.com/brsuite/brond/wire"
 )
 
 var (
@@ -220,7 +220,7 @@ type PaymentCreationInfo struct {
 	PaymentIdentifier lntypes.Hash
 
 	// Value is the amount we are paying.
-	Value lnwire.MilliSatoshi
+	Value lnwire.MilliBronees
 
 	// CreationTime is the time when this payment was initiated.
 	CreationTime time.Time
@@ -1022,7 +1022,7 @@ func deserializePaymentCreationInfo(r io.Reader) (*PaymentCreationInfo, error) {
 	if _, err := io.ReadFull(r, scratch[:]); err != nil {
 		return nil, err
 	}
-	c.Value = lnwire.MilliSatoshi(byteOrder.Uint64(scratch[:]))
+	c.Value = lnwire.MilliBronees(byteOrder.Uint64(scratch[:]))
 
 	creationTime, err := deserializeTime(r)
 	if err != nil {

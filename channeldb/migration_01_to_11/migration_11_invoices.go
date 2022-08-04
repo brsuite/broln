@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"io"
 
-	brocoinCfg "github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/brond/wire"
 	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
 	"github.com/brsuite/broln/channeldb/migration_01_to_11/zpay32"
 	"github.com/brsuite/broln/kvdb"
+	brocoinCfg "github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/brond/wire"
 	litecoinCfg "github.com/ltcsuite/ltcd/chaincfg"
 )
 
@@ -152,7 +152,7 @@ func deserializeInvoiceLegacy(r io.Reader) (Invoice, error) {
 	if _, err := io.ReadFull(r, scratch[:]); err != nil {
 		return invoice, err
 	}
-	invoice.Terms.Value = lnwire.MilliSatoshi(byteOrder.Uint64(scratch[:]))
+	invoice.Terms.Value = lnwire.MilliBronees(byteOrder.Uint64(scratch[:]))
 
 	if err := binary.Read(r, byteOrder, &invoice.Terms.State); err != nil {
 		return invoice, err

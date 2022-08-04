@@ -4,7 +4,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/bronwallet/waddrmgr"
 	"github.com/brsuite/bronwallet/wallet"
@@ -141,7 +141,7 @@ func (b *bronwalletKeyRing) createAccountIfNotExists(
 // NOTE: This is part of the keychain.KeyRing interface.
 func (b *bronwalletKeyRing) DeriveNextKey(keyFam KeyFamily) (KeyDescriptor, error) {
 	var (
-		pubKey *btcec.PublicKey
+		pubKey *bronec.PublicKey
 		keyLoc KeyLocator
 	)
 
@@ -255,9 +255,9 @@ func (b *bronwalletKeyRing) DeriveKey(keyLoc KeyLocator) (KeyDescriptor, error) 
 //
 // NOTE: This is part of the keychain.SecretKeyRing interface.
 func (b *bronwalletKeyRing) DerivePrivKey(keyDesc KeyDescriptor) (
-	*btcec.PrivateKey, error) {
+	*bronec.PrivateKey, error) {
 
-	var key *btcec.PrivateKey
+	var key *bronec.PrivateKey
 
 	scope, err := b.keyScope()
 	if err != nil {
@@ -384,15 +384,15 @@ func (b *bronwalletKeyRing) DerivePrivKey(keyDesc KeyDescriptor) (
 //
 // NOTE: This is part of the keychain.ECDHRing interface.
 func (b *bronwalletKeyRing) ECDH(keyDesc KeyDescriptor,
-	pub *btcec.PublicKey) ([32]byte, error) {
+	pub *bronec.PublicKey) ([32]byte, error) {
 
 	privKey, err := b.DerivePrivKey(keyDesc)
 	if err != nil {
 		return [32]byte{}, err
 	}
 
-	s := &btcec.PublicKey{}
-	x, y := btcec.S256().ScalarMult(pub.X, pub.Y, privKey.D.Bytes())
+	s := &bronec.PublicKey{}
+	x, y := bronec.S256().ScalarMult(pub.X, pub.Y, privKey.D.Bytes())
 	s.X = x
 	s.Y = y
 
@@ -406,7 +406,7 @@ func (b *bronwalletKeyRing) ECDH(keyDesc KeyDescriptor,
 //
 // NOTE: This is part of the keychain.MessageSignerRing interface.
 func (b *bronwalletKeyRing) SignMessage(keyLoc KeyLocator,
-	msg []byte, doubleHash bool) (*btcec.Signature, error) {
+	msg []byte, doubleHash bool) (*bronec.Signature, error) {
 
 	privKey, err := b.DerivePrivKey(KeyDescriptor{
 		KeyLocator: keyLoc,
@@ -445,5 +445,5 @@ func (b *bronwalletKeyRing) SignMessageCompact(keyLoc KeyLocator,
 	} else {
 		digest = chainhash.HashB(msg)
 	}
-	return btcec.SignCompact(btcec.S256(), privKey, digest, true)
+	return bronec.SignCompact(bronec.S256(), privKey, digest, true)
 }

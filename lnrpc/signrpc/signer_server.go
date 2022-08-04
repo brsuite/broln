@@ -11,16 +11,16 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/macaroons"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"gopkg.in/macaroon-bakery.v2/bakery"
 )
@@ -281,7 +281,7 @@ func (s *Server) SignOutputRaw(ctx context.Context, in *SignReq) (*SignResp,
 		// both if both were provided however, to ensure the underlying
 		// SignOutputRaw has as much information as possible.
 		var (
-			targetPubKey *btcec.PublicKey
+			targetPubKey *bronec.PublicKey
 			keyLoc       keychain.KeyLocator
 		)
 
@@ -322,10 +322,10 @@ func (s *Server) SignOutputRaw(ctx context.Context, in *SignReq) (*SignResp,
 
 		// If the users provided a double tweak, then we'll need to
 		// parse that out now to ensure their input is properly signed.
-		var tweakPrivKey *btcec.PrivateKey
+		var tweakPrivKey *bronec.PrivateKey
 		if len(signDesc.DoubleTweak) != 0 {
-			tweakPrivKey, _ = btcec.PrivKeyFromBytes(
-				btcec.S256(), signDesc.DoubleTweak,
+			tweakPrivKey, _ = bronec.PrivKeyFromBytes(
+				bronec.S256(), signDesc.DoubleTweak,
 			)
 		}
 
@@ -515,7 +515,7 @@ func (s *Server) VerifyMessage(ctx context.Context,
 	if in.Pubkey == nil {
 		return nil, fmt.Errorf("a pubkey to verify MUST be passed in")
 	}
-	pubkey, err := btcec.ParsePubKey(in.Pubkey, btcec.S256())
+	pubkey, err := bronec.ParsePubKey(in.Pubkey, bronec.S256())
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse pubkey: %v", err)
 	}
@@ -598,7 +598,7 @@ func (s *Server) DeriveSharedKey(_ context.Context, in *SharedKeyRequest) (
 
 	// Check the raw public key is valid. Notice that if the rawKeyBytes is
 	// empty, the parseRawKeyBytes won't return an error, a nil
-	// *btcec.PublicKey is returned instead.
+	// *bronec.PublicKey is returned instead.
 	pk, err := parseRawKeyBytes(rawKeyBytes)
 	if err != nil {
 		return nil, fmt.Errorf("error in raw pubkey: %v", err)
@@ -630,14 +630,14 @@ func (s *Server) DeriveSharedKey(_ context.Context, in *SharedKeyRequest) (
 // parseRawKeyBytes checks that the provided raw public key is valid and returns
 // the public key. A nil public key is returned if the length of the rawKeyBytes
 // is zero.
-func parseRawKeyBytes(rawKeyBytes []byte) (*btcec.PublicKey, error) {
+func parseRawKeyBytes(rawKeyBytes []byte) (*bronec.PublicKey, error) {
 	switch {
 
 	case len(rawKeyBytes) == 33:
 		// If a proper raw key was provided, then we'll attempt
 		// to decode and parse it.
-		return btcec.ParsePubKey(
-			rawKeyBytes, btcec.S256(),
+		return bronec.ParsePubKey(
+			rawKeyBytes, bronec.S256(),
 		)
 
 	case len(rawKeyBytes) == 0:

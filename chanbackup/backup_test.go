@@ -5,10 +5,10 @@ import (
 	"net"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/kvdb"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/wire"
 )
 
 type mockChannelSource struct {
@@ -54,14 +54,14 @@ func (m *mockChannelSource) FetchChannel(_ kvdb.RTx, chanPoint wire.OutPoint) (
 	return channel, nil
 }
 
-func (m *mockChannelSource) addAddrsForNode(nodePub *btcec.PublicKey, addrs []net.Addr) {
+func (m *mockChannelSource) addAddrsForNode(nodePub *bronec.PublicKey, addrs []net.Addr) {
 	var nodeKey [33]byte
 	copy(nodeKey[:], nodePub.SerializeCompressed())
 
 	m.addrs[nodeKey] = addrs
 }
 
-func (m *mockChannelSource) AddrsForNode(nodePub *btcec.PublicKey) ([]net.Addr, error) {
+func (m *mockChannelSource) AddrsForNode(nodePub *bronec.PublicKey) ([]net.Addr, error) {
 	if m.failQuery {
 		return nil, fmt.Errorf("fail")
 	}

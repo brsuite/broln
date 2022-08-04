@@ -101,7 +101,7 @@ type ChannelUpdate struct {
 	TimeLockDelta uint16
 
 	// HtlcMinimumMsat is the minimum HTLC value which will be accepted.
-	HtlcMinimumMsat MilliSatoshi
+	HtlcMinimumMsat MilliBronees
 
 	// BaseFee is the base fee that must be used for incoming HTLC's to
 	// this particular channel. This value will be tacked onto the required
@@ -109,11 +109,11 @@ type ChannelUpdate struct {
 	BaseFee uint32
 
 	// FeeRate is the fee rate that will be charged per millionth of a
-	// satoshi.
+	// bronees.
 	FeeRate uint32
 
 	// HtlcMaximumMsat is the maximum HTLC value which will be accepted.
-	HtlcMaximumMsat MilliSatoshi
+	HtlcMaximumMsat MilliBronees
 
 	// ExtraOpaqueData is the set of data that was appended to this
 	// message, some of which we may not actually know how to iterate or

@@ -1,9 +1,9 @@
 package wtclientrpc
 
 import (
-	"github.com/btcsuite/btclog"
 	"github.com/brsuite/broln/lncfg"
 	"github.com/brsuite/broln/watchtower/wtclient"
+	"github.com/brsuite/bronlog"
 )
 
 // Config is the primary configuration struct for the watchtower RPC server. It
@@ -29,5 +29,5 @@ type Config struct {
 	Resolver lncfg.TCPResolver
 
 	// Log is the logger instance we should log output to.
-	Log btclog.Logger
+	Log bronlog.Logger
 }

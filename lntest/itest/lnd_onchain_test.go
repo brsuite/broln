@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/walletrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lntest/wait"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/sweep"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -39,7 +39,7 @@ func runCPFP(net *lntest.NetworkHarness, t *harnessTest,
 	// We'll start the test by sending Alice some coins, which she'll use to
 	// send to Bob.
 	ctxb := context.Background()
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, alice)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, alice)
 
 	// Create an address for Bob to send the coins to.
 	addrReq := &lnrpc.NewAddressRequest{
@@ -55,7 +55,7 @@ func runCPFP(net *lntest.NetworkHarness, t *harnessTest,
 	// be broadcast and seen in the mempool.
 	sendReq := &lnrpc.SendCoinsRequest{
 		Addr:   resp.Address,
-		Amount: bronutil.SatoshiPerBrocoin,
+		Amount: bronutil.BroneesPerBrocoin,
 	}
 	ctxt, _ = context.WithTimeout(ctxb, defaultTimeout)
 	if _, err = alice.SendCoins(ctxt, sendReq); err != nil {

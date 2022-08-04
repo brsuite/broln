@@ -3,11 +3,11 @@ package wtmock
 import (
 	"sync"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
 )
 
 // MockSigner is an input.Signer that allows one to add arbitrary private keys
@@ -16,13 +16,13 @@ type MockSigner struct {
 	mu sync.Mutex
 
 	index uint32
-	keys  map[keychain.KeyLocator]*btcec.PrivateKey
+	keys  map[keychain.KeyLocator]*bronec.PrivateKey
 }
 
 // NewMockSigner returns a fresh MockSigner.
 func NewMockSigner() *MockSigner {
 	return &MockSigner{
-		keys: make(map[keychain.KeyLocator]*btcec.PrivateKey),
+		keys: make(map[keychain.KeyLocator]*bronec.PrivateKey),
 	}
 }
 
@@ -50,7 +50,7 @@ func (s *MockSigner) SignOutputRaw(tx *wire.MsgTx,
 		return nil, err
 	}
 
-	return btcec.ParseDERSignature(sig[:len(sig)-1], btcec.S256())
+	return bronec.ParseDERSignature(sig[:len(sig)-1], bronec.S256())
 }
 
 // ComputeInputScript is not implemented.
@@ -62,7 +62,7 @@ func (s *MockSigner) ComputeInputScript(tx *wire.MsgTx,
 // AddPrivKey records the passed privKey in the MockSigner's registry of keys it
 // can sign with in the future. A unique key locator is returned, allowing the
 // caller to sign with this key when presented via an input.SignDescriptor.
-func (s *MockSigner) AddPrivKey(privKey *btcec.PrivateKey) keychain.KeyLocator {
+func (s *MockSigner) AddPrivKey(privKey *bronec.PrivateKey) keychain.KeyLocator {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

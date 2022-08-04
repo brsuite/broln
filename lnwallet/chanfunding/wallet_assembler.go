@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/input"
+	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/txsort"
-	"github.com/brsuite/broln/input"
-	"github.com/brsuite/broln/keychain"
 )
 
 // FullIntent is an intent that is fully backed by the internal wallet. This
@@ -53,7 +53,7 @@ type FullIntent struct {
 // necessarily be under full control of the wallet. Only after this method has
 // been executed will CompileFundingTx succeed.
 func (f *FullIntent) BindKeys(localKey *keychain.KeyDescriptor,
-	remoteKey *btcec.PublicKey) {
+	remoteKey *bronec.PublicKey) {
 
 	f.localKey = localKey
 	f.remoteKey = remoteKey

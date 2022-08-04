@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"io"
 
-	sphinx "github.com/brsuite/lightning-onion"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/record"
 	"github.com/brsuite/broln/tlv"
+	sphinx "github.com/brsuite/lightning-onion"
 )
 
 // PayloadViolation is an enum encapsulating the possible invalid payload
@@ -104,7 +104,7 @@ func NewLegacyPayload(f *sphinx.HopData) *Payload {
 		FwdInfo: ForwardingInfo{
 			Network:         BrocoinNetwork,
 			NextHop:         lnwire.NewShortChanIDFromInt(nextHop),
-			AmountToForward: lnwire.MilliSatoshi(f.ForwardAmount),
+			AmountToForward: lnwire.MilliBronees(f.ForwardAmount),
 			OutgoingCTLV:    f.OutgoingCltv,
 		},
 		customRecords: make(record.CustomSet),
@@ -175,7 +175,7 @@ func NewPayloadFromReader(r io.Reader) (*Payload, error) {
 		FwdInfo: ForwardingInfo{
 			Network:         BrocoinNetwork,
 			NextHop:         nextHop,
-			AmountToForward: lnwire.MilliSatoshi(amt),
+			AmountToForward: lnwire.MilliBronees(amt),
 			OutgoingCTLV:    cltv,
 		},
 		MPP:           mpp,

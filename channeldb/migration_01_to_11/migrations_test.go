@@ -10,12 +10,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/go-errors/errors"
 	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lntypes"
+	"github.com/brsuite/bronutil"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/go-errors/errors"
 )
 
 // TestPaymentStatusesMigration checks that already completed payments will have
@@ -704,7 +704,7 @@ func makeRandPaymentCreationInfo() (*PaymentCreationInfo, error) {
 
 	return &PaymentCreationInfo{
 		PaymentHash:    payHash,
-		Value:          lnwire.MilliSatoshi(rand.Int63()),
+		Value:          lnwire.MilliBronees(rand.Int63()),
 		CreationDate:   time.Now(),
 		PaymentRequest: []byte("test"),
 	}, nil

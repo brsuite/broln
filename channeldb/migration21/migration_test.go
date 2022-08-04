@@ -7,16 +7,16 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/davecgh/go-spew/spew"
 	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
 	"github.com/brsuite/broln/channeldb/migration21/common"
 	"github.com/brsuite/broln/channeldb/migration21/current"
 	"github.com/brsuite/broln/channeldb/migration21/legacy"
 	"github.com/brsuite/broln/channeldb/migtest"
 	"github.com/brsuite/broln/kvdb"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/davecgh/go-spew/spew"
 )
 
 var (
@@ -27,11 +27,11 @@ var (
 		0x1e, 0xb, 0x4c, 0xf9, 0x9e, 0xc5, 0x8c, 0xe9,
 	}
 
-	_, pubKey = btcec.PrivKeyFromBytes(btcec.S256(), key[:])
+	_, pubKey = bronec.PrivKeyFromBytes(bronec.S256(), key[:])
 
 	wireSig, _ = lnwire.NewSigFromSignature(testSig)
 
-	testSig = &btcec.Signature{
+	testSig = &bronec.Signature{
 		R: new(big.Int),
 		S: new(big.Int),
 	}
@@ -89,7 +89,7 @@ var (
 				LogIndex: 1,
 				UpdateMsg: &lnwire.UpdateAddHTLC{
 					ID:     1,
-					Amount: lnwire.NewMSatFromSatoshis(100),
+					Amount: lnwire.NewMSatFromBroneess(100),
 					Expiry: 25,
 				},
 			},
@@ -97,7 +97,7 @@ var (
 				LogIndex: 2,
 				UpdateMsg: &lnwire.UpdateAddHTLC{
 					ID:     2,
-					Amount: lnwire.NewMSatFromSatoshis(200),
+					Amount: lnwire.NewMSatFromBroneess(200),
 					Expiry: 50,
 				},
 			},

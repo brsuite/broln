@@ -10,14 +10,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/htlcswitch/hodl"
 	"github.com/brsuite/broln/htlcswitch/hop"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/ticker"
+	"github.com/brsuite/bronutil"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
 )
 
@@ -2218,8 +2218,8 @@ func TestLocalPaymentNoForwardingEvents(t *testing.T) {
 	// interacting with and asserting the state of the first end point for
 	// this test.
 	channels, cleanUp, _, err := createClusterChannels(
-		bronutil.SatoshiPerBrocoin*3,
-		bronutil.SatoshiPerBrocoin*5)
+		bronutil.BroneesPerBrocoin*3,
+		bronutil.BroneesPerBrocoin*5)
 	if err != nil {
 		t.Fatalf("unable to create channel: %v", err)
 	}
@@ -2232,7 +2232,7 @@ func TestLocalPaymentNoForwardingEvents(t *testing.T) {
 	}
 
 	// We'll now craft and send a payment from Alice to Bob.
-	amount := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
+	amount := lnwire.NewMSatFromBroneess(bronutil.BroneesPerBrocoin)
 	htlcAmt, totalTimelock, hops := generateHops(
 		amount, testStartingHeight, n.firstBobChannelLink,
 	)
@@ -2280,8 +2280,8 @@ func TestMultiHopPaymentForwardingEvents(t *testing.T) {
 
 	// First, we'll create our traditional three hop network.
 	channels, cleanUp, _, err := createClusterChannels(
-		bronutil.SatoshiPerBrocoin*3,
-		bronutil.SatoshiPerBrocoin*5)
+		bronutil.BroneesPerBrocoin*3,
+		bronutil.BroneesPerBrocoin*5)
 	if err != nil {
 		t.Fatalf("unable to create channel: %v", err)
 	}
@@ -2293,10 +2293,10 @@ func TestMultiHopPaymentForwardingEvents(t *testing.T) {
 		t.Fatalf("unable to start three hop network: %v", err)
 	}
 
-	// We'll make now 10 payments, of 100k satoshis each from Alice to
+	// We'll make now 10 payments, of 100k broneess each from Alice to
 	// Carol via Bob.
 	const numPayments = 10
-	finalAmt := lnwire.NewMSatFromSatoshis(100000)
+	finalAmt := lnwire.NewMSatFromBroneess(100000)
 	htlcAmt, totalTimelock, hops := generateHops(
 		finalAmt, testStartingHeight, n.firstBobChannelLink,
 		n.carolChannelLink,
@@ -2437,7 +2437,7 @@ func TestUpdateFailMalformedHTLCErrorConversion(t *testing.T) {
 
 	// First, we'll create our traditional three hop network.
 	channels, cleanUp, _, err := createClusterChannels(
-		bronutil.SatoshiPerBrocoin*3, bronutil.SatoshiPerBrocoin*5,
+		bronutil.BroneesPerBrocoin*3, bronutil.BroneesPerBrocoin*5,
 	)
 	if err != nil {
 		t.Fatalf("unable to create channel: %v", err)
@@ -2455,7 +2455,7 @@ func TestUpdateFailMalformedHTLCErrorConversion(t *testing.T) {
 	assertPaymentFailure := func(t *testing.T) {
 		// With the decoder modified, we'll now attempt to send a
 		// payment from Alice to carol.
-		finalAmt := lnwire.NewMSatFromSatoshis(100000)
+		finalAmt := lnwire.NewMSatFromBroneess(100000)
 		htlcAmt, totalTimelock, hops := generateHops(
 			finalAmt, testStartingHeight, n.firstBobChannelLink,
 			n.carolChannelLink,
@@ -2854,8 +2854,8 @@ func testHtcNotifier(t *testing.T, testOpts []serverOption, iterations int,
 	// First, we'll create our traditional three hop
 	// network.
 	channels, cleanUp, _, err := createClusterChannels(
-		bronutil.SatoshiPerBrocoin*3,
-		bronutil.SatoshiPerBrocoin*5)
+		bronutil.BroneesPerBrocoin*3,
+		bronutil.BroneesPerBrocoin*5)
 	if err != nil {
 		t.Fatalf("unable to create channel: %v", err)
 	}
@@ -2990,7 +2990,7 @@ func checkHtlcEvents(t *testing.T, events <-chan interface{},
 func (n *threeHopNetwork) sendThreeHopPayment(t *testing.T) (*lnwire.UpdateAddHTLC,
 	[]*hop.Payload, *lntypes.Preimage) {
 
-	amount := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
+	amount := lnwire.NewMSatFromBroneess(bronutil.BroneesPerBrocoin)
 
 	htlcAmt, totalTimelock, hops := generateHops(amount, testStartingHeight,
 		n.firstBobChannelLink, n.carolChannelLink)
@@ -3332,7 +3332,7 @@ func TestSwitchDustForwarding(t *testing.T) {
 	// - Bob has a dust limit of 200sats with Carol
 	// - Carol has a dust limit of 800sats with Bob
 	channels, cleanUp, _, err := createClusterChannels(
-		bronutil.SatoshiPerBrocoin, bronutil.SatoshiPerBrocoin,
+		bronutil.BroneesPerBrocoin, bronutil.BroneesPerBrocoin,
 	)
 	require.NoError(t, err)
 	defer cleanUp()
@@ -3357,7 +3357,7 @@ func TestSwitchDustForwarding(t *testing.T) {
 	// Alice will send 357 HTLC's of 700sats. Bob will also send 357 HTLC's
 	// of 700sats. If either side attempts to send a dust HTLC, it will
 	// fail so amounts below 800sats will breach the dust threshold.
-	amt := lnwire.NewMSatFromSatoshis(700)
+	amt := lnwire.NewMSatFromBroneess(700)
 	aliceBobFirstHop := n.aliceChannelLink.ShortChanID()
 
 	sendDustHtlcs(t, n, true, amt, aliceBobFirstHop)
@@ -3388,7 +3388,7 @@ func TestSwitchDustForwarding(t *testing.T) {
 	require.ErrorIs(t, err, errDustThresholdExceeded)
 
 	// Generate the parameters needed for bob to send a non-dust HTLC.
-	nondustAmt := lnwire.NewMSatFromSatoshis(10_000)
+	nondustAmt := lnwire.NewMSatFromBroneess(10_000)
 	_, _, hops = generateHops(
 		nondustAmt, testStartingHeight, n.aliceChannelLink,
 	)
@@ -3485,7 +3485,7 @@ func TestSwitchDustForwarding(t *testing.T) {
 // Switch's dust-threshold logic. It takes a boolean denoting whether or not
 // Alice is the sender.
 func sendDustHtlcs(t *testing.T, n *threeHopNetwork, alice bool,
-	amt lnwire.MilliSatoshi, sid lnwire.ShortChannelID) {
+	amt lnwire.MilliBronees, sid lnwire.ShortChannelID) {
 
 	t.Helper()
 
@@ -3601,12 +3601,12 @@ func TestSwitchMailboxDust(t *testing.T) {
 	require.NoError(t, err)
 
 	// mockChannelLink sets the local and remote dust limits of the mailbox
-	// to 400 satoshis and the feerate to 0. We'll fill the mailbox up with
+	// to 400 broneess and the feerate to 0. We'll fill the mailbox up with
 	// dust packets and assert that calls to SendHTLC will fail.
 	preimage, err := genPreimage()
 	require.NoError(t, err)
 	rhash := sha256.Sum256(preimage[:])
-	amt := lnwire.NewMSatFromSatoshis(350)
+	amt := lnwire.NewMSatFromBroneess(350)
 	addMsg := &lnwire.UpdateAddHTLC{
 		PaymentHash: rhash,
 		Amount:      amt,

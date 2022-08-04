@@ -3,18 +3,18 @@ package wtclient
 import (
 	"fmt"
 
-	"github.com/brsuite/brond/blockchain"
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/brsuite/bronutil/txsort"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/watchtower/blob"
 	"github.com/brsuite/broln/watchtower/wtdb"
+	"github.com/brsuite/brond/blockchain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/brsuite/bronutil/txsort"
 )
 
 // backupTask is an internal struct for computing the justice transaction for a
@@ -360,7 +360,7 @@ func (t *backupTask) craftSessionPayload(
 
 // toBlobPubKey serializes the given pubkey into a blob.PubKey that can be set
 // as a field on a blob.JusticeKit.
-func toBlobPubKey(pubKey *btcec.PublicKey) blob.PubKey {
+func toBlobPubKey(pubKey *bronec.PublicKey) blob.PubKey {
 	var blobPubKey blob.PubKey
 	copy(blobPubKey[:], pubKey.SerializeCompressed())
 	return blobPubKey

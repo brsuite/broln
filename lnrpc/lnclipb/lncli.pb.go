@@ -64,7 +64,7 @@ func (*VersionResponse) Descriptor() ([]byte, []int) {
 	return file_lnclipb_lncli_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *VersionResponse) GetLncli() *verrpc.Version {
+func (x *VersionResponse) GetBrolncli() *verrpc.Version {
 	if x != nil {
 		return x.Brolncli
 	}

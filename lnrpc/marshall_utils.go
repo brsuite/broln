@@ -5,11 +5,11 @@ import (
 	"errors"
 	fmt "fmt"
 
+	"github.com/brsuite/broln/lnwallet"
+	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/bronutil"
-	"github.com/brsuite/broln/lnwallet"
-	"github.com/brsuite/broln/lnwire"
 )
 
 var (
@@ -20,24 +20,24 @@ var (
 	)
 )
 
-// CalculateFeeLimit returns the fee limit in millisatoshis. If a percentage
+// CalculateFeeLimit returns the fee limit in millibroneess. If a percentage
 // based fee limit has been requested, we'll factor in the ratio provided with
 // the amount of the payment.
 func CalculateFeeLimit(feeLimit *FeeLimit,
-	amount lnwire.MilliSatoshi) lnwire.MilliSatoshi {
+	amount lnwire.MilliBronees) lnwire.MilliBronees {
 
 	switch feeLimit.GetLimit().(type) {
 
 	case *FeeLimit_Fixed:
-		return lnwire.NewMSatFromSatoshis(
+		return lnwire.NewMSatFromBroneess(
 			bronutil.Amount(feeLimit.GetFixed()),
 		)
 
 	case *FeeLimit_FixedMsat:
-		return lnwire.MilliSatoshi(feeLimit.GetFixedMsat())
+		return lnwire.MilliBronees(feeLimit.GetFixedMsat())
 
 	case *FeeLimit_Percent:
-		return amount * lnwire.MilliSatoshi(feeLimit.GetPercent()) / 100
+		return amount * lnwire.MilliBronees(feeLimit.GetPercent()) / 100
 
 	default:
 		// Fall back to a sane default value that is based on the amount
@@ -47,16 +47,16 @@ func CalculateFeeLimit(feeLimit *FeeLimit,
 }
 
 // UnmarshallAmt returns a strong msat type for a sat/msat pair of rpc fields.
-func UnmarshallAmt(amtSat, amtMsat int64) (lnwire.MilliSatoshi, error) {
+func UnmarshallAmt(amtSat, amtMsat int64) (lnwire.MilliBronees, error) {
 	if amtSat != 0 && amtMsat != 0 {
 		return 0, ErrSatMsatMutualExclusive
 	}
 
 	if amtSat != 0 {
-		return lnwire.NewMSatFromSatoshis(bronutil.Amount(amtSat)), nil
+		return lnwire.NewMSatFromBroneess(bronutil.Amount(amtSat)), nil
 	}
 
-	return lnwire.MilliSatoshi(amtMsat), nil
+	return lnwire.MilliBronees(amtMsat), nil
 }
 
 // ParseConfs validates the minimum and maximum confirmation arguments of a

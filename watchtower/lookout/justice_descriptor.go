@@ -3,15 +3,15 @@ package lookout
 import (
 	"errors"
 
+	"github.com/brsuite/broln/input"
+	"github.com/brsuite/broln/watchtower/blob"
+	"github.com/brsuite/broln/watchtower/wtdb"
 	"github.com/brsuite/brond/blockchain"
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/txsort"
-	"github.com/brsuite/broln/input"
-	"github.com/brsuite/broln/watchtower/blob"
-	"github.com/brsuite/broln/watchtower/wtdb"
 )
 
 var (
@@ -121,7 +121,7 @@ func (p *JusticeDescriptor) commitToRemoteInput() (*breachedInput, error) {
 	} else {
 		// Since the to-remote witness script should just be a regular p2wkh
 		// output, we'll parse it to retrieve the public key.
-		toRemotePubKey, err := btcec.ParsePubKey(toRemoteScript, btcec.S256())
+		toRemotePubKey, err := bronec.ParsePubKey(toRemoteScript, bronec.S256())
 		if err != nil {
 			return nil, err
 		}

@@ -8,14 +8,14 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/shachain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/davecgh/go-spew/spew"
 )
 
 var (
@@ -101,7 +101,7 @@ func genRandomOpenChannelShell() (*channeldb.OpenChannel, error) {
 		return nil, err
 	}
 
-	_, pub := btcec.PrivKeyFromBytes(btcec.S256(), testPriv[:])
+	_, pub := bronec.PrivKeyFromBytes(bronec.S256(), testPriv[:])
 
 	var chanPoint wire.OutPoint
 	if _, err := rand.Read(chanPoint.Hash[:]); err != nil {

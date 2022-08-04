@@ -7,8 +7,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/lncfg"
+	"github.com/brsuite/bronutil"
 	"github.com/urfave/cli"
 	"gopkg.in/macaroon.v2"
 )
@@ -17,12 +17,12 @@ var (
 	// defaultLncliDir is the default directory to store the profile file
 	// in. This defaults to:
 	//   C:\Users\<username>\AppData\Local\Brolncli\ on Windows
-	//   ~/.brolncli/ on Linux
+	//   ~/.Brolncli/ on Linux
 	//   ~/Library/Application Support/Brolncli/ on MacOS
-	defaultLncliDir = bronutil.AppDataDir("brolncli", false)
+	defaultBrolncliDir = bronutil.AppDataDir("brolncli", false)
 
 	// defaultProfileFile is the full, absolute path of the profile file.
-	defaultProfileFile = path.Join(defaultLncliDir, "profiles.json")
+	defaultProfileFile = path.Join(defaultBrolncliDir, "profiles.json")
 )
 
 var profileSubCommand = cli.Command{

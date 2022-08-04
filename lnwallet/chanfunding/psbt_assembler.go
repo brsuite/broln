@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/input"
+	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/psbt"
-	"github.com/brsuite/broln/input"
-	"github.com/brsuite/broln/keychain"
 )
 
 // PsbtState is a type for the state of the PSBT intent state machine.
@@ -156,7 +156,7 @@ type PsbtIntent struct {
 // BindKeys sets both the remote and local node's keys that will be used for the
 // channel funding multisig output.
 func (i *PsbtIntent) BindKeys(localKey *keychain.KeyDescriptor,
-	remoteKey *btcec.PublicKey) {
+	remoteKey *bronec.PublicKey) {
 
 	i.localKey = localKey
 	i.remoteKey = remoteKey

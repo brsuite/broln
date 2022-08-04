@@ -6,13 +6,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/funding"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -40,9 +40,9 @@ func testUpdateChannelPolicy(net *lntest.NetworkHarness, t *harnessTest) {
 		defaultTimeLockDelta = chainreg.DefaultBrocoinTimeLockDelta
 		defaultMinHtlc       = 1000
 	)
-	defaultMaxHtlc := calculateMaxHtlc(funding.MaxBtcFundingAmount)
+	defaultMaxHtlc := calculateMaxHtlc(funding.MaxBronFundingAmount)
 
-	chanAmt := funding.MaxBtcFundingAmount
+	chanAmt := funding.MaxBronFundingAmount
 	pushAmt := chanAmt / 2
 
 	// Create a channel Alice->Bob.
@@ -110,7 +110,7 @@ func testUpdateChannelPolicy(net *lntest.NetworkHarness, t *harnessTest) {
 	nodes = append(nodes, carol)
 
 	// Send some coins to Carol that can be used for channel funding.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	net.ConnectNodes(t.t, carol, net.Bob)
 
@@ -226,7 +226,7 @@ func testUpdateChannelPolicy(net *lntest.NetworkHarness, t *harnessTest) {
 	// mSAT.
 	payAmt = bronutil.Amount(4)
 	amtSat := int64(payAmt)
-	amtMSat := int64(lnwire.NewMSatFromSatoshis(payAmt))
+	amtMSat := int64(lnwire.NewMSatFromBroneess(payAmt))
 	routes.Routes[0].Hops[0].AmtToForward = amtSat // nolint:staticcheck
 	routes.Routes[0].Hops[0].AmtToForwardMsat = amtMSat
 	routes.Routes[0].Hops[1].AmtToForward = amtSat // nolint:staticcheck
@@ -258,7 +258,7 @@ func testUpdateChannelPolicy(net *lntest.NetworkHarness, t *harnessTest) {
 	// Expected as part of the error message.
 	substrs := []string{
 		"AmountBelowMinimum",
-		"HtlcMinimumMsat: (lnwire.MilliSatoshi) 5000 mSAT",
+		"HtlcMinimumMsat: (lnwire.MilliBronees) 5000 mSAT",
 	}
 	for _, s := range substrs {
 		if !strings.Contains(sendResp.PaymentError, s) {
@@ -270,7 +270,7 @@ func testUpdateChannelPolicy(net *lntest.NetworkHarness, t *harnessTest) {
 	// Make sure sending using the original value succeeds.
 	payAmt = bronutil.Amount(5)
 	amtSat = int64(payAmt)
-	amtMSat = int64(lnwire.NewMSatFromSatoshis(payAmt))
+	amtMSat = int64(lnwire.NewMSatFromBroneess(payAmt))
 	routes.Routes[0].Hops[0].AmtToForward = amtSat // nolint:staticcheck
 	routes.Routes[0].Hops[0].AmtToForwardMsat = amtMSat
 	routes.Routes[0].Hops[1].AmtToForward = amtSat // nolint:staticcheck
@@ -546,7 +546,7 @@ func testSendUpdateDisableChannel(net *lntest.NetworkHarness, t *harnessTest) {
 	defer shutdownAndAssert(net, t, eve)
 
 	// Give Eve some coins.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, eve)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, eve)
 
 	// Connect Eve to Carol and Bob, and open a channel to carol.
 	net.ConnectNodes(t.t, eve, carol)
@@ -700,7 +700,7 @@ func testUpdateChannelPolicyForPrivateChannel(net *lntest.NetworkHarness,
 	// Alice <--public:100k--> Bob <--private:100k--> Carol
 	const chanAmt = bronutil.Amount(100000)
 
-	// Open a channel with 100k satoshis between Alice and Bob.
+	// Open a channel with 100k broneess between Alice and Bob.
 	chanPointAliceBob := openChannelAndAssert(
 		t, net, net.Alice, net.Bob,
 		lntest.OpenChannelParams{
@@ -724,7 +724,7 @@ func testUpdateChannelPolicyForPrivateChannel(net *lntest.NetworkHarness,
 	// Connect Carol to Bob.
 	net.ConnectNodes(t.t, carol, net.Bob)
 
-	// Open a channel with 100k satoshis between Bob and Carol.
+	// Open a channel with 100k broneess between Bob and Carol.
 	chanPointBobCarol := openChannelAndAssert(
 		t, net, net.Bob, carol,
 		lntest.OpenChannelParams{
@@ -802,22 +802,22 @@ func testUpdateChannelPolicyForPrivateChannel(net *lntest.NetworkHarness,
 		"the second HTLC attempt should succeed",
 	)
 
-	// Carol should have received 20k satoshis from Bob.
+	// Carol should have received 20k broneess from Bob.
 	assertAmountPaid(t, "Carol(remote) [<=private] Bob(local)",
 		carol, bobFundPoint, 0, paymentAmt)
 
-	// Bob should have sent 20k satoshis to Carol.
+	// Bob should have sent 20k broneess to Carol.
 	assertAmountPaid(t, "Bob(local) [private=>] Carol(remote)",
 		net.Bob, bobFundPoint, paymentAmt, 0)
 
-	// Calcuate the amount in satoshis.
+	// Calcuate the amount in broneess.
 	amtExpected := int64(paymentAmt + baseFeeMSat/1000)
 
-	// Bob should have received 20k satoshis + fee from Alice.
+	// Bob should have received 20k broneess + fee from Alice.
 	assertAmountPaid(t, "Bob(remote) <= Alice(local)",
 		net.Bob, aliceFundPoint, 0, amtExpected)
 
-	// Alice should have sent 20k satoshis + fee to Bob.
+	// Alice should have sent 20k broneess + fee to Bob.
 	assertAmountPaid(t, "Alice(local) => Bob(remote)",
 		net.Alice, aliceFundPoint, amtExpected, 0)
 }
@@ -828,7 +828,7 @@ func testUpdateChannelPolicyForPrivateChannel(net *lntest.NetworkHarness,
 func testUpdateChannelPolicyFeeRateAccuracy(net *lntest.NetworkHarness,
 	t *harnessTest) {
 
-	chanAmt := funding.MaxBtcFundingAmount
+	chanAmt := funding.MaxBronFundingAmount
 	pushAmt := chanAmt / 2
 
 	// Create a channel Alice -> Bob.

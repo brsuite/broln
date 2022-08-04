@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	brocoinCfg "github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/zpay32"
+	"github.com/brsuite/brond/bronec"
+	brocoinCfg "github.com/brsuite/brond/chaincfg"
 	litecoinCfg "github.com/ltcsuite/ltcd/chaincfg"
 )
 
@@ -65,7 +65,7 @@ func beforeMigrationFuncV11(t *testing.T, d *DB, invoices []Invoice) {
 func TestMigrateInvoices(t *testing.T) {
 	t.Parallel()
 
-	payReqBtc, err := getPayReq(&brocoinCfg.MainNetParams)
+	payReqBron, err := getPayReq(&brocoinCfg.MainNetParams)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestMigrateInvoices(t *testing.T) {
 
 	invoices := []Invoice{
 		{
-			PaymentRequest: []byte(payReqBtc),
+			PaymentRequest: []byte(payReqBron),
 		},
 		{
 			PaymentRequest: []byte(payReqLtc),
@@ -123,14 +123,14 @@ func TestMigrateInvoices(t *testing.T) {
 func TestMigrateInvoicesHodl(t *testing.T) {
 	t.Parallel()
 
-	payReqBtc, err := getPayReq(&brocoinCfg.MainNetParams)
+	payReqBron, err := getPayReq(&brocoinCfg.MainNetParams)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	invoices := []Invoice{
 		{
-			PaymentRequest: []byte(payReqBtc),
+			PaymentRequest: []byte(payReqBron),
 			Terms: ContractTerm{
 				State: ContractAccepted,
 			},
@@ -150,11 +150,11 @@ func signDigestCompact(hash []byte) ([]byte, error) {
 	// Should the signature reference a compressed public key or not.
 	isCompressedKey := true
 
-	privKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), testPrivKeyBytes)
+	privKey, _ := bronec.PrivKeyFromBytes(bronec.S256(), testPrivKeyBytes)
 
-	// btcec.SignCompact returns a pubkey-recoverable signature
-	sig, err := btcec.SignCompact(
-		btcec.S256(), privKey, hash, isCompressedKey,
+	// bronec.SignCompact returns a pubkey-recoverable signature
+	sig, err := bronec.SignCompact(
+		bronec.S256(), privKey, hash, isCompressedKey,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("can't sign the hash: %v", err)

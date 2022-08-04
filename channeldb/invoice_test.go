@@ -30,7 +30,7 @@ var (
 	testNow = time.Unix(1, 0)
 )
 
-func randInvoice(value lnwire.MilliSatoshi) (*Invoice, error) {
+func randInvoice(value lnwire.MilliBronees) (*Invoice, error) {
 	var (
 		pre     lntypes.Preimage
 		payAddr [32]byte
@@ -259,7 +259,7 @@ func testInvoiceWorkflow(t *testing.T, test invWorkflowTest) {
 
 	// Add 10 random invoices.
 	const numInvoices = 10
-	amt := lnwire.NewMSatFromSatoshis(1000)
+	amt := lnwire.NewMSatFromBroneess(1000)
 	invoices := make([]*Invoice, numInvoices+1)
 	invoices[0] = &dbInvoice2
 	for i := 1; i < len(invoices); i++ {
@@ -453,7 +453,7 @@ func TestInvoiceCancelSingleHtlc(t *testing.T) {
 	testInvoice := &Invoice{
 		Htlcs: map[CircuitKey]*InvoiceHTLC{},
 		Terms: ContractTerm{
-			Value:           lnwire.NewMSatFromSatoshis(10000),
+			Value:           lnwire.NewMSatFromBroneess(10000),
 			Features:        emptyFeatures,
 			PaymentPreimage: &preimage,
 		},
@@ -520,7 +520,7 @@ func TestInvoiceCancelSingleHtlcAMP(t *testing.T) {
 	require.NoError(t, err, "unable to make test db: %v", err)
 
 	// We'll start out by creating an invoice and writing it to the DB.
-	amt := lnwire.NewMSatFromSatoshis(1000)
+	amt := lnwire.NewMSatFromBroneess(1000)
 	invoice, err := randInvoice(amt)
 	require.Nil(t, err)
 
@@ -555,7 +555,7 @@ func TestInvoiceCancelSingleHtlcAMP(t *testing.T) {
 	)
 	require.Nil(t, err)
 
-	// At this point, we should detect that 3k satoshis total has been
+	// At this point, we should detect that 3k broneess total has been
 	// paid.
 	require.Equal(t, dbInvoice.AmtPaid, amt*3)
 
@@ -690,7 +690,7 @@ func TestInvoiceAddTimeSeries(t *testing.T) {
 	// We'll start off by creating 20 random invoices, and inserting them
 	// into the database.
 	const numInvoices = 20
-	amt := lnwire.NewMSatFromSatoshis(1000)
+	amt := lnwire.NewMSatFromBroneess(1000)
 	invoices := make([]Invoice, numInvoices)
 	for i := 0; i < len(invoices); i++ {
 		invoice, err := randInvoice(amt)
@@ -842,7 +842,7 @@ func TestSettleIndexAmpPayments(t *testing.T) {
 
 	// First, we'll make a sample invoice that'll be paid to several times
 	// below.
-	amt := lnwire.NewMSatFromSatoshis(1000)
+	amt := lnwire.NewMSatFromBroneess(1000)
 	testInvoice, err := randInvoice(amt)
 	require.Nil(t, err)
 	testInvoice.Terms.Features = ampFeatures
@@ -1032,7 +1032,7 @@ func TestScanInvoices(t *testing.T) {
 	// Now populate the DB and check if we can get all invoices with their
 	// payment hashes as expected.
 	for i := 1; i <= numInvoices; i++ {
-		invoice, err := randInvoice(lnwire.MilliSatoshi(i))
+		invoice, err := randInvoice(lnwire.MilliBronees(i))
 		require.NoError(t, err)
 
 		paymentHash := invoice.Terms.PaymentPreimage.Hash()
@@ -1062,7 +1062,7 @@ func TestDuplicateSettleInvoice(t *testing.T) {
 	}
 
 	// We'll start out by creating an invoice and writing it to the DB.
-	amt := lnwire.NewMSatFromSatoshis(1000)
+	amt := lnwire.NewMSatFromBroneess(1000)
 	invoice, err := randInvoice(amt)
 	if err != nil {
 		t.Fatalf("unable to create invoice: %v", err)
@@ -1135,7 +1135,7 @@ func TestQueryInvoices(t *testing.T) {
 	var pendingInvoices []Invoice
 
 	for i := 1; i <= numInvoices; i++ {
-		amt := lnwire.MilliSatoshi(i)
+		amt := lnwire.MilliBronees(i)
 		invoice, err := randInvoice(amt)
 		if err != nil {
 			t.Fatalf("unable to create invoice: %v", err)
@@ -1405,7 +1405,7 @@ func TestQueryInvoices(t *testing.T) {
 
 // getUpdateInvoice returns an invoice update callback that, when called,
 // settles the invoice with the given amount.
-func getUpdateInvoice(amt lnwire.MilliSatoshi) InvoiceUpdateCallback {
+func getUpdateInvoice(amt lnwire.MilliBronees) InvoiceUpdateCallback {
 	return func(invoice *Invoice) (*InvoiceUpdateDesc, error) {
 		if invoice.State == ContractSettled {
 			return nil, ErrInvoiceAlreadySettled
@@ -1447,7 +1447,7 @@ func TestCustomRecords(t *testing.T) {
 	testInvoice := &Invoice{
 		Htlcs: map[CircuitKey]*InvoiceHTLC{},
 		Terms: ContractTerm{
-			Value:           lnwire.NewMSatFromSatoshis(10000),
+			Value:           lnwire.NewMSatFromBroneess(10000),
 			Features:        emptyFeatures,
 			PaymentPreimage: &preimage,
 		},
@@ -1719,7 +1719,7 @@ func TestSetIDIndex(t *testing.T) {
 	require.Nil(t, err)
 
 	// We'll start out by creating an invoice and writing it to the DB.
-	amt := lnwire.NewMSatFromSatoshis(1000)
+	amt := lnwire.NewMSatFromBroneess(1000)
 	invoice, err := randInvoice(amt)
 	require.Nil(t, err)
 
@@ -1929,7 +1929,7 @@ func TestSetIDIndex(t *testing.T) {
 	require.Equal(t, ErrInvoiceNotFound, err)
 }
 
-func makeAMPInvoiceHTLC(amt lnwire.MilliSatoshi, setID [32]byte,
+func makeAMPInvoiceHTLC(amt lnwire.MilliBronees, setID [32]byte,
 	hash lntypes.Hash, preimage *lntypes.Preimage) *InvoiceHTLC {
 
 	return &InvoiceHTLC{
@@ -1948,7 +1948,7 @@ func makeAMPInvoiceHTLC(amt lnwire.MilliSatoshi, setID [32]byte,
 
 // updateAcceptAMPHtlc returns an invoice update callback that, when called,
 // settles the invoice with the given amount.
-func updateAcceptAMPHtlc(id uint64, amt lnwire.MilliSatoshi,
+func updateAcceptAMPHtlc(id uint64, amt lnwire.MilliBronees,
 	setID *[32]byte, accept bool) InvoiceUpdateCallback {
 
 	return func(invoice *Invoice) (*InvoiceUpdateDesc, error) {
@@ -2029,7 +2029,7 @@ func TestUnexpectedInvoicePreimage(t *testing.T) {
 	defer cleanup()
 	require.NoError(t, err, "unable to make test db")
 
-	invoice, err := randInvoice(lnwire.MilliSatoshi(100))
+	invoice, err := randInvoice(lnwire.MilliBronees(100))
 	require.NoError(t, err)
 
 	// Add a random invoice indexed by payment hash and payment addr.
@@ -2087,7 +2087,7 @@ func testUpdateHTLCPreimages(t *testing.T, test updateHTLCPreimageTestCase) {
 	require.NoError(t, err, "unable to make test db")
 
 	// We'll start out by creating an invoice and writing it to the DB.
-	amt := lnwire.NewMSatFromSatoshis(1000)
+	amt := lnwire.NewMSatFromBroneess(1000)
 	invoice, err := randInvoice(amt)
 	require.Nil(t, err)
 
@@ -2823,7 +2823,7 @@ func TestDeleteInvoices(t *testing.T) {
 	invoicesToDelete := make([]InvoiceDeleteRef, numInvoices)
 
 	for i := 0; i < numInvoices; i++ {
-		invoice, err := randInvoice(lnwire.MilliSatoshi(i + 1))
+		invoice, err := randInvoice(lnwire.MilliBronees(i + 1))
 		require.NoError(t, err)
 
 		paymentHash := invoice.Terms.PaymentPreimage.Hash()

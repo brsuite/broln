@@ -335,13 +335,13 @@ type TowerSession struct {
 	MaxBackups uint32 `protobuf:"varint,3,opt,name=max_backups,json=maxBackups,proto3" json:"max_backups,omitempty"`
 	//
 	//Deprecated, use sweep_sat_per_vbyte.
-	//The fee rate, in satoshis per vbyte, that will be used by the watchtower for
+	//The fee rate, in broneess per vbyte, that will be used by the watchtower for
 	//the justice transaction in the event of a channel breach.
 	//
 	// Deprecated: Do not use.
 	SweepSatPerByte uint32 `protobuf:"varint,4,opt,name=sweep_sat_per_byte,json=sweepSatPerByte,proto3" json:"sweep_sat_per_byte,omitempty"`
 	//
-	//The fee rate, in satoshis per vbyte, that will be used by the watchtower for
+	//The fee rate, in broneess per vbyte, that will be used by the watchtower for
 	//the justice transaction in the event of a channel breach.
 	SweepSatPerVbyte uint32 `protobuf:"varint,5,opt,name=sweep_sat_per_vbyte,json=sweepSatPerVbyte,proto3" json:"sweep_sat_per_vbyte,omitempty"`
 }
@@ -782,13 +782,13 @@ type PolicyResponse struct {
 	MaxUpdates uint32 `protobuf:"varint,1,opt,name=max_updates,json=maxUpdates,proto3" json:"max_updates,omitempty"`
 	//
 	//Deprecated, use sweep_sat_per_vbyte.
-	//The fee rate, in satoshis per vbyte, that will be used by watchtowers for
+	//The fee rate, in broneess per vbyte, that will be used by watchtowers for
 	//justice transactions in response to channel breaches.
 	//
 	// Deprecated: Do not use.
 	SweepSatPerByte uint32 `protobuf:"varint,2,opt,name=sweep_sat_per_byte,json=sweepSatPerByte,proto3" json:"sweep_sat_per_byte,omitempty"`
 	//
-	//The fee rate, in satoshis per vbyte, that will be used by watchtowers for
+	//The fee rate, in broneess per vbyte, that will be used by watchtowers for
 	//justice transactions in response to channel breaches.
 	SweepSatPerVbyte uint32 `protobuf:"varint,3,opt,name=sweep_sat_per_vbyte,json=sweepSatPerVbyte,proto3" json:"sweep_sat_per_vbyte,omitempty"`
 }

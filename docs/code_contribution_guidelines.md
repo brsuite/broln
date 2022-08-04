@@ -42,7 +42,7 @@ minimal by comparison.  In the world of cryptocurrencies, even the smallest bug
 in the wrong area can cost people a significant amount of money.  For this
 reason, the Lightning Network Daemon (`broln`) has a formalized and rigorous
 development process (heavily inspired by
-[btcsuite](https://github.com/brsuite)) which is outlined on this page.
+[brsuite](https://github.com/brsuite)) which is outlined on this page.
 
 We highly encourage code contributions, however it is imperative that you adhere
 to the guidelines established on this page.
@@ -79,7 +79,7 @@ security and performance implications.
 - [Effective Go](http://golang.org/doc/effective_go.html) - The entire `broln` 
   project follows the guidelines in this document.  For your code to be accepted,
   it must follow the guidelines therein.
-- [Original Satoshi Whitepaper](https://brocoin.org/brocoin.pdf) - This is the white paper that started it all.  Having a solid
+- [Original Bronees Whitepaper](https://brocoin.org/brocoin.pdf) - This is the white paper that started it all.  Having a solid
   foundation to build on will make the code much more comprehensible.
 - [Lightning Network Whitepaper](https://lightning.network/lightning-network-paper.pdf) - This is the white paper that kicked off the Layer 2 revolution. Having a good grasp of the concepts of Lightning will make the core logic within the daemon much more comprehensible: Brocoin Script, off-chain blockchain protocols, payment channels, bi-directional payment channels, relative and absolute time-locks, commitment state revocations, and Segregated Witness. 
     - The original LN was written for a rather narrow audience, the paper may be a bit unapproachable to many. Thanks to the Brocoin community, there exist many easily accessible supplemental resources which can help one see how all the pieces fit together from double-spend protection all the way up to commitment state transitions and Hash Time Locked Contracts (HTLCs): 
@@ -180,8 +180,8 @@ extensively using the commands within our `Makefile`. As a result, we recommend
 **WRONG**
 ```go
 // generates a revocation key
-func DeriveRevocationPubkey(commitPubKey *btcec.PublicKey,
-	revokePreimage []byte) *btcec.PublicKey {
+func DeriveRevocationPubkey(commitPubKey *bronec.PublicKey,
+	revokePreimage []byte) *bronec.PublicKey {
 ```
 **RIGHT**
 ```go
@@ -204,8 +204,8 @@ func DeriveRevocationPubkey(commitPubKey *btcec.PublicKey,
 //   revokePriv := commitPriv + revokePreimge mod N
 //
 // Where N is the order of the sub-group.
-func DeriveRevocationPubkey(commitPubKey *btcec.PublicKey,
-	revokePreimage []byte) *btcec.PublicKey {
+func DeriveRevocationPubkey(commitPubKey *bronec.PublicKey,
+	revokePreimage []byte) *bronec.PublicKey {
 ```
 - Comments in the body of the code are highly encouraged, but they should
   explain the intention of the code as opposed to just calling out the

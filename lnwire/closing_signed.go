@@ -22,9 +22,9 @@ type ClosingSigned struct {
 	// ChannelID serves to identify which channel is to be closed.
 	ChannelID ChannelID
 
-	// FeeSatoshis is the total fee in satoshis that the party to the
+	// FeeBroneess is the total fee in broneess that the party to the
 	// channel would like to propose for the close transaction.
-	FeeSatoshis bronutil.Amount
+	FeeBroneess bronutil.Amount
 
 	// Signature is for the proposed channel close transaction.
 	Signature Sig
@@ -41,7 +41,7 @@ func NewClosingSigned(cid ChannelID, fs bronutil.Amount,
 
 	return &ClosingSigned{
 		ChannelID:   cid,
-		FeeSatoshis: fs,
+		FeeBroneess: fs,
 		Signature:   sig,
 	}
 }
@@ -56,7 +56,7 @@ var _ Message = (*ClosingSigned)(nil)
 // This is part of the lnwire.Message interface.
 func (c *ClosingSigned) Decode(r io.Reader, pver uint32) error {
 	return ReadElements(
-		r, &c.ChannelID, &c.FeeSatoshis, &c.Signature, &c.ExtraData,
+		r, &c.ChannelID, &c.FeeBroneess, &c.Signature, &c.ExtraData,
 	)
 }
 
@@ -69,7 +69,7 @@ func (c *ClosingSigned) Encode(w *bytes.Buffer, pver uint32) error {
 		return err
 	}
 
-	if err := WriteSatoshi(w, c.FeeSatoshis); err != nil {
+	if err := WriteBronees(w, c.FeeBroneess); err != nil {
 		return err
 	}
 

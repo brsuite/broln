@@ -3,7 +3,7 @@ package lnwire
 import (
 	"io"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 )
 
 // ChannelReestablish is a message sent between peers that have an existing
@@ -59,7 +59,7 @@ type ChannelReestablish struct {
 
 	// LocalUnrevokedCommitPoint is the commitment point used in the
 	// current un-revoked commitment transaction of the sending party.
-	LocalUnrevokedCommitPoint *btcec.PublicKey
+	LocalUnrevokedCommitPoint *bronec.PublicKey
 }
 
 // A compile time check to ensure ChannelReestablish implements the

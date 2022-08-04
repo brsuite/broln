@@ -6,7 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/broln/lnwallet/chainfee"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
@@ -15,8 +17,6 @@ import (
 	"github.com/brsuite/bronwallet/waddrmgr"
 	"github.com/brsuite/bronwallet/wallet/txauthor"
 	"github.com/brsuite/bronwallet/wtxmgr"
-	"github.com/brsuite/broln/keychain"
-	"github.com/brsuite/broln/lnwallet/chainfee"
 )
 
 const (
@@ -88,7 +88,7 @@ type TransactionDetail struct {
 	// Hash is the transaction hash of the transaction.
 	Hash chainhash.Hash
 
-	// Value is the net value of this transaction (in satoshis) from the
+	// Value is the net value of this transaction (in broneess) from the
 	// PoV of the wallet. If this transaction purely spends from the
 	// wallet's funds, then this value will be negative. Similarly, if this
 	// transaction credits the wallet, then this value will be positive.
@@ -113,7 +113,7 @@ type TransactionDetail struct {
 	// timestamp of txn creation.
 	Timestamp int64
 
-	// TotalFees is the total fee in satoshis paid by this transaction.
+	// TotalFees is the total fee in broneess paid by this transaction.
 	TotalFees int64
 
 	// DestAddresses are the destinations for a transaction
@@ -238,7 +238,7 @@ type WalletController interface {
 	// in the case of legacy versions (xpub, tpub), an address type must be
 	// specified as we intend to not support importing BIP-44 keys into the
 	// wallet using the legacy pay-to-pubkey-hash (P2PKH) scheme.
-	ImportPublicKey(pubKey *btcec.PublicKey,
+	ImportPublicKey(pubKey *bronec.PublicKey,
 		addrType waddrmgr.AddressType) error
 
 	// SendOutputs funds, signs, and broadcasts a Brocoin transaction paying
@@ -468,7 +468,7 @@ type MessageSigner interface {
 	// be found, then an error will be returned. The actual digest signed is
 	// the single or double SHA-256 of the passed message.
 	SignMessage(keyLoc keychain.KeyLocator, msg []byte,
-		doubleHash bool) (*btcec.Signature, error)
+		doubleHash bool) (*bronec.Signature, error)
 }
 
 // WalletDriver represents a "driver" for a particular concrete

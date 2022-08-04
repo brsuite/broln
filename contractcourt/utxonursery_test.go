@@ -14,16 +14,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lntest/mock"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/sweep"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 var (
@@ -328,7 +328,7 @@ func init() {
 	// Finish initializing our test vectors by parsing the desired public keys and
 	// properly populating the sign descriptors of all baby and kid outputs.
 	for i := range signDescriptors {
-		pk, err := btcec.ParsePubKey(keys[i], btcec.S256())
+		pk, err := bronec.ParsePubKey(keys[i], bronec.S256())
 		if err != nil {
 			panic(fmt.Sprintf("unable to parse pub key during init: %v", err))
 		}

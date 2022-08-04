@@ -5,16 +5,16 @@ import (
 	"net"
 	"sync"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwallet/chanfunding"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 // CommitmentType is an enum indicating the commitment type we should use for
@@ -107,7 +107,7 @@ type ChannelContribution struct {
 	// FirstCommitmentPoint is the first commitment point that will be used
 	// to create the revocation key in the first commitment transaction we
 	// send to the remote party.
-	FirstCommitmentPoint *btcec.PublicKey
+	FirstCommitmentPoint *bronec.PublicKey
 
 	// ChannelConfig is the concrete contribution that this node is
 	// offering to the channel. This includes all the various constraints
@@ -188,10 +188,10 @@ type ChannelReservation struct {
 	// identified within the wire protocol.
 	pendingChanID [32]byte
 
-	// pushMSat the amount of milli-satoshis that should be pushed to the
+	// pushMSat the amount of milli-broneess that should be pushed to the
 	// responder of a single funding channel as part of the initial
 	// commitment state.
-	pushMSat lnwire.MilliSatoshi
+	pushMSat lnwire.MilliBronees
 
 	wallet     *LightningWallet
 	chanFunder chanfunding.Assembler
@@ -209,14 +209,14 @@ type ChannelReservation struct {
 // lnwallet.InitChannelReservation interface.
 func NewChannelReservation(capacity, localFundingAmt bronutil.Amount,
 	commitFeePerKw chainfee.SatPerKWeight, wallet *LightningWallet,
-	id uint64, pushMSat lnwire.MilliSatoshi, chainHash *chainhash.Hash,
+	id uint64, pushMSat lnwire.MilliBronees, chainHash *chainhash.Hash,
 	flags lnwire.FundingFlag, commitType CommitmentType,
 	fundingAssembler chanfunding.Assembler,
 	pendingChanID [32]byte, thawHeight uint32) (*ChannelReservation, error) {
 
 	var (
-		ourBalance   lnwire.MilliSatoshi
-		theirBalance lnwire.MilliSatoshi
+		ourBalance   lnwire.MilliBronees
+		theirBalance lnwire.MilliBronees
 		initiator    bool
 	)
 
@@ -228,16 +228,16 @@ func NewChannelReservation(capacity, localFundingAmt bronutil.Amount,
 	}
 	commitFee := commitFeePerKw.FeeForWeight(commitWeight)
 
-	localFundingMSat := lnwire.NewMSatFromSatoshis(localFundingAmt)
+	localFundingMSat := lnwire.NewMSatFromBroneess(localFundingAmt)
 	// TODO(halseth): make method take remote funding amount directly
 	// instead of inferring it from capacity and local amt.
-	capacityMSat := lnwire.NewMSatFromSatoshis(capacity)
+	capacityMSat := lnwire.NewMSatFromBroneess(capacity)
 
 	// The total fee paid by the initiator will be the commitment fee in
 	// addition to the two anchor outputs.
-	feeMSat := lnwire.NewMSatFromSatoshis(commitFee)
+	feeMSat := lnwire.NewMSatFromBroneess(commitFee)
 	if commitType.HasAnchors() {
-		feeMSat += 2 * lnwire.NewMSatFromSatoshis(anchorSize)
+		feeMSat += 2 * lnwire.NewMSatFromBroneess(anchorSize)
 	}
 
 	// Used to cut down on verbosity.
@@ -255,7 +255,7 @@ func NewChannelReservation(capacity, localFundingAmt bronutil.Amount,
 		// the fees, then we'll bail our early.
 		if int64(theirBalance) < 0 {
 			return nil, ErrFunderBalanceDust(
-				int64(commitFee), int64(theirBalance.ToSatoshis()),
+				int64(commitFee), int64(theirBalance.ToBroneess()),
 				int64(2*defaultDust),
 			)
 		}
@@ -295,20 +295,20 @@ func NewChannelReservation(capacity, localFundingAmt bronutil.Amount,
 	// reject this channel creation request.
 	//
 	// TODO(roasbeef): reject if 30% goes to fees? dust channel
-	if initiator && ourBalance.ToSatoshis() <= 2*defaultDust {
+	if initiator && ourBalance.ToBroneess() <= 2*defaultDust {
 		return nil, ErrFunderBalanceDust(
 			int64(commitFee),
-			int64(ourBalance.ToSatoshis()),
+			int64(ourBalance.ToBroneess()),
 			int64(2*defaultDust),
 		)
 	}
 
 	// Similarly we ensure their balance is reasonable if we are not the
 	// initiator.
-	if !initiator && theirBalance.ToSatoshis() <= 2*defaultDust {
+	if !initiator && theirBalance.ToBroneess() <= 2*defaultDust {
 		return nil, ErrFunderBalanceDust(
 			int64(commitFee),
-			int64(theirBalance.ToSatoshis()),
+			int64(theirBalance.ToBroneess()),
 			int64(2*defaultDust),
 		)
 	}
@@ -378,11 +378,11 @@ func NewChannelReservation(capacity, localFundingAmt bronutil.Amount,
 
 	return &ChannelReservation{
 		ourContribution: &ChannelContribution{
-			FundingAmount: ourBalance.ToSatoshis(),
+			FundingAmount: ourBalance.ToBroneess(),
 			ChannelConfig: &channeldb.ChannelConfig{},
 		},
 		theirContribution: &ChannelContribution{
-			FundingAmount: theirBalance.ToSatoshis(),
+			FundingAmount: theirBalance.ToBroneess(),
 			ChannelConfig: &channeldb.ChannelConfig{},
 		},
 		partialState: &channeldb.OpenChannel{
@@ -430,7 +430,7 @@ func (r *ChannelReservation) SetNumConfsRequired(numConfs uint16) {
 // CommitConstraints takes the constraints that the remote party specifies for
 // the type of commitments that we can generate for them. These constraints
 // include several parameters that serve as flow control restricting the amount
-// of satoshis that can be transferred in a single commitment. This function
+// of broneess that can be transferred in a single commitment. This function
 // will also attempt to verify the constraints for sanity, returning an error
 // if the parameters are seemed unsound.
 func (r *ChannelReservation) CommitConstraints(c *channeldb.ChannelConstraints,

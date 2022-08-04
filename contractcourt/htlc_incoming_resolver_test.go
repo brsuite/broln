@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"testing"
 
-	sphinx "github.com/brsuite/lightning-onion"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/htlcswitch/hop"
@@ -16,6 +15,7 @@ import (
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwire"
+	sphinx "github.com/brsuite/lightning-onion"
 )
 
 const (
@@ -92,7 +92,7 @@ func TestHtlcIncomingResolverFwdContestedTimeout(t *testing.T) {
 	// Assert that we have a failure resolution because our invoice was
 	// cancelled.
 	assertResolverReport(t, reportChan, &channeldb.ResolverReport{
-		Amount:          lnwire.MilliSatoshi(testHtlcAmount).ToSatoshis(),
+		Amount:          lnwire.MilliBronees(testHtlcAmount).ToBroneess(),
 		ResolverType:    channeldb.ResolverTypeIncomingHtlc,
 		ResolverOutcome: channeldb.ResolverOutcomeTimeout,
 	})
@@ -207,7 +207,7 @@ func TestHtlcIncomingResolverExitTimeoutHodl(t *testing.T) {
 	// Assert that we have a failure resolution because our invoice was
 	// cancelled.
 	assertResolverReport(t, reportChan, &channeldb.ResolverReport{
-		Amount:          lnwire.MilliSatoshi(testHtlcAmount).ToSatoshis(),
+		Amount:          lnwire.MilliBronees(testHtlcAmount).ToBroneess(),
 		ResolverType:    channeldb.ResolverTypeIncomingHtlc,
 		ResolverOutcome: channeldb.ResolverOutcomeTimeout,
 	})
@@ -247,7 +247,7 @@ func TestHtlcIncomingResolverExitCancelHodl(t *testing.T) {
 	// Assert that we have a failure resolution because our invoice was
 	// cancelled.
 	assertResolverReport(t, reportChan, &channeldb.ResolverReport{
-		Amount:          lnwire.MilliSatoshi(testHtlcAmount).ToSatoshis(),
+		Amount:          lnwire.MilliBronees(testHtlcAmount).ToBroneess(),
 		ResolverType:    channeldb.ResolverTypeIncomingHtlc,
 		ResolverOutcome: channeldb.ResolverOutcomeAbandoned,
 	})
@@ -346,7 +346,7 @@ func newIncomingResolverTestContext(t *testing.T, isExit bool) *incomingResolver
 			contractResolverKit: *newContractResolverKit(cfg),
 			htlcResolution:      lnwallet.IncomingHtlcResolution{},
 			htlc: channeldb.HTLC{
-				Amt:       lnwire.MilliSatoshi(testHtlcAmount),
+				Amt:       lnwire.MilliBronees(testHtlcAmount),
 				RHash:     testResHash,
 				OnionBlob: testOnionBlob,
 			},

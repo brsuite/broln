@@ -1,6 +1,6 @@
 package zpay32
 
-import "github.com/brsuite/brond/btcec"
+import "github.com/brsuite/brond/bronec"
 
 const (
 	// DefaultFinalCLTVDelta is the default value to be used as the final
@@ -14,16 +14,16 @@ const (
 // publicly advertised to the network for routing.
 type HopHint struct {
 	// NodeID is the public key of the node at the start of the channel.
-	NodeID *btcec.PublicKey
+	NodeID *bronec.PublicKey
 
 	// ChannelID is the unique identifier of the channel.
 	ChannelID uint64
 
-	// FeeBaseMSat is the base fee of the channel in millisatoshis.
+	// FeeBaseMSat is the base fee of the channel in millibroneess.
 	FeeBaseMSat uint32
 
 	// FeeProportionalMillionths is the fee rate, in millionths of a
-	// satoshi, for every satoshi sent through the channel.
+	// bronees, for every bronees sent through the channel.
 	FeeProportionalMillionths uint32
 
 	// CLTVExpiryDelta is the time-lock delta of the channel.

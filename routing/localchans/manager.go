@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/discovery"
 	"github.com/brsuite/broln/htlcswitch"
@@ -13,6 +12,7 @@ import (
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing"
+	"github.com/brsuite/brond/wire"
 )
 
 // Manager manages the node's local channels. The only operation that is
@@ -177,7 +177,7 @@ func (r *Manager) updateEdge(tx kvdb.RTx, chanPoint wire.OutPoint,
 
 	// Update forwarding fee scheme and required time lock delta.
 	edge.FeeBaseMSat = newSchema.BaseFee
-	edge.FeeProportionalMillionths = lnwire.MilliSatoshi(
+	edge.FeeProportionalMillionths = lnwire.MilliBronees(
 		newSchema.FeeRate,
 	)
 	edge.TimeLockDelta = uint16(newSchema.TimeLockDelta)
@@ -246,7 +246,7 @@ func (r *Manager) updateEdge(tx kvdb.RTx, chanPoint wire.OutPoint,
 // getHtlcAmtLimits retrieves the negotiated channel min and max htlc amount
 // constraints.
 func (r *Manager) getHtlcAmtLimits(tx kvdb.RTx, chanPoint wire.OutPoint) (
-	lnwire.MilliSatoshi, lnwire.MilliSatoshi, error) {
+	lnwire.MilliBronees, lnwire.MilliBronees, error) {
 
 	ch, err := r.FetchChannel(tx, chanPoint)
 	if err != nil {

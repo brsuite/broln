@@ -16,12 +16,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/go-errors/errors"
-	sphinx "github.com/brsuite/lightning-onion"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/contractcourt"
 	"github.com/brsuite/broln/htlcswitch/hop"
@@ -38,6 +32,12 @@ import (
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/shachain"
 	"github.com/brsuite/broln/ticker"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	sphinx "github.com/brsuite/lightning-onion"
+	"github.com/go-errors/errors"
 )
 
 var (
@@ -45,7 +45,7 @@ var (
 	bobPrivKey   = []byte("bob priv key")
 	carolPrivKey = []byte("carol priv key")
 
-	testSig = &btcec.Signature{
+	testSig = &bronec.Signature{
 		R: new(big.Int),
 		S: new(big.Int),
 	}
@@ -128,8 +128,8 @@ func createTestChannel(alicePrivKey, bobPrivKey []byte,
 	chanID lnwire.ShortChannelID) (*testLightningChannel,
 	*testLightningChannel, func(), error) {
 
-	aliceKeyPriv, aliceKeyPub := btcec.PrivKeyFromBytes(btcec.S256(), alicePrivKey)
-	bobKeyPriv, bobKeyPub := btcec.PrivKeyFromBytes(btcec.S256(), bobPrivKey)
+	aliceKeyPriv, aliceKeyPub := bronec.PrivKeyFromBytes(bronec.S256(), alicePrivKey)
+	bobKeyPriv, bobKeyPub := bronec.PrivKeyFromBytes(bronec.S256(), bobPrivKey)
 
 	channelCapacity := aliceAmount + bobAmount
 	csvTimeoutAlice := uint32(5)
@@ -138,7 +138,7 @@ func createTestChannel(alicePrivKey, bobPrivKey []byte,
 
 	aliceConstraints := &channeldb.ChannelConstraints{
 		DustLimit: bronutil.Amount(200),
-		MaxPendingAmount: lnwire.NewMSatFromSatoshis(
+		MaxPendingAmount: lnwire.NewMSatFromBroneess(
 			channelCapacity),
 		ChanReserve:      aliceReserve,
 		MinHTLC:          0,
@@ -148,7 +148,7 @@ func createTestChannel(alicePrivKey, bobPrivKey []byte,
 
 	bobConstraints := &channeldb.ChannelConstraints{
 		DustLimit: bronutil.Amount(800),
-		MaxPendingAmount: lnwire.NewMSatFromSatoshis(
+		MaxPendingAmount: lnwire.NewMSatFromBroneess(
 			channelCapacity),
 		ChanReserve:      bobReserve,
 		MinHTLC:          0,
@@ -277,8 +277,8 @@ func createTestChannel(alicePrivKey, bobPrivKey []byte,
 
 	aliceCommit := channeldb.ChannelCommitment{
 		CommitHeight:  0,
-		LocalBalance:  lnwire.NewMSatFromSatoshis(aliceAmount - commitFee),
-		RemoteBalance: lnwire.NewMSatFromSatoshis(bobAmount),
+		LocalBalance:  lnwire.NewMSatFromBroneess(aliceAmount - commitFee),
+		RemoteBalance: lnwire.NewMSatFromBroneess(bobAmount),
 		CommitFee:     commitFee,
 		FeePerKw:      bronutil.Amount(feePerKw),
 		CommitTx:      aliceCommitTx,
@@ -286,8 +286,8 @@ func createTestChannel(alicePrivKey, bobPrivKey []byte,
 	}
 	bobCommit := channeldb.ChannelCommitment{
 		CommitHeight:  0,
-		LocalBalance:  lnwire.NewMSatFromSatoshis(bobAmount),
-		RemoteBalance: lnwire.NewMSatFromSatoshis(aliceAmount - commitFee),
+		LocalBalance:  lnwire.NewMSatFromBroneess(bobAmount),
+		RemoteBalance: lnwire.NewMSatFromBroneess(aliceAmount - commitFee),
 		CommitFee:     commitFee,
 		FeePerKw:      bronutil.Amount(feePerKw),
 		CommitTx:      bobCommitTx,
@@ -519,7 +519,7 @@ func getChanID(msg lnwire.Message) (lnwire.ChannelID, error) {
 
 // generateHoldPayment generates the htlc add request by given path blob and
 // invoice which should be added by destination peer.
-func generatePaymentWithPreimage(invoiceAmt, htlcAmt lnwire.MilliSatoshi,
+func generatePaymentWithPreimage(invoiceAmt, htlcAmt lnwire.MilliBronees,
 	timelock uint32, blob [lnwire.OnionPacketSize]byte,
 	preimage *lntypes.Preimage, rhash, payAddr [32]byte) (
 	*channeldb.Invoice, *lnwire.UpdateAddHTLC, uint64, error) {
@@ -563,7 +563,7 @@ func generatePaymentWithPreimage(invoiceAmt, htlcAmt lnwire.MilliSatoshi,
 
 // generatePayment generates the htlc add request by given path blob and
 // invoice which should be added by destination peer.
-func generatePayment(invoiceAmt, htlcAmt lnwire.MilliSatoshi, timelock uint32,
+func generatePayment(invoiceAmt, htlcAmt lnwire.MilliBronees, timelock uint32,
 	blob [lnwire.OnionPacketSize]byte) (*channeldb.Invoice,
 	*lnwire.UpdateAddHTLC, uint64, error) {
 
@@ -629,8 +629,8 @@ type threeHopNetwork struct {
 // generateHops creates the per hop payload, the total amount to be sent, and
 // also the time lock value needed to route an HTLC with the target amount over
 // the specified path.
-func generateHops(payAmt lnwire.MilliSatoshi, startingHeight uint32,
-	path ...*channelLink) (lnwire.MilliSatoshi, uint32, []*hop.Payload) {
+func generateHops(payAmt lnwire.MilliBronees, startingHeight uint32,
+	path ...*channelLink) (lnwire.MilliBronees, uint32, []*hop.Payload) {
 
 	totalTimelock := startingHeight
 	runningAmt := payAmt
@@ -730,7 +730,7 @@ func waitForPayFuncResult(payFunc func() error, d time.Duration) error {
 // * from Alice to some another peer through the Bob
 func makePayment(sendingPeer, receivingPeer lnpeer.Peer,
 	firstHop lnwire.ShortChannelID, hops []*hop.Payload,
-	invoiceAmt, htlcAmt lnwire.MilliSatoshi,
+	invoiceAmt, htlcAmt lnwire.MilliBronees,
 	timelock uint32) *paymentResponse {
 
 	paymentErr := make(chan error, 1)
@@ -764,7 +764,7 @@ func makePayment(sendingPeer, receivingPeer lnpeer.Peer,
 // that, when called, launches the payment from the sendingPeer.
 func preparePayment(sendingPeer, receivingPeer lnpeer.Peer,
 	firstHop lnwire.ShortChannelID, hops []*hop.Payload,
-	invoiceAmt, htlcAmt lnwire.MilliSatoshi,
+	invoiceAmt, htlcAmt lnwire.MilliBronees,
 	timelock uint32) (*channeldb.Invoice, func() error, error) {
 
 	sender := sendingPeer.(*mockServer)
@@ -1098,8 +1098,8 @@ func newHopNetwork() *hopNetwork {
 	defaultDelta := uint32(6)
 
 	globalPolicy := ForwardingPolicy{
-		MinHTLCOut:    lnwire.NewMSatFromSatoshis(5),
-		BaseFee:       lnwire.NewMSatFromSatoshis(1),
+		MinHTLCOut:    lnwire.NewMSatFromBroneess(5),
+		BaseFee:       lnwire.NewMSatFromBroneess(1),
 		TimeLockDelta: defaultDelta,
 	}
 	obfuscator := NewMockObfuscator()
@@ -1131,7 +1131,7 @@ func (h *hopNetwork) createChannelLink(server, peer *mockServer,
 			Circuits:           server.htlcSwitch.CircuitModifier(),
 			ForwardPackets:     server.htlcSwitch.ForwardPackets,
 			DecodeHopIterators: decoder.DecodeHopIterators,
-			ExtractErrorEncrypter: func(*btcec.PublicKey) (
+			ExtractErrorEncrypter: func(*bronec.PublicKey) (
 				hop.ErrorEncrypter, lnwire.FailCode) {
 				return h.obfuscator, lnwire.CodeNone
 			},
@@ -1292,7 +1292,7 @@ func (n *twoHopNetwork) stop() {
 
 func (n *twoHopNetwork) makeHoldPayment(sendingPeer, receivingPeer lnpeer.Peer,
 	firstHop lnwire.ShortChannelID, hops []*hop.Payload,
-	invoiceAmt, htlcAmt lnwire.MilliSatoshi,
+	invoiceAmt, htlcAmt lnwire.MilliBronees,
 	timelock uint32, preimage lntypes.Preimage) chan error {
 
 	paymentErr := make(chan error, 1)

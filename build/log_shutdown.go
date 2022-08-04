@@ -1,19 +1,19 @@
 package build
 
 import (
-	"github.com/btcsuite/btclog"
+	"github.com/brsuite/bronlog"
 )
 
 // ShutdownLogger wraps an existing logger with a shutdown function which will
 // be called on Critical/Criticalf to prompt shutdown.
 type ShutdownLogger struct {
-	btclog.Logger
+	bronlog.Logger
 	shutdown func()
 }
 
 // NewShutdownLogger creates a shutdown logger for the log provided which will
 // use the signal package to request shutdown on critical errors.
-func NewShutdownLogger(logger btclog.Logger, shutdown func()) *ShutdownLogger {
+func NewShutdownLogger(logger bronlog.Logger, shutdown func()) *ShutdownLogger {
 	return &ShutdownLogger{
 		Logger:   logger,
 		shutdown: shutdown,
@@ -24,7 +24,7 @@ func NewShutdownLogger(logger btclog.Logger, shutdown func()) *ShutdownLogger {
 // log with LevelCritical. It will then call the shutdown logger's shutdown
 // function to prompt safe shutdown.
 //
-// Note: it is part of the btclog.Logger interface.
+// Note: it is part of the bronlog.Logger interface.
 func (s *ShutdownLogger) Criticalf(format string, params ...interface{}) {
 	s.Logger.Criticalf(format, params...)
 	s.Logger.Info("Sending request for shutdown")
@@ -35,7 +35,7 @@ func (s *ShutdownLogger) Criticalf(format string, params ...interface{}) {
 // and writes to log with LevelCritical. It will then call the shutdown
 // logger's shutdown function to prompt safe shutdown.
 //
-// Note: it is part of the btclog.Logger interface.
+// Note: it is part of the bronlog.Logger interface.
 func (s *ShutdownLogger) Critical(v ...interface{}) {
 	s.Logger.Critical(v)
 	s.Logger.Info("Sending request for shutdown")

@@ -1,6 +1,6 @@
 version: '2'
 services:
-    # btc is an image of brocoin node which used as base image for brond and
+    # bron is an image of brocoin node which used as base image for brond and
     # btccli. The environment variables default values determined on stage of
     # container start within starting script.
     brond:

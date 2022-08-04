@@ -6,9 +6,9 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/brsuite/brond/btcec"
 	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
 	"github.com/brsuite/broln/kvdb"
+	"github.com/brsuite/brond/bronec"
 )
 
 // MigrateNodeAndEdgeUpdateIndex is a migration function that will update the
@@ -839,7 +839,7 @@ func MigrateOutgoingPayments(tx kvdb.RwTx) error {
 		// Since we don't have the session key for old payments, we
 		// create a random one to be able to serialize the attempt
 		// info.
-		priv, _ := btcec.NewPrivateKey(btcec.S256())
+		priv, _ := bronec.NewPrivateKey(bronec.S256())
 		s := &PaymentAttemptInfo{
 			PaymentID:  0,    // unknown.
 			SessionKey: priv, // unknown.

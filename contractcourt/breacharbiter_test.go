@@ -19,12 +19,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/go-errors/errors"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
@@ -36,6 +30,12 @@ import (
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/shachain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/go-errors/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -432,7 +432,7 @@ func initBreachedOutputs() error {
 		bo := &breachedOutputs[i]
 
 		// Parse the sign descriptor's pubkey.
-		pubkey, err := btcec.ParsePubKey(breachKeys[i], btcec.S256())
+		pubkey, err := bronec.ParsePubKey(breachKeys[i], bronec.S256())
 		if err != nil {
 			return fmt.Errorf("unable to parse pubkey: %v",
 				breachKeys[i])
@@ -1215,8 +1215,8 @@ func TestBreachCreateJusticeTx(t *testing.T) {
 	// In this test we just want to check that the correct inputs are added
 	// to the justice tx, not that we create a valid spend, so we just set
 	// some params making the script generation succeed.
-	aliceKeyPriv, _ := btcec.PrivKeyFromBytes(
-		btcec.S256(), channels.AlicesPrivKey,
+	aliceKeyPriv, _ := bronec.PrivKeyFromBytes(
+		bronec.S256(), channels.AlicesPrivKey,
 	)
 	alicePubKey := aliceKeyPriv.PubKey()
 
@@ -2166,7 +2166,7 @@ func createTestArbiter(t *testing.T, contractBreaches chan *ContractBreachEvent,
 		return NewRetributionStore(db)
 	})
 
-	aliceKeyPriv, _ := btcec.PrivKeyFromBytes(btcec.S256(),
+	aliceKeyPriv, _ := bronec.PrivKeyFromBytes(bronec.S256(),
 		channels.AlicesPrivKey)
 	signer := &mock.SingleSigner{Privkey: aliceKeyPriv}
 
@@ -2196,14 +2196,14 @@ func createTestArbiter(t *testing.T, contractBreaches chan *ContractBreachEvent,
 	return ba, cleanUp, nil
 }
 
-// createInitChannels creates two initialized test channels funded with 10 BTC,
-// with 5 BTC allocated to each side. Within the channel, Alice is the
+// createInitChannels creates two initialized test channels funded with 10 BRON,
+// with 5 BRON allocated to each side. Within the channel, Alice is the
 // initiator.
 func createInitChannels(revocationWindow int) (*lnwallet.LightningChannel, *lnwallet.LightningChannel, func(), error) {
 
-	aliceKeyPriv, aliceKeyPub := btcec.PrivKeyFromBytes(btcec.S256(),
+	aliceKeyPriv, aliceKeyPub := bronec.PrivKeyFromBytes(bronec.S256(),
 		channels.AlicesPrivKey)
-	bobKeyPriv, bobKeyPub := btcec.PrivKeyFromBytes(btcec.S256(),
+	bobKeyPriv, bobKeyPub := bronec.PrivKeyFromBytes(bronec.S256(),
 		channels.BobsPrivKey)
 
 	channelCapacity, err := bronutil.NewAmount(10)

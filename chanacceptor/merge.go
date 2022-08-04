@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/bronutil"
 )
 
 const (
@@ -45,10 +45,10 @@ func mergeInt64(name string, current, new int64) (int64, error) {
 	}
 }
 
-// mergeMillisatoshi merges two msat values, failing if they have different
+// mergeMillibronees merges two msat values, failing if they have different
 // non-zero values.
-func mergeMillisatoshi(name string, current,
-	new lnwire.MilliSatoshi) (lnwire.MilliSatoshi, error) {
+func mergeMillibronees(name string, current,
+	new lnwire.MilliBronees) (lnwire.MilliBronees, error) {
 
 	switch {
 	case current == 0:
@@ -125,14 +125,14 @@ func mergeResponse(current, new ChannelAcceptResponse) (ChannelAcceptResponse,
 	}
 	current.Reserve = bronutil.Amount(reserve)
 
-	current.MinHtlcIn, err = mergeMillisatoshi(
+	current.MinHtlcIn, err = mergeMillibronees(
 		fieldMinIn, current.MinHtlcIn, new.MinHtlcIn,
 	)
 	if err != nil {
 		return current, err
 	}
 
-	current.InFlightTotal, err = mergeMillisatoshi(
+	current.InFlightTotal, err = mergeMillibronees(
 		fieldInFlightTotal, current.InFlightTotal,
 		new.InFlightTotal,
 	)

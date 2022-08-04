@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/chanbackup"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/channelnotifier"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/wire"
 )
 
 // addrSource is an interface that allow us to get the addresses for a target
@@ -17,7 +17,7 @@ import (
 type addrSource interface {
 	// AddrsForNode returns all known addresses for the target node public
 	// key.
-	AddrsForNode(nodePub *btcec.PublicKey) ([]net.Addr, error)
+	AddrsForNode(nodePub *bronec.PublicKey) ([]net.Addr, error)
 }
 
 // channelNotifier is an implementation of the chanbackup.ChannelNotifier

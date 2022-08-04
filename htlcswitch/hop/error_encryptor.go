@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/brsuite/brond/btcec"
-	sphinx "github.com/brsuite/lightning-onion"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	sphinx "github.com/brsuite/lightning-onion"
 )
 
 // EncrypterType establishes an enum used in serialization to indicate how to
@@ -29,7 +29,7 @@ const (
 
 // ErrorEncrypterExtracter defines a function signature that extracts an
 // ErrorEncrypter from an sphinx OnionPacket.
-type ErrorEncrypterExtracter func(*btcec.PublicKey) (ErrorEncrypter,
+type ErrorEncrypterExtracter func(*bronec.PublicKey) (ErrorEncrypter,
 	lnwire.FailCode)
 
 // ErrorEncrypter is an interface that is used to encrypt HTLC related errors
@@ -81,7 +81,7 @@ type ErrorEncrypter interface {
 type SphinxErrorEncrypter struct {
 	*sphinx.OnionErrorEncrypter
 
-	EphemeralKey *btcec.PublicKey
+	EphemeralKey *bronec.PublicKey
 }
 
 // NewSphinxErrorEncrypter initializes a blank sphinx error encrypter, that
@@ -94,7 +94,7 @@ type SphinxErrorEncrypter struct {
 func NewSphinxErrorEncrypter() *SphinxErrorEncrypter {
 	return &SphinxErrorEncrypter{
 		OnionErrorEncrypter: nil,
-		EphemeralKey:        &btcec.PublicKey{},
+		EphemeralKey:        &bronec.PublicKey{},
 	}
 }
 
@@ -165,7 +165,7 @@ func (s *SphinxErrorEncrypter) Decode(r io.Reader) error {
 	}
 
 	var err error
-	s.EphemeralKey, err = btcec.ParsePubKey(ephemeral[:], btcec.S256())
+	s.EphemeralKey, err = bronec.ParsePubKey(ephemeral[:], bronec.S256())
 	if err != nil {
 		return err
 	}

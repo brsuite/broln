@@ -14,10 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/brsuite/bronutil"
-	"github.com/jedib0t/go-pretty/table"
-	"github.com/jedib0t/go-pretty/text"
-	"github.com/lightninglabs/protobuf-hex-display/jsonpb"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/routerrpc"
@@ -26,6 +22,10 @@ import (
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/record"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/bronutil"
+	"github.com/jedib0t/go-pretty/table"
+	"github.com/jedib0t/go-pretty/text"
+	"github.com/lightninglabs/protobuf-hex-display/jsonpb"
 	"github.com/urfave/cli"
 )
 
@@ -80,14 +80,14 @@ var (
 		Name: "max_shard_size_sat",
 		Usage: "the largest payment split that should be attempted if " +
 			"payment splitting is required to attempt a payment, " +
-			"specified in satoshis",
+			"specified in broneess",
 	}
 
 	maxShardSizeMsatFlag = cli.UintFlag{
 		Name: "max_shard_size_msat",
 		Usage: "the largest payment split that should be attempted if " +
 			"payment splitting is required to attempt a payment, " +
-			"specified in milli-satoshis",
+			"specified in milli-broneess",
 	}
 
 	ampFlag = cli.BoolFlag{
@@ -106,7 +106,7 @@ func paymentFlags() []cli.Flag {
 		},
 		cli.Int64Flag{
 			Name: "fee_limit",
-			Usage: "maximum fee allowed in satoshis when " +
+			Usage: "maximum fee allowed in broneess when " +
 				"sending the payment",
 		},
 		cli.Int64Flag{
@@ -174,7 +174,7 @@ var sendPaymentCommand = cli.Command{
 		},
 		cli.Int64Flag{
 			Name:  "amt, a",
-			Usage: "number of satoshis to send",
+			Usage: "number of broneess to send",
 		},
 		cli.StringFlag{
 			Name:  "payment_hash, r",
@@ -219,16 +219,16 @@ func retrieveFeeLimit(ctx *cli.Context, amt int64) (int64, error) {
 	}
 
 	// If no fee limit is set, use a default value based on the amount.
-	amtMsat := lnwire.NewMSatFromSatoshis(bronutil.Amount(amt))
+	amtMsat := lnwire.NewMSatFromBroneess(bronutil.Amount(amt))
 	limitMsat := lnwallet.DefaultRoutingFeeLimitForAmount(amtMsat)
-	return int64(limitMsat.ToSatoshis()), nil
+	return int64(limitMsat.ToBroneess()), nil
 }
 
 func confirmPayReq(resp *lnrpc.PayReq, amt, feeLimit int64) error {
 	fmt.Printf("Payment hash: %v\n", resp.GetPaymentHash())
 	fmt.Printf("Description: %v\n", resp.GetDescription())
-	fmt.Printf("Amount (in satoshis): %v\n", amt)
-	fmt.Printf("Fee limit (in satoshis): %v\n", feeLimit)
+	fmt.Printf("Amount (in broneess): %v\n", amt)
+	fmt.Printf("Fee limit (in broneess): %v\n", feeLimit)
 	fmt.Printf("Destination: %v\n", resp.GetDestination())
 
 	confirm := promptForConfirmation("Confirm payment (yes/no): ")
@@ -451,7 +451,7 @@ func sendPaymentRequest(ctx *cli.Context,
 		req.MaxShardSizeMsat = ctx.Uint64(maxShardSizeMsatFlag.Name)
 
 	case ctx.Uint64(maxShardSizeSatFlag.Name) != 0:
-		req.MaxShardSizeMsat = uint64(lnwire.NewMSatFromSatoshis(
+		req.MaxShardSizeMsat = uint64(lnwire.NewMSatFromBroneess(
 			bronutil.Amount(ctx.Uint64(maxShardSizeSatFlag.Name)),
 		))
 	}
@@ -495,7 +495,7 @@ func sendPaymentRequest(ctx *cli.Context,
 		// If amount is present in the request, override the request
 		// amount.
 		amt := req.Amt
-		invoiceAmt := decodeResp.GetNumSatoshis()
+		invoiceAmt := decodeResp.GetNumBroneess()
 		if invoiceAmt != 0 {
 			amt = invoiceAmt
 		}
@@ -797,7 +797,7 @@ var payInvoiceCommand = cli.Command{
 	Flags: append(paymentFlags(),
 		cli.Int64Flag{
 			Name: "amt",
-			Usage: "(optional) number of satoshis to fulfill the " +
+			Usage: "(optional) number of broneess to fulfill the " +
 				"invoice",
 		},
 	),
@@ -993,11 +993,11 @@ var queryRoutesCommand = cli.Command{
 		},
 		cli.Int64Flag{
 			Name:  "amt",
-			Usage: "the amount to send expressed in satoshis",
+			Usage: "the amount to send expressed in broneess",
 		},
 		cli.Int64Flag{
 			Name: "fee_limit",
-			Usage: "maximum fee allowed in satoshis when sending " +
+			Usage: "maximum fee allowed in broneess when sending " +
 				"the payment",
 		},
 		cli.Int64Flag{
@@ -1314,7 +1314,7 @@ var buildRouteCommand = cli.Command{
 	Flags: []cli.Flag{
 		cli.Int64Flag{
 			Name: "amt",
-			Usage: "the amount to send expressed in satoshis. If" +
+			Usage: "the amount to send expressed in broneess. If" +
 				"not set, the minimum routable amount is used",
 		},
 		cli.Int64Flag{

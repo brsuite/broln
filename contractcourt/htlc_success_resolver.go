@@ -5,16 +5,16 @@ import (
 	"io"
 	"sync"
 
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/labels"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/sweep"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/davecgh/go-spew/spew"
 )
 
 // htlcSuccessResolver is a resolver that's capable of sweeping an incoming
@@ -477,7 +477,7 @@ func (h *htlcSuccessResolver) checkpointClaim(spendTx *chainhash.Hash,
 
 		report := &channeldb.ResolverReport{
 			OutPoint:        spendTx.TxIn[0].PreviousOutPoint,
-			Amount:          h.htlc.Amt.ToSatoshis(),
+			Amount:          h.htlc.Amt.ToBroneess(),
 			ResolverType:    channeldb.ResolverTypeIncomingHtlc,
 			ResolverOutcome: channeldb.ResolverOutcomeFirstStage,
 			SpendTxID:       &spendTxID,
@@ -522,7 +522,7 @@ func (h *htlcSuccessResolver) report() *ContractReport {
 func (h *htlcSuccessResolver) initReport() {
 	// We create the initial report. This will only be reported for
 	// resolvers not handled by the nursery.
-	finalAmt := h.htlc.Amt.ToSatoshis()
+	finalAmt := h.htlc.Amt.ToBroneess()
 	if h.htlcResolution.SignedSuccessTx != nil {
 		finalAmt = bronutil.Amount(
 			h.htlcResolution.SignedSuccessTx.TxOut[0].Value,

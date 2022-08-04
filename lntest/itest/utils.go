@@ -7,10 +7,6 @@ import (
 	"io"
 	"time"
 
-	"github.com/brsuite/brond/rpcclient"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/go-errors/errors"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/routerrpc"
@@ -19,6 +15,10 @@ import (
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/rpcclient"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/go-errors/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -293,8 +293,8 @@ func channelCommitType(node *lntest.HarnessNode,
 // funding manager's config, which corresponds to the maximum MaxHTLC value we
 // allow users to set when updating a channel policy.
 func calculateMaxHtlc(chanCap bronutil.Amount) uint64 {
-	reserve := lnwire.NewMSatFromSatoshis(chanCap / 100)
-	max := lnwire.NewMSatFromSatoshis(chanCap) - reserve
+	reserve := lnwire.NewMSatFromBroneess(chanCap / 100)
+	max := lnwire.NewMSatFromBroneess(chanCap) - reserve
 	return uint64(max)
 }
 

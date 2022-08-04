@@ -9,7 +9,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/blockcache"
+	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/broln/kvdb"
+	"github.com/brsuite/broln/lnwallet"
+	"github.com/brsuite/broln/lnwallet/chainfee"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/txscript"
@@ -24,11 +29,6 @@ import (
 	"github.com/brsuite/bronwallet/wallet/txrules"
 	"github.com/brsuite/bronwallet/walletdb"
 	"github.com/brsuite/bronwallet/wtxmgr"
-	"github.com/brsuite/broln/blockcache"
-	"github.com/brsuite/broln/keychain"
-	"github.com/brsuite/broln/kvdb"
-	"github.com/brsuite/broln/lnwallet"
-	"github.com/brsuite/broln/lnwallet/chainfee"
 )
 
 const (
@@ -712,7 +712,7 @@ func (b *bronwallet) ImportAccount(name string, accountPubKey *hdkeychain.Extend
 // pay-to-pubkey-hash (P2PKH) scheme.
 //
 // This is a part of the WalletController interface.
-func (b *bronwallet) ImportPublicKey(pubKey *btcec.PublicKey,
+func (b *bronwallet) ImportPublicKey(pubKey *bronec.PublicKey,
 	addrType waddrmgr.AddressType) error {
 
 	return b.wallet.ImportPublicKey(pubKey, addrType)
@@ -910,7 +910,7 @@ func (b *bronwallet) ListUnspentWitness(minConfs, maxConfs int32,
 			}
 
 			// We'll ensure we properly convert the amount given in
-			// BTC to satoshis.
+			// BRON to broneess.
 			amt, err := bronutil.NewAmount(output.Amount)
 			if err != nil {
 				return nil, err

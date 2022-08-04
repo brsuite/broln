@@ -48,7 +48,7 @@ func (s *Shard) AMP() *record.AMP {
 type ShardTracker struct {
 	setID       [32]byte
 	paymentAddr [32]byte
-	totalAmt    lnwire.MilliSatoshi
+	totalAmt    lnwire.MilliBronees
 
 	sharer Sharer
 
@@ -65,7 +65,7 @@ var _ shards.ShardTracker = (*ShardTracker)(nil)
 // order for the TLV options to include with each shard to be created
 // correctly.
 func NewShardTracker(root, setID, payAddr [32]byte,
-	totalAmt lnwire.MilliSatoshi) *ShardTracker {
+	totalAmt lnwire.MilliBronees) *ShardTracker {
 
 	// Create a new seed sharer from this root.
 	rootShare := Share(root)

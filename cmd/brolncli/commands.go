@@ -15,14 +15,14 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/brsuite/broln/lnrpc"
+	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/broln/signal"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/lightninglabs/protobuf-hex-display/json"
 	"github.com/lightninglabs/protobuf-hex-display/jsonpb"
 	"github.com/lightninglabs/protobuf-hex-display/proto"
-	"github.com/brsuite/broln/lnrpc"
-	"github.com/brsuite/broln/routing/route"
-	"github.com/brsuite/broln/signal"
 	"github.com/urfave/cli"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -188,7 +188,7 @@ var estimateFeeCommand = cli.Command{
 
 	The send-json-string' param decodes addresses and the amount to send respectively in the following format:
 
-	    '{"ExampleAddr": NumCoinsInSatoshis, "SecondAddr": NumCoins}'
+	    '{"ExampleAddr": NumCoinsInBroneess, "SecondAddr": NumCoins}'
 	`,
 	Flags: []cli.Flag{
 		cli.Int64Flag{
@@ -235,7 +235,7 @@ var sendCoinsCommand = cli.Command{
 	Usage:     "Send brocoin on-chain to an address.",
 	ArgsUsage: "addr amt",
 	Description: `
-	Send amt coins in satoshis to the base58 or bech32 encoded brocoin address addr.
+	Send amt coins in broneess to the base58 or bech32 encoded brocoin address addr.
 
 	Fees used when sending the transaction can be specified via the --conf_target, or
 	--sat_per_vbyte optional flags.
@@ -257,7 +257,7 @@ var sendCoinsCommand = cli.Command{
 		},
 		cli.Int64Flag{
 			Name:  "amt",
-			Usage: "the number of brocoin denominated in satoshis to send",
+			Usage: "the number of brocoin denominated in broneess to send",
 		},
 		cli.Int64Flag{
 			Name: "conf_target",
@@ -500,7 +500,7 @@ var sendManyCommand = cli.Command{
 	The send-json-string' param decodes addresses and the amount to send
 	respectively in the following format:
 
-	    '{"ExampleAddr": NumCoinsInSatoshis, "SecondAddr": NumCoins}'
+	    '{"ExampleAddr": NumCoinsInBroneess, "SecondAddr": NumCoins}'
 	`,
 	Flags: []cli.Flag{
 		cli.Int64Flag{
@@ -1944,7 +1944,7 @@ var updateChannelPolicyCommand = cli.Command{
 	Flags: []cli.Flag{
 		cli.Int64Flag{
 			Name: "base_fee_msat",
-			Usage: "the base fee in milli-satoshis that will " +
+			Usage: "the base fee in milli-broneess that will " +
 				"be charged for each forwarded HTLC, regardless " +
 				"of payment size",
 		},

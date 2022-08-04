@@ -9,11 +9,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/brsuite/brond/wire"
-	"github.com/btcsuite/btclog"
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/go-errors/errors"
 	"github.com/brsuite/broln/build"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/contractcourt"
@@ -27,6 +22,11 @@ import (
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/queue"
 	"github.com/brsuite/broln/ticker"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronlog"
+	"github.com/brsuite/bronutil"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/go-errors/errors"
 )
 
 func init() {
@@ -71,20 +71,20 @@ const (
 // latest policy.
 type ForwardingPolicy struct {
 	// MinHTLC is the smallest HTLC that is to be forwarded.
-	MinHTLCOut lnwire.MilliSatoshi
+	MinHTLCOut lnwire.MilliBronees
 
 	// MaxHTLC is the largest HTLC that is to be forwarded.
-	MaxHTLC lnwire.MilliSatoshi
+	MaxHTLC lnwire.MilliBronees
 
-	// BaseFee is the base fee, expressed in milli-satoshi that must be
+	// BaseFee is the base fee, expressed in milli-bronees that must be
 	// paid for each incoming HTLC. This field, combined with FeeRate is
 	// used to compute the required fee for a given HTLC.
-	BaseFee lnwire.MilliSatoshi
+	BaseFee lnwire.MilliBronees
 
-	// FeeRate is the fee rate, expressed in milli-satoshi that must be
+	// FeeRate is the fee rate, expressed in milli-bronees that must be
 	// paid for each incoming HTLC. This field combined with BaseFee is
 	// used to compute the required fee for a given HTLC.
-	FeeRate lnwire.MilliSatoshi
+	FeeRate lnwire.MilliBronees
 
 	// TimeLockDelta is the absolute time-lock value, expressed in blocks,
 	// that will be subtracted from an incoming HTLC's timelock value to
@@ -108,7 +108,7 @@ type ForwardingPolicy struct {
 // TODO(roasbeef): also add in current available channel bandwidth, inverse
 // func
 func ExpectedFee(f ForwardingPolicy,
-	htlcAmt lnwire.MilliSatoshi) lnwire.MilliSatoshi {
+	htlcAmt lnwire.MilliBronees) lnwire.MilliBronees {
 
 	return f.BaseFee + (htlcAmt*f.FeeRate)/1000000
 }
@@ -401,7 +401,7 @@ type channelLink struct {
 	hodlMap map[channeldb.CircuitKey]hodlHtlc
 
 	// log is a link-specific logging instance.
-	log btclog.Logger
+	log bronlog.Logger
 
 	wg   sync.WaitGroup
 	quit chan struct{}
@@ -1308,7 +1308,7 @@ func (l *channelLink) processHtlcResolution(resolution invoices.HtlcResolution,
 // getResolutionFailure returns the wire message that a htlc resolution should
 // be failed with.
 func getResolutionFailure(resolution *invoices.HtlcFailResolution,
-	amount lnwire.MilliSatoshi) *LinkError {
+	amount lnwire.MilliBronees) *LinkError {
 
 	// If the resolution has been resolved as part of a MPP timeout,
 	// we need to fail the htlc with lnwire.FailMppTimeout.
@@ -2191,12 +2191,12 @@ func (l *channelLink) ChanID() lnwire.ChannelID {
 }
 
 // Bandwidth returns the total amount that can flow through the channel link at
-// this given instance. The value returned is expressed in millisatoshi and can
+// this given instance. The value returned is expressed in millibronees and can
 // be used by callers when making forwarding decisions to determine if a link
 // can accept an HTLC.
 //
 // NOTE: Part of the ChannelLink interface.
-func (l *channelLink) Bandwidth() lnwire.MilliSatoshi {
+func (l *channelLink) Bandwidth() lnwire.MilliBronees {
 	// Get the balance available on the channel for new HTLCs. This takes
 	// the channel reserve into account so HTLCs up to this value won't
 	// violate it.
@@ -2207,7 +2207,7 @@ func (l *channelLink) Bandwidth() lnwire.MilliSatoshi {
 // amount provided to the link. This check does not reserve a space, since
 // forwards or other payments may use the available slot, so it should be
 // considered best-effort.
-func (l *channelLink) MayAddOutgoingHtlc(amt lnwire.MilliSatoshi) error {
+func (l *channelLink) MayAddOutgoingHtlc(amt lnwire.MilliBronees) error {
 	return l.channel.MayAddOutgoingHtlc(amt)
 }
 
@@ -2215,7 +2215,7 @@ func (l *channelLink) MayAddOutgoingHtlc(amt lnwire.MilliSatoshi) error {
 // method.
 //
 // NOTE: Part of the dustHandler interface.
-func (l *channelLink) getDustSum(remote bool) lnwire.MilliSatoshi {
+func (l *channelLink) getDustSum(remote bool) lnwire.MilliBronees {
 	return l.channel.GetDustSum(remote)
 }
 
@@ -2310,7 +2310,7 @@ func (l *channelLink) UpdateForwardingPolicy(newPolicy ForwardingPolicy) {
 //
 // NOTE: Part of the ChannelLink interface.
 func (l *channelLink) CheckHtlcForward(payHash [32]byte,
-	incomingHtlcAmt, amtToForward lnwire.MilliSatoshi,
+	incomingHtlcAmt, amtToForward lnwire.MilliBronees,
 	incomingTimeout, outgoingTimeout uint32,
 	heightNow uint32) *LinkError {
 
@@ -2385,7 +2385,7 @@ func (l *channelLink) CheckHtlcForward(payHash [32]byte,
 // the violation. This call is intended to be used for locally initiated
 // payments for which there is no corresponding incoming htlc.
 func (l *channelLink) CheckHtlcTransit(payHash [32]byte,
-	amt lnwire.MilliSatoshi, timeout uint32,
+	amt lnwire.MilliBronees, timeout uint32,
 	heightNow uint32) *LinkError {
 
 	l.RLock()
@@ -2400,7 +2400,7 @@ func (l *channelLink) CheckHtlcTransit(payHash [32]byte,
 // canSendHtlc checks whether the given htlc parameters satisfy
 // the channel's amount and time lock constraints.
 func (l *channelLink) canSendHtlc(policy ForwardingPolicy,
-	payHash [32]byte, amt lnwire.MilliSatoshi, timeout uint32,
+	payHash [32]byte, amt lnwire.MilliBronees, timeout uint32,
 	heightNow uint32) *LinkError {
 
 	// As our first sanity check, we'll ensure that the passed HTLC isn't
@@ -2483,7 +2483,7 @@ func (l *channelLink) canSendHtlc(policy ForwardingPolicy,
 // Stats returns the statistics of channel link.
 //
 // NOTE: Part of the ChannelLink interface.
-func (l *channelLink) Stats() (uint64, lnwire.MilliSatoshi, lnwire.MilliSatoshi) {
+func (l *channelLink) Stats() (uint64, lnwire.MilliBronees, lnwire.MilliBronees) {
 	snapshot := l.channel.StateSnapshot()
 
 	return snapshot.ChannelCommitment.CommitHeight,

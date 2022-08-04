@@ -7,12 +7,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/tlv"
+	"github.com/brsuite/brond/bronec"
 )
 
 type nodeAmts struct {
-	nodeID *btcec.PublicKey
+	nodeID *bronec.PublicKey
 	amt1   uint64
 	amt2   uint64
 }

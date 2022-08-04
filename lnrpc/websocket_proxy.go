@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/btcsuite/btclog"
+	"github.com/brsuite/bronlog"
 	"github.com/gorilla/websocket"
 	"golang.org/x/net/context"
 )
@@ -74,7 +74,7 @@ var (
 // for URIs that are mapped to client-streaming RPC methods. We need to keep
 // track of those to make sure we initialize the request body correctly for the
 // underlying grpc-gateway library.
-func NewWebSocketProxy(h http.Handler, logger btclog.Logger,
+func NewWebSocketProxy(h http.Handler, logger bronlog.Logger,
 	pingInterval, pongWait time.Duration,
 	clientStreamingURIs []*regexp.Regexp) http.Handler {
 
@@ -102,7 +102,7 @@ func NewWebSocketProxy(h http.Handler, logger btclog.Logger,
 // WebsocketProxy provides websocket transport upgrade to compatible endpoints.
 type WebsocketProxy struct {
 	backend  http.Handler
-	logger   btclog.Logger
+	logger   bronlog.Logger
 	upgrader *websocket.Upgrader
 
 	// clientStreamingURIs holds a list of all patterns for URIs that are

@@ -7,12 +7,12 @@ import (
 	"math"
 	"time"
 
-	sphinx "github.com/brsuite/lightning-onion"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/feature"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/record"
 	"github.com/brsuite/broln/routing/route"
+	sphinx "github.com/brsuite/lightning-onion"
 )
 
 const (
@@ -41,14 +41,14 @@ const (
 // pathFinder defines the interface of a path finding algorithm.
 type pathFinder = func(g *graphParams, r *RestrictParams,
 	cfg *PathFindingConfig, source, target route.Vertex,
-	amt lnwire.MilliSatoshi, finalHtlcExpiry int32) (
+	amt lnwire.MilliBronees, finalHtlcExpiry int32) (
 	[]*channeldb.CachedEdgePolicy, error)
 
 var (
 	// DefaultAttemptCost is the default fixed virtual cost in path finding
 	// of a failed payment attempt. It is used to trade off potentially
 	// better routes against their probability of succeeding.
-	DefaultAttemptCost = lnwire.NewMSatFromSatoshis(100)
+	DefaultAttemptCost = lnwire.NewMSatFromBroneess(100)
 
 	// DefaultAttemptCostPPM is the default proportional virtual cost in
 	// path finding weight units of executing a payment attempt that fails.
@@ -84,8 +84,8 @@ type edgePolicyWithSource struct {
 // such as amounts and cltvs, as well as more complex features like destination
 // custom records and payment address.
 type finalHopParams struct {
-	amt         lnwire.MilliSatoshi
-	totalAmt    lnwire.MilliSatoshi
+	amt         lnwire.MilliBronees
+	totalAmt    lnwire.MilliBronees
 	cltvDelta   uint16
 	records     record.CustomSet
 	paymentAddr *[32]byte
@@ -117,7 +117,7 @@ func newRoute(sourceVertex route.Vertex,
 		// the *next* hop. Since we're going to be walking the route
 		// backwards below, this next hop gets closer and closer to the
 		// sender of the payment.
-		nextIncomingAmount lnwire.MilliSatoshi
+		nextIncomingAmount lnwire.MilliBronees
 	)
 
 	pathLength := len(pathEdges)
@@ -132,8 +132,8 @@ func newRoute(sourceVertex route.Vertex,
 		// contributions from the preceding hops back to the sender as
 		// we compute the route in reverse.
 		var (
-			amtToForward     lnwire.MilliSatoshi
-			fee              lnwire.MilliSatoshi
+			amtToForward     lnwire.MilliBronees
+			fee              lnwire.MilliBronees
 			outgoingTimeLock uint32
 			tlvPayload       bool
 			customRecords    record.CustomSet
@@ -169,7 +169,7 @@ func newRoute(sourceVertex route.Vertex,
 
 			// Fee is not part of the hop payload, but only used for
 			// reporting through RPC. Set to zero for the final hop.
-			fee = lnwire.MilliSatoshi(0)
+			fee = lnwire.MilliBronees(0)
 
 			// As this is the last hop, we'll use the specified
 			// final CLTV delta value instead of the value from the
@@ -260,7 +260,7 @@ func newRoute(sourceVertex route.Vertex,
 // channels with shorter time lock deltas and shorter (hops) routes in general.
 // RiskFactor controls the influence of time lock on route selection. This is
 // currently a fixed value, but might be configurable in the future.
-func edgeWeight(lockedAmt lnwire.MilliSatoshi, fee lnwire.MilliSatoshi,
+func edgeWeight(lockedAmt lnwire.MilliBronees, fee lnwire.MilliBronees,
 	timeLockDelta uint16) int64 {
 	// timeLockPenalty is the penalty for the time lock delta of this channel.
 	// It is controlled by RiskFactorBillionths and scales proportional
@@ -298,11 +298,11 @@ type RestrictParams struct {
 	// ProbabilitySource is a callback that is expected to return the
 	// success probability of traversing the channel from the node.
 	ProbabilitySource func(route.Vertex, route.Vertex,
-		lnwire.MilliSatoshi) float64
+		lnwire.MilliBronees) float64
 
 	// FeeLimit is a maximum fee amount allowed to be used on the path from
 	// the source to the target.
-	FeeLimit lnwire.MilliSatoshi
+	FeeLimit lnwire.MilliBronees
 
 	// OutgoingChannelIDs is the list of channels that are allowed for the
 	// first hop. If nil, any channel may be used.
@@ -338,7 +338,7 @@ type PathFindingConfig struct {
 	// AttemptCost is the fixed virtual cost in path finding of a failed
 	// payment attempt. It is used to trade off potentially better routes
 	// against their probability of succeeding.
-	AttemptCost lnwire.MilliSatoshi
+	AttemptCost lnwire.MilliBronees
 
 	// AttemptCostPPM is the proportional virtual cost in path finding of a
 	// failed payment attempt. It is used to trade off potentially better
@@ -356,9 +356,9 @@ type PathFindingConfig struct {
 // available balance.
 func getOutgoingBalance(node route.Vertex, outgoingChans map[uint64]struct{},
 	bandwidthHints bandwidthHints,
-	g routingGraph) (lnwire.MilliSatoshi, lnwire.MilliSatoshi, error) {
+	g routingGraph) (lnwire.MilliBronees, lnwire.MilliBronees, error) {
 
-	var max, total lnwire.MilliSatoshi
+	var max, total lnwire.MilliBronees
 	cb := func(channel *channeldb.DirectedChannel) error {
 		if !channel.OutPolicySet {
 			return nil
@@ -381,7 +381,7 @@ func getOutgoingBalance(node route.Vertex, outgoingChans map[uint64]struct{},
 		// This can happen when a channel is added to the graph after
 		// we've already queried the bandwidth hints.
 		if !ok {
-			bandwidth = lnwire.NewMSatFromSatoshis(channel.Capacity)
+			bandwidth = lnwire.NewMSatFromBroneess(channel.Capacity)
 		}
 
 		if bandwidth > max {
@@ -413,7 +413,7 @@ func getOutgoingBalance(node route.Vertex, outgoingChans map[uint64]struct{},
 // path and accurately check the amount to forward at every node against the
 // available bandwidth.
 func findPath(g *graphParams, r *RestrictParams, cfg *PathFindingConfig,
-	source, target route.Vertex, amt lnwire.MilliSatoshi,
+	source, target route.Vertex, amt lnwire.MilliBronees,
 	finalHtlcExpiry int32) ([]*channeldb.CachedEdgePolicy, error) {
 
 	// Pathfinding can be a significant portion of the total payment
@@ -620,7 +620,7 @@ func findPath(g *graphParams, r *RestrictParams, cfg *PathFindingConfig,
 		// Also determine the time lock delta that will be added to the
 		// route if fromVertex is selected. If fromVertex is the source
 		// node, no additional timelock is required.
-		var fee lnwire.MilliSatoshi
+		var fee lnwire.MilliBronees
 		var timeLockDelta uint16
 		if fromVertex != source {
 			fee = edge.ComputeFee(amountToSend)

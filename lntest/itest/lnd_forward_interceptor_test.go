@@ -7,14 +7,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/routerrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lntest/wait"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -511,7 +511,7 @@ func (c *interceptorTestContext) prepareTestCases() []*interceptorTestCase {
 func (c *interceptorTestContext) openChannel(from, to *lntest.HarnessNode,
 	chanSize bronutil.Amount) {
 
-	c.net.SendCoins(c.t.t, bronutil.SatoshiPerBrocoin, from)
+	c.net.SendCoins(c.t.t, bronutil.BroneesPerBrocoin, from)
 
 	chanPoint := openChannelAndAssert(
 		c.t, c.net, from, to,

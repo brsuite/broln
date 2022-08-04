@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/brond/bronec"
 )
 
 var (
@@ -30,7 +30,7 @@ func (m *mockKeyRing) DeriveKey(keyLoc keychain.KeyLocator) (keychain.KeyDescrip
 		return keychain.KeyDescriptor{}, fmt.Errorf("fail")
 	}
 
-	_, pub := btcec.PrivKeyFromBytes(btcec.S256(), testWalletPrivKey)
+	_, pub := bronec.PrivKeyFromBytes(bronec.S256(), testWalletPrivKey)
 	return keychain.KeyDescriptor{
 		PubKey: pub,
 	}, nil

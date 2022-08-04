@@ -3,10 +3,10 @@ package autopilot
 import (
 	"net"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/brsuite/broln/lnwire"
 )
 
 // DefaultConfTarget is the default confirmation target for autopilot channels.
@@ -44,7 +44,7 @@ type LocalChannel struct {
 	// BOLT-0007.
 	ChanID lnwire.ShortChannelID
 
-	// Balance is the local balance of the channel expressed in satoshis.
+	// Balance is the local balance of the channel expressed in broneess.
 	Balance bronutil.Amount
 
 	// Node is the peer that this channel has been established with.
@@ -63,7 +63,7 @@ type ChannelEdge struct {
 	// BOLT-0007.
 	ChanID lnwire.ShortChannelID
 
-	// Capacity is the capacity of the channel expressed in satoshis.
+	// Capacity is the capacity of the channel expressed in broneess.
 	Capacity bronutil.Amount
 
 	// Peer is the peer that this channel creates an edge to in the channel
@@ -107,7 +107,7 @@ type AttachmentDirective struct {
 	NodeID NodeID
 
 	// ChanAmt is the size of the channel that should be opened, expressed
-	// in satoshis.
+	// in broneess.
 	ChanAmt bronutil.Amount
 
 	// Addrs is a list of addresses that the target peer may be reachable
@@ -209,7 +209,7 @@ type ChannelController interface {
 	// slightly less to account for fees. This function should un-block
 	// immediately after the funding transaction that marks the channel
 	// open has been broadcast.
-	OpenChannel(target *btcec.PublicKey, amt bronutil.Amount) error
+	OpenChannel(target *bronec.PublicKey, amt bronutil.Amount) error
 
 	// CloseChannel attempts to close out the target channel.
 	//

@@ -10,7 +10,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/connmgr"
 	"github.com/brsuite/brond/txscript"
@@ -262,7 +262,7 @@ type Config struct {
 
 	// DisconnectPeer is used to disconnect this peer if the cooperative close
 	// process fails.
-	DisconnectPeer func(*btcec.PublicKey) error
+	DisconnectPeer func(*bronec.PublicKey) error
 
 	// GenNodeAnnouncement is used to send our node announcement to the remote
 	// on startup.
@@ -1631,7 +1631,7 @@ func messageSummary(msg lnwire.Message) string {
 
 	case *lnwire.ClosingSigned:
 		return fmt.Sprintf("chan_id=%v, fee_sat=%v", msg.ChannelID,
-			msg.FeeSatoshis)
+			msg.FeeBroneess)
 
 	case *lnwire.UpdateAddHTLC:
 		return fmt.Sprintf("chan_id=%v, id=%v, amt=%v, expiry=%v, hash=%x",
@@ -3109,7 +3109,7 @@ func (p *Brontide) PubKey() [33]byte {
 // IdentityKey returns the public key of the remote peer.
 //
 // NOTE: Part of the lnpeer.Peer interface.
-func (p *Brontide) IdentityKey() *btcec.PublicKey {
+func (p *Brontide) IdentityKey() *bronec.PublicKey {
 	return p.cfg.Addr.IdentityKey
 }
 

@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/btcjson"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/chaincfg/chainhash"
@@ -25,10 +25,10 @@ import (
 	"github.com/brsuite/bronwallet/walletdb"
 	_ "github.com/brsuite/bronwallet/walletdb/bdb" // Required to register the boltdb walletdb implementation.
 
-	"github.com/brsuite/neutrino"
 	"github.com/brsuite/broln/blockcache"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/kvdb"
+	"github.com/brsuite/neutrino"
 )
 
 var (
@@ -41,7 +41,7 @@ var (
 		0x1e, 0xb, 0x4c, 0xfd, 0x9e, 0xc5, 0x8c, 0xe9,
 	}
 
-	privKey, pubKey = btcec.PrivKeyFromBytes(btcec.S256(), testPrivKey)
+	privKey, pubKey = bronec.PrivKeyFromBytes(bronec.S256(), testPrivKey)
 	addrPk, _       = bronutil.NewAddressPubKey(pubKey.SerializeCompressed(),
 		netParams)
 	testAddr = addrPk.AddressPubKeyHash()

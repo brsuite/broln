@@ -19,10 +19,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/bronutil"
-	flags "github.com/jessevdk/go-flags"
-	"github.com/brsuite/neutrino"
 	"github.com/brsuite/broln/autopilot"
 	"github.com/brsuite/broln/build"
 	"github.com/brsuite/broln/chainreg"
@@ -41,6 +37,10 @@ import (
 	"github.com/brsuite/broln/routing"
 	"github.com/brsuite/broln/signal"
 	"github.com/brsuite/broln/tor"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/bronutil"
+	"github.com/brsuite/neutrino"
+	flags "github.com/jessevdk/go-flags"
 )
 
 const (
@@ -183,26 +183,26 @@ const (
 )
 
 var (
-	// DefaultbrolnDir is the default directory where broln tries to find its
+	// DefaultBrolnDir is the default directory where broln tries to find its
 	// configuration file and store its data. This is a directory in the
 	// user's application data, for example:
 	//   C:\Users\<username>\AppData\Local\broln on Windows
 	//   ~/.broln on Linux
 	//   ~/Library/Application Support/broln on MacOS
-	DefaultbrolnDir = bronutil.AppDataDir("broln", false)
+	DefaultBrolnDir = bronutil.AppDataDir("broln", false)
 
 	// DefaultConfigFile is the default full path of broln's configuration
 	// file.
-	DefaultConfigFile = filepath.Join(DefaultbrolnDir, lncfg.DefaultConfigFilename)
+	DefaultConfigFile = filepath.Join(DefaultBrolnDir, lncfg.DefaultConfigFilename)
 
-	defaultDataDir = filepath.Join(DefaultbrolnDir, defaultDataDirname)
-	defaultLogDir  = filepath.Join(DefaultbrolnDir, defaultLogDirname)
+	defaultDataDir = filepath.Join(DefaultBrolnDir, defaultDataDirname)
+	defaultLogDir  = filepath.Join(DefaultBrolnDir, defaultLogDirname)
 
 	defaultTowerDir = filepath.Join(defaultDataDir, defaultTowerSubDirname)
 
-	defaultTLSCertPath    = filepath.Join(DefaultbrolnDir, defaultTLSCertFilename)
-	defaultTLSKeyPath     = filepath.Join(DefaultbrolnDir, defaultTLSKeyFilename)
-	defaultLetsEncryptDir = filepath.Join(DefaultbrolnDir, defaultLetsEncryptDirname)
+	defaultTLSCertPath    = filepath.Join(DefaultBrolnDir, defaultTLSCertFilename)
+	defaultTLSKeyPath     = filepath.Join(DefaultBrolnDir, defaultTLSKeyFilename)
+	defaultLetsEncryptDir = filepath.Join(DefaultBrolnDir, defaultLetsEncryptDirname)
 
 	defaultBrondDir         = bronutil.AppDataDir("brond", false)
 	defaultBrondRPCCertFile = filepath.Join(defaultBrondDir, "rpc.cert")
@@ -232,7 +232,7 @@ var (
 type Config struct {
 	ShowVersion bool `short:"V" long:"version" description:"Display version information and exit"`
 
-	brolnDir       string `long:"brolndir" description:"The base directory that contains broln's data, logs, configuration file, etc."`
+	BrolnDir     string `long:"brolndir" description:"The base directory that contains broln's data, logs, configuration file, etc."`
 	ConfigFile   string `short:"C" long:"configfile" description:"Path to configuration file"`
 	DataDir      string `short:"b" long:"datadir" description:"The directory to store broln's data within"`
 	SyncFreelist bool   `long:"sync-freelist" description:"Whether the databases used within broln should sync their freelist to disk. This is disabled by default resulting in improved memory performance during operation, but with an increase in startup time."`
@@ -296,12 +296,12 @@ type Config struct {
 	FeeURL string `long:"feeurl" description:"Optional URL for external fee estimation. If no URL is specified, the method for fee estimation will depend on the chosen backend and network. Must be set for neutrino on mainnet."`
 
 	Brocoin      *lncfg.Chain    `group:"Brocoin" namespace:"brocoin"`
-	BrondMode     *lncfg.Brond     `group:"brond" namespace:"brond"`
+	BrondMode    *lncfg.Brond    `group:"brond" namespace:"brond"`
 	BrocoindMode *lncfg.Brocoind `group:"brocoind" namespace:"brocoind"`
 	NeutrinoMode *lncfg.Neutrino `group:"neutrino" namespace:"neutrino"`
 
 	Litecoin      *lncfg.Chain    `group:"Litecoin" namespace:"litecoin"`
-	LtcdMode      *lncfg.Brond     `group:"ltcd" namespace:"ltcd"`
+	LtcdMode      *lncfg.Brond    `group:"ltcd" namespace:"ltcd"`
 	LitecoindMode *lncfg.Brocoind `group:"litecoind" namespace:"litecoind"`
 
 	BlockCacheSize uint64 `long:"blockcachesize" description:"The maximum capacity of the block cache"`
@@ -332,8 +332,8 @@ type Config struct {
 	HeightHintCacheQueryDisable   bool          `long:"height-hint-cache-query-disable" description:"Disable queries from the height-hint cache to try to recover channels stuck in the pending close state. Disabling height hint queries may cause longer chain rescans, resulting in a performance hit. Unset this after channels are unstuck so you can get better performance again."`
 	Alias                         string        `long:"alias" description:"The node alias. Used as a moniker by peers and intelligence services"`
 	Color                         string        `long:"color" description:"The color of the node in hex format (i.e. '#3399FF'). Used to customize node appearance in intelligence services"`
-	MinChanSize                   int64         `long:"minchansize" description:"The smallest channel size (in satoshis) that we should accept. Incoming channels smaller than this will be rejected"`
-	MaxChanSize                   int64         `long:"maxchansize" description:"The largest channel size (in satoshis) that we should accept. Incoming channels larger than this will be rejected"`
+	MinChanSize                   int64         `long:"minchansize" description:"The smallest channel size (in broneess) that we should accept. Incoming channels smaller than this will be rejected"`
+	MaxChanSize                   int64         `long:"maxchansize" description:"The largest channel size (in broneess) that we should accept. Incoming channels larger than this will be rejected"`
 	CoopCloseTargetConfs          uint32        `long:"coop-close-target-confs" description:"The target number of blocks that a cooperative channel close transaction should confirm in. This is used to estimate the fee to use as the lower bound during fee negotiation for the channel closure."`
 
 	ChannelCommitInterval  time.Duration `long:"channel-commit-interval" description:"The maximum time that is allowed to pass between receiving a channel state update and signing the next commitment. Setting this to a longer duration allows for more efficient channel operations at the cost of latency."`
@@ -374,7 +374,7 @@ type Config struct {
 
 	GcCanceledInvoicesOnTheFly bool `long:"gc-canceled-invoices-on-the-fly" description:"If true, we'll delete newly canceled invoices on the fly."`
 
-	DustThreshold uint64 `long:"dust-threshold" description:"Sets the dust sum threshold in satoshis for a channel after which dust HTLC's will be failed."`
+	DustThreshold uint64 `long:"dust-threshold" description:"Sets the dust sum threshold in broneess for a channel after which dust HTLC's will be failed."`
 
 	Invoices *lncfg.Invoices `group:"invoices" namespace:"invoices"`
 
@@ -426,7 +426,7 @@ type Config struct {
 // DefaultConfig returns all default values for the Config struct.
 func DefaultConfig() Config {
 	return Config{
-		brolnDir:            DefaultbrolnDir,
+		BrolnDir:          DefaultBrolnDir,
 		ConfigFile:        DefaultConfigFile,
 		DataDir:           defaultDataDir,
 		DebugLevel:        defaultLogLevel,
@@ -585,7 +585,7 @@ func DefaultConfig() Config {
 		MaxOutgoingCltvExpiry:   htlcswitch.DefaultMaxOutgoingCltvExpiry,
 		MaxChannelFeeAllocation: htlcswitch.DefaultMaxLinkFeeAllocation,
 		MaxCommitFeeRateAnchors: lnwallet.DefaultAnchorsCommitMaxFeeRateSatPerVByte,
-		DustThreshold:           uint64(htlcswitch.DefaultDustThreshold.ToSatoshis()),
+		DustThreshold:           uint64(htlcswitch.DefaultDustThreshold.ToBroneess()),
 		LogWriter:               build.NewRotatingLogWriter(),
 		DB:                      lncfg.DefaultDB(),
 		Cluster:                 lncfg.DefaultCluster(),
@@ -631,9 +631,9 @@ func LoadConfig(interceptor signal.Interceptor) (*Config, error) {
 	// use the default config file path. However, if the user has modified
 	// their brolndir, then we should assume they intend to use the config
 	// file within it.
-	configFileDir := CleanAndExpandPath(preCfg.brolnDir)
+	configFileDir := CleanAndExpandPath(preCfg.BrolnDir)
 	configFilePath := CleanAndExpandPath(preCfg.ConfigFile)
-	if configFileDir != DefaultbrolnDir {
+	if configFileDir != DefaultBrolnDir {
 		if configFilePath == DefaultConfigFile {
 			configFilePath = filepath.Join(
 				configFileDir, lncfg.DefaultConfigFilename,
@@ -720,8 +720,8 @@ func ValidateConfig(cfg Config, interceptor signal.Interceptor, fileParser,
 
 	// If the provided broln directory is not the default, we'll modify the
 	// path to all of the files and directories that will live within it.
-	brolnDir := CleanAndExpandPath(cfg.brolnDir)
-	if brolnDir != DefaultbrolnDir {
+	brolnDir := CleanAndExpandPath(cfg.BrolnDir)
+	if brolnDir != DefaultBrolnDir {
 		cfg.DataDir = filepath.Join(brolnDir, defaultDataDirname)
 		cfg.LetsEncryptDir = filepath.Join(
 			brolnDir, defaultLetsEncryptDirname,
@@ -868,15 +868,15 @@ func ValidateConfig(cfg Config, interceptor signal.Interceptor, fileParser,
 	}
 
 	// Ensure that --maxchansize is properly handled when set by user.
-	// For non-Wumbo channels this limit remains 16777215 satoshis by default
+	// For non-Wumbo channels this limit remains 16777215 broneess by default
 	// as specified in BOLT-02. For wumbo channels this limit is 1,000,000,000.
-	// satoshis (10 BTC). Always enforce --maxchansize explicitly set by user.
+	// broneess (10 BRON). Always enforce --maxchansize explicitly set by user.
 	// If unset (marked by 0 value), then enforce proper default.
 	if cfg.MaxChanSize == 0 {
 		if cfg.ProtocolOptions.Wumbo() {
-			cfg.MaxChanSize = int64(funding.MaxBtcFundingAmountWumbo)
+			cfg.MaxChanSize = int64(funding.MaxBronFundingAmountWumbo)
 		} else {
-			cfg.MaxChanSize = int64(funding.MaxBtcFundingAmount)
+			cfg.MaxChanSize = int64(funding.MaxBronFundingAmount)
 		}
 	}
 
@@ -1196,7 +1196,7 @@ func ValidateConfig(cfg Config, interceptor signal.Interceptor, fileParser,
 		}
 
 		err := cfg.Brocoin.Validate(
-			minTimeLockDelta, funding.MinBtcRemoteDelay,
+			minTimeLockDelta, funding.MinBronRemoteDelay,
 		)
 		if err != nil {
 			return nil, mkErr("error validating brocoin params: %v",

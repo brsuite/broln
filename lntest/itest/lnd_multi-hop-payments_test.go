@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/routerrpc"
 	"github.com/brsuite/broln/lntest"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 func testMultiHopPayments(net *lntest.NetworkHarness, t *harnessTest) {
@@ -18,7 +18,7 @@ func testMultiHopPayments(net *lntest.NetworkHarness, t *harnessTest) {
 	const chanAmt = bronutil.Amount(100000)
 	var networkChans []*lnrpc.ChannelPoint
 
-	// Open a channel with 100k satoshis between Alice and Bob with Alice
+	// Open a channel with 100k broneess between Alice and Bob with Alice
 	// being the sole funder of the channel.
 	chanPointAlice := openChannelAndAssert(
 		t, net, net.Alice, net.Bob,
@@ -50,7 +50,7 @@ func testMultiHopPayments(net *lntest.NetworkHarness, t *harnessTest) {
 	defer shutdownAndAssert(net, t, dave)
 
 	net.ConnectNodes(t.t, dave, net.Alice)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, dave)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, dave)
 
 	chanPointDave := openChannelAndAssert(
 		t, net, dave, net.Alice,
@@ -74,7 +74,7 @@ func testMultiHopPayments(net *lntest.NetworkHarness, t *harnessTest) {
 	defer shutdownAndAssert(net, t, carol)
 
 	net.ConnectNodes(t.t, carol, dave)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	chanPointCarol := openChannelAndAssert(
 		t, net, carol, dave,
@@ -117,7 +117,7 @@ func testMultiHopPayments(net *lntest.NetworkHarness, t *harnessTest) {
 	}
 
 	// Create 5 invoices for Bob, which expect a payment from Carol for 1k
-	// satoshis with a different preimage each time.
+	// broneess with a different preimage each time.
 	const numPayments = 5
 	const paymentAmt = 1000
 	payReqs, _, _, err := createPayReqs(
@@ -201,7 +201,7 @@ func testMultiHopPayments(net *lntest.NetworkHarness, t *harnessTest) {
 	}
 
 	// At this point all the channels within our proto network should be
-	// shifted by 5k satoshis in the direction of Bob, the sink within the
+	// shifted by 5k broneess in the direction of Bob, the sink within the
 	// payment flow generated above. The order of asserts corresponds to
 	// increasing of time is needed to embed the HTLC in commitment
 	// transaction, in channel Carol->David->Alice->Bob, order is Bob,
@@ -249,7 +249,7 @@ func testMultiHopPayments(net *lntest.NetworkHarness, t *harnessTest) {
 	// was properly updated.
 
 	// First, check that the FeeReport response shows the proper fees
-	// accrued over each time range. Dave should've earned 170 satoshi for
+	// accrued over each time range. Dave should've earned 170 bronees for
 	// each of the forwarded payments.
 	ctxt, _ = context.WithTimeout(ctxb, defaultTimeout)
 	feeReport, err := dave.FeeReport(ctxt, &lnrpc.FeeReportRequest{})
@@ -286,7 +286,7 @@ func testMultiHopPayments(net *lntest.NetworkHarness, t *harnessTest) {
 	}
 	expectedForwardingFee := uint64(expectedFeeDave / numPayments)
 	for _, event := range fwdingHistory.ForwardingEvents {
-		// Each event should show a fee of 170 satoshi.
+		// Each event should show a fee of 170 bronees.
 		if event.Fee != expectedForwardingFee {
 			t.Fatalf("fee mismatch:  expected %v, got %v",
 				expectedForwardingFee, event.Fee)

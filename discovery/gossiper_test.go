@@ -16,12 +16,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/go-errors/errors"
 	"github.com/brsuite/broln/batch"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
@@ -35,6 +29,12 @@ import (
 	"github.com/brsuite/broln/routing"
 	"github.com/brsuite/broln/routing/route"
 	"github.com/brsuite/broln/ticker"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/go-errors/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -43,7 +43,7 @@ var (
 		Port: 9000}
 	testAddrs    = []net.Addr{testAddr}
 	testFeatures = lnwire.NewRawFeatureVector()
-	testSig      = &btcec.Signature{
+	testSig      = &bronec.Signature{
 		R: new(big.Int),
 		S: new(big.Int),
 	}
@@ -51,22 +51,22 @@ var (
 	_, _       = testSig.S.SetString("18801056069249825825291287104931333862866033135609736119018462340006816851118", 10)
 	testKeyLoc = keychain.KeyLocator{Family: keychain.KeyFamilyNodeKey}
 
-	selfKeyPriv, _ = btcec.NewPrivateKey(btcec.S256())
+	selfKeyPriv, _ = bronec.NewPrivateKey(bronec.S256())
 	selfKeyDesc    = &keychain.KeyDescriptor{
 		PubKey:     selfKeyPriv.PubKey(),
 		KeyLocator: testKeyLoc,
 	}
 
-	brocoinKeyPriv1, _ = btcec.NewPrivateKey(btcec.S256())
+	brocoinKeyPriv1, _ = bronec.NewPrivateKey(bronec.S256())
 	brocoinKeyPub1     = brocoinKeyPriv1.PubKey()
 
-	remoteKeyPriv1, _ = btcec.NewPrivateKey(btcec.S256())
+	remoteKeyPriv1, _ = bronec.NewPrivateKey(bronec.S256())
 	remoteKeyPub1     = remoteKeyPriv1.PubKey()
 
-	brocoinKeyPriv2, _ = btcec.NewPrivateKey(btcec.S256())
+	brocoinKeyPriv2, _ = bronec.NewPrivateKey(bronec.S256())
 	brocoinKeyPub2     = brocoinKeyPriv2.PubKey()
 
-	remoteKeyPriv2, _ = btcec.NewPrivateKey(btcec.S256())
+	remoteKeyPriv2, _ = bronec.NewPrivateKey(bronec.S256())
 
 	trickleDelay     = time.Millisecond * 100
 	retransmitDelay  = time.Hour * 1
@@ -497,7 +497,7 @@ func createRemoteAnnouncements(blockHeight uint32) (*annBatch, error) {
 	return createAnnouncements(blockHeight, remoteKeyPriv1, remoteKeyPriv2)
 }
 
-func createAnnouncements(blockHeight uint32, key1, key2 *btcec.PrivateKey) (*annBatch, error) {
+func createAnnouncements(blockHeight uint32, key1, key2 *bronec.PrivateKey) (*annBatch, error) {
 	var err error
 	var batch annBatch
 	timestamp := testTimestamp
@@ -551,7 +551,7 @@ func createAnnouncements(blockHeight uint32, key1, key2 *btcec.PrivateKey) (*ann
 
 }
 
-func createNodeAnnouncement(priv *btcec.PrivateKey,
+func createNodeAnnouncement(priv *bronec.PrivateKey,
 	timestamp uint32, extraBytes ...[]byte) (*lnwire.NodeAnnouncement, error) {
 
 	var err error
@@ -588,12 +588,12 @@ func createNodeAnnouncement(priv *btcec.PrivateKey,
 
 func createUpdateAnnouncement(blockHeight uint32,
 	flags lnwire.ChanUpdateChanFlags,
-	nodeKey *btcec.PrivateKey, timestamp uint32,
+	nodeKey *bronec.PrivateKey, timestamp uint32,
 	extraBytes ...[]byte) (*lnwire.ChannelUpdate, error) {
 
 	var err error
 
-	htlcMinMsat := lnwire.MilliSatoshi(prand.Int63())
+	htlcMinMsat := lnwire.MilliBronees(prand.Int63())
 	a := &lnwire.ChannelUpdate{
 		ShortChannelID: lnwire.ShortChannelID{
 			BlockHeight: blockHeight,
@@ -622,7 +622,7 @@ func createUpdateAnnouncement(blockHeight uint32,
 	return a, nil
 }
 
-func signUpdate(nodeKey *btcec.PrivateKey, a *lnwire.ChannelUpdate) error {
+func signUpdate(nodeKey *bronec.PrivateKey, a *lnwire.ChannelUpdate) error {
 	signer := mock.SingleSigner{Privkey: nodeKey}
 	sig, err := netann.SignAnnouncement(&signer, testKeyLoc, a)
 	if err != nil {
@@ -638,7 +638,7 @@ func signUpdate(nodeKey *btcec.PrivateKey, a *lnwire.ChannelUpdate) error {
 }
 
 func createAnnouncementWithoutProof(blockHeight uint32,
-	key1, key2 *btcec.PublicKey,
+	key1, key2 *bronec.PublicKey,
 	extraBytes ...[]byte) *lnwire.ChannelAnnouncement {
 
 	a := &lnwire.ChannelAnnouncement{
@@ -666,7 +666,7 @@ func createRemoteChannelAnnouncement(blockHeight uint32,
 	return createChannelAnnouncement(blockHeight, remoteKeyPriv1, remoteKeyPriv2, extraBytes...)
 }
 
-func createChannelAnnouncement(blockHeight uint32, key1, key2 *btcec.PrivateKey,
+func createChannelAnnouncement(blockHeight uint32, key1, key2 *bronec.PrivateKey,
 	extraBytes ...[]byte) (*lnwire.ChannelAnnouncement, error) {
 
 	a := createAnnouncementWithoutProof(blockHeight, key1.PubKey(), key2.PubKey(), extraBytes...)
@@ -758,7 +758,7 @@ func createTestCtx(startHeight uint32) (*testCtx, func(), error) {
 		NotifyWhenOnline: func(target [33]byte,
 			peerChan chan<- lnpeer.Peer) {
 
-			pk, _ := btcec.ParsePubKey(target[:], btcec.S256())
+			pk, _ := bronec.ParsePubKey(target[:], bronec.S256())
 			peerChan <- &mockPeer{pk, nil, nil}
 		},
 		NotifyWhenOffline: func(_ [33]byte) <-chan struct{} {
@@ -821,7 +821,7 @@ func TestProcessAnnouncement(t *testing.T) {
 	}
 	defer cleanup()
 
-	assertSenderExistence := func(sender *btcec.PublicKey, msg msgWithSenders) {
+	assertSenderExistence := func(sender *bronec.PublicKey, msg msgWithSenders) {
 		if _, ok := msg.senders[route.NewVertex(sender)]; !ok {
 			t.Fatalf("sender=%x not present in %v",
 				sender.SerializeCompressed(), spew.Sdump(msg))
@@ -973,7 +973,7 @@ func TestSignatureAnnouncementLocalFirst(t *testing.T) {
 	ctx.gossiper.reliableSender.cfg.NotifyWhenOnline = func(target [33]byte,
 		peerChan chan<- lnpeer.Peer) {
 
-		pk, _ := btcec.ParsePubKey(target[:], btcec.S256())
+		pk, _ := bronec.ParsePubKey(target[:], bronec.S256())
 
 		select {
 		case peerChan <- &mockPeer{pk, sentMsgs, ctx.gossiper.quit}:
@@ -986,7 +986,7 @@ func TestSignatureAnnouncementLocalFirst(t *testing.T) {
 		t.Fatalf("can't generate announcements: %v", err)
 	}
 
-	remoteKey, err := btcec.ParsePubKey(batch.nodeAnn2.NodeID[:], btcec.S256())
+	remoteKey, err := bronec.ParsePubKey(batch.nodeAnn2.NodeID[:], bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to parse pubkey: %v", err)
 	}
@@ -1166,7 +1166,7 @@ func TestOrphanSignatureAnnouncement(t *testing.T) {
 	ctx.gossiper.reliableSender.cfg.NotifyWhenOnline = func(target [33]byte,
 		peerChan chan<- lnpeer.Peer) {
 
-		pk, _ := btcec.ParsePubKey(target[:], btcec.S256())
+		pk, _ := bronec.ParsePubKey(target[:], bronec.S256())
 
 		select {
 		case peerChan <- &mockPeer{pk, sentMsgs, ctx.gossiper.quit}:
@@ -1179,7 +1179,7 @@ func TestOrphanSignatureAnnouncement(t *testing.T) {
 		t.Fatalf("can't generate announcements: %v", err)
 	}
 
-	remoteKey, err := btcec.ParsePubKey(batch.nodeAnn2.NodeID[:], btcec.S256())
+	remoteKey, err := bronec.ParsePubKey(batch.nodeAnn2.NodeID[:], bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to parse pubkey: %v", err)
 	}
@@ -1369,7 +1369,7 @@ func TestSignatureAnnouncementRetryAtStartup(t *testing.T) {
 		t.Fatalf("can't generate announcements: %v", err)
 	}
 
-	remoteKey, err := btcec.ParsePubKey(batch.nodeAnn2.NodeID[:], btcec.S256())
+	remoteKey, err := bronec.ParsePubKey(batch.nodeAnn2.NodeID[:], bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to parse pubkey: %v", err)
 	}
@@ -1586,7 +1586,7 @@ func TestSignatureAnnouncementFullProofWhenRemoteProof(t *testing.T) {
 		t.Fatalf("can't generate announcements: %v", err)
 	}
 
-	remoteKey, err := btcec.ParsePubKey(batch.nodeAnn2.NodeID[:], btcec.S256())
+	remoteKey, err := bronec.ParsePubKey(batch.nodeAnn2.NodeID[:], bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to parse pubkey: %v", err)
 	}
@@ -2437,7 +2437,7 @@ func TestReceiveRemoteChannelUpdateFirst(t *testing.T) {
 		t.Fatalf("can't generate announcements: %v", err)
 	}
 
-	remoteKey, err := btcec.ParsePubKey(batch.nodeAnn2.NodeID[:], btcec.S256())
+	remoteKey, err := bronec.ParsePubKey(batch.nodeAnn2.NodeID[:], bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to parse pubkey: %v", err)
 	}
@@ -2822,7 +2822,7 @@ func TestRetransmit(t *testing.T) {
 		t.Fatalf("can't generate announcements: %v", err)
 	}
 
-	remoteKey, err := btcec.ParsePubKey(batch.nodeAnn2.NodeID[:], btcec.S256())
+	remoteKey, err := bronec.ParsePubKey(batch.nodeAnn2.NodeID[:], bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to parse pubkey: %v", err)
 	}
@@ -2934,8 +2934,8 @@ func TestNodeAnnouncementNoChannels(t *testing.T) {
 		t.Fatalf("can't generate announcements: %v", err)
 	}
 
-	remoteKey, err := btcec.ParsePubKey(batch.nodeAnn2.NodeID[:],
-		btcec.S256())
+	remoteKey, err := bronec.ParsePubKey(batch.nodeAnn2.NodeID[:],
+		bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to parse pubkey: %v", err)
 	}
@@ -3129,7 +3129,7 @@ func TestSendChannelUpdateReliably(t *testing.T) {
 	// We'll also create two keys, one for ourselves and another for the
 	// remote party.
 
-	remoteKey, err := btcec.ParsePubKey(batch.nodeAnn2.NodeID[:], btcec.S256())
+	remoteKey, err := bronec.ParsePubKey(batch.nodeAnn2.NodeID[:], bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to parse pubkey: %v", err)
 	}
@@ -4078,7 +4078,7 @@ func TestIgnoreOwnAnnouncement(t *testing.T) {
 		t.Fatalf("can't generate announcements: %v", err)
 	}
 
-	remoteKey, err := btcec.ParsePubKey(batch.nodeAnn2.NodeID[:], btcec.S256())
+	remoteKey, err := bronec.ParsePubKey(batch.nodeAnn2.NodeID[:], bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to parse pubkey: %v", err)
 	}
@@ -4245,7 +4245,7 @@ func TestRejectCacheChannelAnn(t *testing.T) {
 		t.Fatalf("can't generate announcements: %v", err)
 	}
 
-	remoteKey, err := btcec.ParsePubKey(batch.nodeAnn2.NodeID[:], btcec.S256())
+	remoteKey, err := bronec.ParsePubKey(batch.nodeAnn2.NodeID[:], bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to parse pubkey: %v", err)
 	}

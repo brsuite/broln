@@ -6,13 +6,13 @@ import (
 	"io"
 	"net"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 // SingleBackupVersion denotes the version of the single static channel backup.
@@ -89,7 +89,7 @@ type Single struct {
 
 	// RemoteNodePub is the identity public key of the remote node this
 	// channel has been established with.
-	RemoteNodePub *btcec.PublicKey
+	RemoteNodePub *bronec.PublicKey
 
 	// Addresses is a list of IP address in which either we were able to
 	// reach the node over in the past, OR we received an incoming
@@ -160,7 +160,7 @@ func NewSingle(channel *channeldb.OpenChannel,
 		// the backups plaintext don't carry any private information. When
 		// we go to recover, we'll present this in order to derive the
 		// private key.
-		_, shaChainPoint := btcec.PrivKeyFromBytes(btcec.S256(), b.Bytes())
+		_, shaChainPoint := bronec.PrivKeyFromBytes(bronec.S256(), b.Bytes())
 
 		shaChainRootDesc = keychain.KeyDescriptor{
 			PubKey: shaChainPoint,
@@ -369,7 +369,7 @@ func readRemoteKeyDesc(r io.Reader) (keychain.KeyDescriptor, error) {
 		return keychain.KeyDescriptor{}, err
 	}
 
-	keyDesc.PubKey, err = btcec.ParsePubKey(pub[:], btcec.S256())
+	keyDesc.PubKey, err = bronec.ParsePubKey(pub[:], bronec.S256())
 	if err != nil {
 		return keychain.KeyDescriptor{}, err
 	}
@@ -479,8 +479,8 @@ func (s *Single) Deserialize(r io.Reader) error {
 	// Since this field is optional, we'll check to see if the pubkey has
 	// been specified or not.
 	if !bytes.Equal(shaChainPub[:], zeroPub[:]) {
-		s.ShaChainRootDesc.PubKey, err = btcec.ParsePubKey(
-			shaChainPub[:], btcec.S256(),
+		s.ShaChainRootDesc.PubKey, err = bronec.ParsePubKey(
+			shaChainPub[:], bronec.S256(),
 		)
 		if err != nil {
 			return err

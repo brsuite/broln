@@ -9,9 +9,9 @@ import (
 
 	"bytes"
 
+	"github.com/brsuite/broln/tlv"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-errors/errors"
-	"github.com/brsuite/broln/tlv"
 )
 
 // FailureMessage represents the onion failure object identified by its unique
@@ -341,7 +341,7 @@ func (f *FailIncorrectPaymentAmount) Error() string {
 // NOTE: May only be returned by the final node in the path.
 type FailIncorrectDetails struct {
 	// amount is the value of the extended HTLC.
-	amount MilliSatoshi
+	amount MilliBronees
 
 	// height is the block height when the htlc was received.
 	height uint32
@@ -349,7 +349,7 @@ type FailIncorrectDetails struct {
 
 // NewFailIncorrectDetails makes a new instance of the FailIncorrectDetails
 // error bound to the specified HTLC amount and acceptance height.
-func NewFailIncorrectDetails(amt MilliSatoshi,
+func NewFailIncorrectDetails(amt MilliBronees,
 	height uint32) *FailIncorrectDetails {
 
 	return &FailIncorrectDetails{
@@ -359,7 +359,7 @@ func NewFailIncorrectDetails(amt MilliSatoshi,
 }
 
 // Amount is the value of the extended HTLC.
-func (f *FailIncorrectDetails) Amount() MilliSatoshi {
+func (f *FailIncorrectDetails) Amount() MilliBronees {
 	return f.amount
 }
 
@@ -695,7 +695,7 @@ func (f *FailTemporaryChannelFailure) Encode(w io.Writer, pver uint32) error {
 // NOTE: May only be returned by the intermediate nodes in the path.
 type FailAmountBelowMinimum struct {
 	// HtlcMsat is the wrong amount of the incoming HTLC.
-	HtlcMsat MilliSatoshi
+	HtlcMsat MilliBronees
 
 	// Update is used to update information about state of the channel
 	// which caused the failure.
@@ -703,7 +703,7 @@ type FailAmountBelowMinimum struct {
 }
 
 // NewAmountBelowMinimum creates new instance of the FailAmountBelowMinimum.
-func NewAmountBelowMinimum(htlcMsat MilliSatoshi,
+func NewAmountBelowMinimum(htlcMsat MilliBronees,
 	update ChannelUpdate) *FailAmountBelowMinimum {
 
 	return &FailAmountBelowMinimum{
@@ -764,7 +764,7 @@ func (f *FailAmountBelowMinimum) Encode(w io.Writer, pver uint32) error {
 // NOTE: May only be returned by intermediate nodes.
 type FailFeeInsufficient struct {
 	// HtlcMsat is the wrong amount of the incoming HTLC.
-	HtlcMsat MilliSatoshi
+	HtlcMsat MilliBronees
 
 	// Update is used to update information about state of the channel
 	// which caused the failure.
@@ -772,7 +772,7 @@ type FailFeeInsufficient struct {
 }
 
 // NewFeeInsufficient creates new instance of the FailFeeInsufficient.
-func NewFeeInsufficient(htlcMsat MilliSatoshi,
+func NewFeeInsufficient(htlcMsat MilliBronees,
 	update ChannelUpdate) *FailFeeInsufficient {
 	return &FailFeeInsufficient{
 		HtlcMsat: htlcMsat,
@@ -1066,7 +1066,7 @@ func (f *FailFinalIncorrectCltvExpiry) Encode(w io.Writer, pver uint32) error {
 // NOTE: May only be returned by the final node.
 type FailFinalIncorrectHtlcAmount struct {
 	// IncomingHTLCAmount is the wrong forwarded htlc amount.
-	IncomingHTLCAmount MilliSatoshi
+	IncomingHTLCAmount MilliBronees
 }
 
 // Returns a human readable string describing the target FailureMessage.
@@ -1079,7 +1079,7 @@ func (f *FailFinalIncorrectHtlcAmount) Error() string {
 
 // NewFinalIncorrectHtlcAmount creates new instance of the
 // FailFinalIncorrectHtlcAmount.
-func NewFinalIncorrectHtlcAmount(amount MilliSatoshi) *FailFinalIncorrectHtlcAmount {
+func NewFinalIncorrectHtlcAmount(amount MilliBronees) *FailFinalIncorrectHtlcAmount {
 	return &FailFinalIncorrectHtlcAmount{
 		IncomingHTLCAmount: amount,
 	}

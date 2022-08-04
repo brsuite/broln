@@ -6,9 +6,9 @@ import (
 	"sort"
 	"time"
 
-	"github.com/brsuite/bronwallet/walletdb"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/bronwallet/walletdb"
 )
 
 var (
@@ -73,11 +73,11 @@ type ForwardingEvent struct {
 
 	// AmtIn is the amount of the incoming HTLC. Subtracting this from the
 	// outgoing amount gives the total fees of this payment circuit.
-	AmtIn lnwire.MilliSatoshi
+	AmtIn lnwire.MilliBronees
 
 	// AmtOut is the amount of the outgoing HTLC. Subtracting the incoming
 	// amount from this gives the total fees for this payment circuit.
-	AmtOut lnwire.MilliSatoshi
+	AmtOut lnwire.MilliBronees
 }
 
 // encodeForwardingEvent writes out the target forwarding event to the passed

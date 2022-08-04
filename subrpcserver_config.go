@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/btcsuite/btclog"
 	"github.com/brsuite/broln/autopilot"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/channeldb"
@@ -27,6 +25,8 @@ import (
 	"github.com/brsuite/broln/sweep"
 	"github.com/brsuite/broln/watchtower"
 	"github.com/brsuite/broln/watchtower/wtclient"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/bronlog"
 )
 
 // subRPCServerConfigs is special sub-config in the main configuration that
@@ -101,7 +101,7 @@ func (s *subRPCServerConfigs) PopulateDependencies(cfg *Config,
 	tcpResolver lncfg.TCPResolver,
 	genInvoiceFeatures func() *lnwire.FeatureVector,
 	genAmpInvoiceFeatures func() *lnwire.FeatureVector,
-	rpcLogger btclog.Logger) error {
+	rpcLogger bronlog.Logger) error {
 
 	// First, we'll use reflect to obtain a version of the config struct
 	// that allows us to programmatically inspect its fields.

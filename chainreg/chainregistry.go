@@ -13,11 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/rpcclient"
-	"github.com/brsuite/bronutil"
-	"github.com/brsuite/bronwallet/chain"
-	"github.com/brsuite/neutrino"
 	"github.com/brsuite/broln/blockcache"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/chainntnfs/brocoindnotify"
@@ -34,6 +29,11 @@ import (
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/chainview"
 	"github.com/brsuite/broln/walletunlocker"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/rpcclient"
+	"github.com/brsuite/bronutil"
+	"github.com/brsuite/bronwallet/chain"
+	"github.com/brsuite/neutrino"
 )
 
 // Config houses necessary fields that a chainControl instance needs to
@@ -111,28 +111,28 @@ const (
 	// All forwarded payments are subjected to the min htlc constraint of
 	// the routing policy of the outgoing channel. This implicitly controls
 	// the minimum htlc value on the incoming channel too.
-	DefaultBrocoinMinHTLCInMSat = lnwire.MilliSatoshi(1)
+	DefaultBrocoinMinHTLCInMSat = lnwire.MilliBronees(1)
 
 	// DefaultBrocoinMinHTLCOutMSat is the default minimum htlc value that
 	// we require for sending out htlcs. Our channel peer may have a lower
 	// min htlc channel parameter, but we - by default - don't forward
 	// anything under the value defined here.
-	DefaultBrocoinMinHTLCOutMSat = lnwire.MilliSatoshi(1000)
+	DefaultBrocoinMinHTLCOutMSat = lnwire.MilliBronees(1000)
 
 	// DefaultBrocoinBaseFeeMSat is the default forwarding base fee.
-	DefaultBrocoinBaseFeeMSat = lnwire.MilliSatoshi(1000)
+	DefaultBrocoinBaseFeeMSat = lnwire.MilliBronees(1000)
 
 	// DefaultBrocoinFeeRate is the default forwarding fee rate.
-	DefaultBrocoinFeeRate = lnwire.MilliSatoshi(1)
+	DefaultBrocoinFeeRate = lnwire.MilliBronees(1)
 
 	// DefaultBrocoinTimeLockDelta is the default forwarding time lock
 	// delta.
 	DefaultBrocoinTimeLockDelta = 40
 
-	DefaultLitecoinMinHTLCInMSat  = lnwire.MilliSatoshi(1)
-	DefaultLitecoinMinHTLCOutMSat = lnwire.MilliSatoshi(1000)
-	DefaultLitecoinBaseFeeMSat    = lnwire.MilliSatoshi(1000)
-	DefaultLitecoinFeeRate        = lnwire.MilliSatoshi(1)
+	DefaultLitecoinMinHTLCInMSat  = lnwire.MilliBronees(1)
+	DefaultLitecoinMinHTLCOutMSat = lnwire.MilliBronees(1000)
+	DefaultLitecoinBaseFeeMSat    = lnwire.MilliBronees(1000)
+	DefaultLitecoinFeeRate        = lnwire.MilliBronees(1)
 	DefaultLitecoinTimeLockDelta  = 576
 	DefaultLitecoinDustLimit      = bronutil.Amount(54600)
 
@@ -148,9 +148,9 @@ const (
 	// expressed in sat/kw.
 	DefaultLitecoinStaticFeePerKW = chainfee.SatPerKWeight(50000)
 
-	// BtcToLtcConversionRate is a fixed ratio used in order to scale up
+	// BronToLtcConversionRate is a fixed ratio used in order to scale up
 	// payments when running on the Litecoin chain.
-	BtcToLtcConversionRate = 60
+	BronToLtcConversionRate = 60
 )
 
 // DefaultLtcChannelConstraints is the default set of channel constraints that
@@ -193,7 +193,7 @@ type PartialChainControl struct {
 	RoutingPolicy htlcswitch.ForwardingPolicy
 
 	// MinHtlcIn is the minimum HTLC we will accept.
-	MinHtlcIn lnwire.MilliSatoshi
+	MinHtlcIn lnwire.MilliBronees
 
 	// ChannelConstraints is the set of default constraints that will be
 	// used for any incoming or outgoing channel reservation requests.
@@ -232,9 +232,9 @@ type ChainControl struct {
 	Wallet *lnwallet.LightningWallet
 }
 
-// GenDefaultBtcConstraints generates the default set of channel constraints
+// GenDefaultBronConstraints generates the default set of channel constraints
 // that are to be used when funding a Brocoin channel.
-func GenDefaultBtcConstraints() channeldb.ChannelConstraints {
+func GenDefaultBronConstraints() channeldb.ChannelConstraints {
 	// We use the dust limit for the maximally sized witness program with
 	// a 40-byte data push.
 	dustLimit := lnwallet.DustLimitForSize(input.UnknownWitnessSize)
@@ -671,7 +671,7 @@ func NewPartialChainControl(cfg *Config) (*PartialChainControl, func(), error) {
 	}
 
 	// Select the default channel constraints for the primary chain.
-	cc.ChannelConstraints = GenDefaultBtcConstraints()
+	cc.ChannelConstraints = GenDefaultBronConstraints()
 	if cfg.PrimaryChain() == LitecoinChain {
 		cc.ChannelConstraints = DefaultLtcChannelConstraints
 	}
@@ -759,10 +759,10 @@ var (
 	// BrocoinTestnetGenesis is the genesis hash of Brocoin's testnet
 	// chain.
 	BrocoinTestnetGenesis = chainhash.Hash([chainhash.HashSize]byte{
-		0xce, 0xeb, 0x1a, 0x38, 0x06, 0xf0, 0x71, 0x0c, 
-0xda, 0x62, 0xbd, 0x49, 0x32, 0x8d, 0x70, 0x62,
-0xb1, 0x0c, 0xca, 0x75, 0xd1, 0xd8, 0x16, 0x9f,
-0xa9, 0x9e, 0xed, 0x16, 0xfa, 0x0c, 0x00, 0x00, 
+		0xce, 0xeb, 0x1a, 0x38, 0x06, 0xf0, 0x71, 0x0c,
+		0xda, 0x62, 0xbd, 0x49, 0x32, 0x8d, 0x70, 0x62,
+		0xb1, 0x0c, 0xca, 0x75, 0xd1, 0xd8, 0x16, 0x9f,
+		0xa9, 0x9e, 0xed, 0x16, 0xfa, 0x0c, 0x00, 0x00,
 	})
 
 	// BrocoinSignetGenesis is the genesis hash of Brocoin's signet chain.
@@ -776,9 +776,9 @@ var (
 	// BrocoinMainnetGenesis is the genesis hash of Brocoin's main chain.
 	BrocoinMainnetGenesis = chainhash.Hash([chainhash.HashSize]byte{
 		0xd2, 0x28, 0x0d, 0x8c, 0xf4, 0x3a, 0x3e, 0xfd,
-0x9a, 0x51, 0x41, 0x4b, 0x15, 0xbf, 0x6a, 0xb0,
-0x2b, 0x1c, 0x12, 0xfb, 0x78, 0xd6, 0xb6, 0x9e,
-0x63, 0xf8, 0x88, 0xc5, 0xe3, 0x18, 0xbf, 0x05, 
+		0x9a, 0x51, 0x41, 0x4b, 0x15, 0xbf, 0x6a, 0xb0,
+		0x2b, 0x1c, 0x12, 0xfb, 0x78, 0xd6, 0xb6, 0x9e,
+		0x63, 0xf8, 0x88, 0xc5, 0xe3, 0x18, 0xbf, 0x05,
 	})
 
 	// LitecoinTestnetGenesis is the genesis hash of Litecoin's testnet4

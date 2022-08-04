@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/clock"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/bronutil"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
 )
 
@@ -39,7 +39,7 @@ func TestMailBoxCouriers(t *testing.T) {
 		pkt := &htlcPacket{
 			outgoingChanID: lnwire.NewShortChanIDFromInt(uint64(prand.Int63())),
 			incomingChanID: lnwire.NewShortChanIDFromInt(uint64(prand.Int63())),
-			amount:         lnwire.MilliSatoshi(prand.Int63()),
+			amount:         lnwire.MilliBronees(prand.Int63()),
 			htlc: &lnwire.UpdateAddHTLC{
 				ID: uint64(i),
 			},
@@ -57,7 +57,7 @@ func TestMailBoxCouriers(t *testing.T) {
 	for i := 0; i < numPackets; i++ {
 		msg := &lnwire.UpdateAddHTLC{
 			ID:     uint64(prand.Int63()),
-			Amount: lnwire.MilliSatoshi(prand.Int63()),
+			Amount: lnwire.MilliBronees(prand.Int63()),
 		}
 		sentMessages[i] = msg
 
@@ -242,7 +242,7 @@ func (c *mailboxContext) sendAdds(start, num int) []*htlcPacket {
 			incomingChanID: lnwire.NewShortChanIDFromInt(
 				uint64(prand.Int63())),
 			incomingHTLCID: uint64(start + i),
-			amount:         lnwire.MilliSatoshi(prand.Int63()),
+			amount:         lnwire.MilliBronees(prand.Int63()),
 			htlc: &lnwire.UpdateAddHTLC{
 				ID: uint64(start + i),
 			},
@@ -402,7 +402,7 @@ func TestMailBoxPacketPrioritization(t *testing.T) {
 			outgoingHTLCID: uint64(i),
 			incomingChanID: bobChanID,
 			incomingHTLCID: uint64(i),
-			amount:         lnwire.MilliSatoshi(prand.Int63()),
+			amount:         lnwire.MilliBronees(prand.Int63()),
 		}
 
 		switch i {
@@ -579,10 +579,10 @@ func testMailBoxDust(t *testing.T, chantype channeldb.ChannelType) {
 	// The first packet will be dust according to the remote dust limit,
 	// but not the local. We set a different amount if this is a zero fee
 	// htlc channel type.
-	firstAmt := lnwire.MilliSatoshi(600_000)
+	firstAmt := lnwire.MilliBronees(600_000)
 
 	if chantype.ZeroHtlcTxFee() {
-		firstAmt = lnwire.MilliSatoshi(450_000)
+		firstAmt = lnwire.MilliBronees(450_000)
 	}
 
 	firstPkt := &htlcPacket{
@@ -602,11 +602,11 @@ func testMailBoxDust(t *testing.T, chantype channeldb.ChannelType) {
 	// Assert that the local sum is 0, and the remote sum accounts for this
 	// added packet.
 	localSum, remoteSum := ctx.mailbox.DustPackets()
-	require.Equal(t, lnwire.MilliSatoshi(0), localSum)
+	require.Equal(t, lnwire.MilliBronees(0), localSum)
 	require.Equal(t, firstAmt, remoteSum)
 
 	// The next packet will be dust according to both limits.
-	secondAmt := lnwire.MilliSatoshi(300_000)
+	secondAmt := lnwire.MilliBronees(300_000)
 	secondPkt := &htlcPacket{
 		outgoingChanID: aliceID,
 		outgoingHTLCID: 1,
@@ -656,8 +656,8 @@ func testMailBoxDust(t *testing.T, chantype channeldb.ChannelType) {
 
 	// Assert that both sums are equal to 0.
 	localSum, remoteSum = ctx.mailbox.DustPackets()
-	require.Equal(t, lnwire.MilliSatoshi(0), localSum)
-	require.Equal(t, lnwire.MilliSatoshi(0), remoteSum)
+	require.Equal(t, lnwire.MilliBronees(0), localSum)
+	require.Equal(t, lnwire.MilliBronees(0), remoteSum)
 }
 
 // TestMailOrchestrator asserts that the orchestrator properly buffers packets
@@ -698,7 +698,7 @@ func TestMailOrchestrator(t *testing.T) {
 			outgoingHTLCID: uint64(i),
 			incomingChanID: bobChanID,
 			incomingHTLCID: uint64(i),
-			amount:         lnwire.MilliSatoshi(prand.Int63()),
+			amount:         lnwire.MilliBronees(prand.Int63()),
 			htlc: &lnwire.UpdateAddHTLC{
 				ID: uint64(i),
 			},
@@ -766,7 +766,7 @@ func TestMailOrchestrator(t *testing.T) {
 			outgoingHTLCID: uint64(halfPackets + i),
 			incomingChanID: bobChanID,
 			incomingHTLCID: uint64(halfPackets + i),
-			amount:         lnwire.MilliSatoshi(prand.Int63()),
+			amount:         lnwire.MilliBronees(prand.Int63()),
 			htlc: &lnwire.UpdateAddHTLC{
 				ID: uint64(halfPackets + i),
 			},

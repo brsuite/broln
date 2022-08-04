@@ -5,8 +5,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/watchtower/wtdb"
+	"github.com/brsuite/brond/bronec"
 )
 
 // Interface represents a simple, listen-only service that accepts watchtower
@@ -41,7 +41,7 @@ type Peer interface {
 	SetReadDeadline(time.Time) error
 
 	// RemotePub returns the client's public key.
-	RemotePub() *btcec.PublicKey
+	RemotePub() *bronec.PublicKey
 
 	// RemoteAddr returns the client's network address.
 	RemoteAddr() net.Addr

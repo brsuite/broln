@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/bronutil"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-errors/errors"
-	"github.com/brsuite/broln/lnwire"
 )
 
 // ValidateChannelAnn validates the channel announcement message and checks
@@ -32,7 +32,7 @@ func ValidateChannelAnn(a *lnwire.ChannelAnnouncement) error {
 	if err != nil {
 		return err
 	}
-	brocoinKey1, err := btcec.ParsePubKey(a.BrocoinKey1[:], btcec.S256())
+	brocoinKey1, err := bronec.ParsePubKey(a.BrocoinKey1[:], bronec.S256())
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func ValidateChannelAnn(a *lnwire.ChannelAnnouncement) error {
 	if err != nil {
 		return err
 	}
-	brocoinKey2, err := btcec.ParsePubKey(a.BrocoinKey2[:], btcec.S256())
+	brocoinKey2, err := bronec.ParsePubKey(a.BrocoinKey2[:], bronec.S256())
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,7 @@ func ValidateChannelAnn(a *lnwire.ChannelAnnouncement) error {
 	if err != nil {
 		return err
 	}
-	nodeKey1, err := btcec.ParsePubKey(a.NodeID1[:], btcec.S256())
+	nodeKey1, err := bronec.ParsePubKey(a.NodeID1[:], bronec.S256())
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func ValidateChannelAnn(a *lnwire.ChannelAnnouncement) error {
 	if err != nil {
 		return err
 	}
-	nodeKey2, err := btcec.ParsePubKey(a.NodeID2[:], btcec.S256())
+	nodeKey2, err := bronec.ParsePubKey(a.NodeID2[:], bronec.S256())
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func ValidateNodeAnn(a *lnwire.NodeAnnouncement) error {
 	if err != nil {
 		return err
 	}
-	nodeKey, err := btcec.ParsePubKey(a.NodeID[:], btcec.S256())
+	nodeKey, err := bronec.ParsePubKey(a.NodeID[:], bronec.S256())
 	if err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func ValidateNodeAnn(a *lnwire.NodeAnnouncement) error {
 // checking (1) that the included signature covers the announcement and has been
 // signed by the node's private key, and (2) that the announcement's message
 // flags and optional fields are sane.
-func ValidateChannelUpdateAnn(pubKey *btcec.PublicKey, capacity bronutil.Amount,
+func ValidateChannelUpdateAnn(pubKey *bronec.PublicKey, capacity bronutil.Amount,
 	a *lnwire.ChannelUpdate) error {
 
 	if err := validateOptionalFields(capacity, a); err != nil {
@@ -139,7 +139,7 @@ func ValidateChannelUpdateAnn(pubKey *btcec.PublicKey, capacity bronutil.Amount,
 // VerifyChannelUpdateSignature verifies that the channel update message was
 // signed by the party with the given node public key.
 func VerifyChannelUpdateSignature(msg *lnwire.ChannelUpdate,
-	pubKey *btcec.PublicKey) error {
+	pubKey *bronec.PublicKey) error {
 
 	data, err := msg.DataToSign()
 	if err != nil {
@@ -175,7 +175,7 @@ func validateOptionalFields(capacity bronutil.Amount,
 		// For light clients, the capacity will not be set so we'll skip
 		// checking whether the MaxHTLC value respects the channel's
 		// capacity.
-		capacityMsat := lnwire.NewMSatFromSatoshis(capacity)
+		capacityMsat := lnwire.NewMSatFromBroneess(capacity)
 		if capacityMsat != 0 && maxHtlc > capacityMsat {
 			return errors.Errorf("max_htlc(%v) for channel "+
 				"update greater than capacity(%v)", maxHtlc,

@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/autopilot"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/funding"
@@ -15,6 +12,9 @@ import (
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/tor"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 // validateAtplConfig is a helper method that makes sure the passed
@@ -78,14 +78,14 @@ type chanController struct {
 	private       bool
 	minConfs      int32
 	confTarget    uint32
-	chanMinHtlcIn lnwire.MilliSatoshi
+	chanMinHtlcIn lnwire.MilliBronees
 	netParams     chainreg.BrocoinNetParams
 }
 
 // OpenChannel opens a channel to a target peer, with a capacity of the
 // specified amount. This function should un-block immediately after the
 // funding transaction that marks the channel open has been broadcast.
-func (c *chanController) OpenChannel(target *btcec.PublicKey,
+func (c *chanController) OpenChannel(target *bronec.PublicKey,
 	amt bronutil.Amount) error {
 
 	// With the connection established, we'll now establish our connection
@@ -137,7 +137,7 @@ var _ autopilot.ChannelController = (*chanController)(nil)
 // interfaces needed to drive it won't be launched before the Manager's
 // StartAgent method is called.
 func initAutoPilot(svr *server, cfg *lncfg.AutoPilot,
-	minHTLCIn lnwire.MilliSatoshi, netParams chainreg.BrocoinNetParams) (
+	minHTLCIn lnwire.MilliBronees, netParams chainreg.BrocoinNetParams) (
 	*autopilot.ManagerCfg, error) {
 
 	atplLog.Infof("Instantiating autopilot with active=%v, "+
@@ -187,7 +187,7 @@ func initAutoPilot(svr *server, cfg *lncfg.AutoPilot,
 		},
 		Graph:       autopilot.ChannelGraphFromDatabase(svr.graphDB),
 		Constraints: atplConstraints,
-		ConnectToPeer: func(target *btcec.PublicKey, addrs []net.Addr) (bool, error) {
+		ConnectToPeer: func(target *bronec.PublicKey, addrs []net.Addr) (bool, error) {
 			// First, we'll check if we're already connected to the
 			// target peer. If we are, we can exit early. Otherwise,
 			// we'll need to establish a connection.
@@ -266,7 +266,7 @@ func initAutoPilot(svr *server, cfg *lncfg.AutoPilot,
 				len(activeChannels))
 			for i, channel := range activeChannels {
 				localCommit := channel.LocalCommitment
-				balance := localCommit.LocalBalance.ToSatoshis()
+				balance := localCommit.LocalBalance.ToBroneess()
 
 				chanState[i] = autopilot.LocalChannel{
 					ChanID:  channel.ShortChanID(),
@@ -290,7 +290,7 @@ func initAutoPilot(svr *server, cfg *lncfg.AutoPilot,
 			localCommit := channel.LocalCommitment
 			return &autopilot.LocalChannel{
 				ChanID:  channel.ShortChanID(),
-				Balance: localCommit.LocalBalance.ToSatoshis(),
+				Balance: localCommit.LocalBalance.ToBroneess(),
 				Node:    autopilot.NewNodeID(channel.IdentityPub),
 			}, nil
 		},

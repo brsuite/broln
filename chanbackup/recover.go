@@ -3,10 +3,10 @@ package chanbackup
 import (
 	"net"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/davecgh/go-spew/spew"
 )
 
 // ChannelRestorer is an interface that allows the Recover method to map the
@@ -29,7 +29,7 @@ type PeerConnector interface {
 	// available addresses. Once this method returns with a non-nil error,
 	// the connector should attempt to persistently connect to the target
 	// peer in the background as a persistent attempt.
-	ConnectPeer(node *btcec.PublicKey, addrs []net.Addr) error
+	ConnectPeer(node *bronec.PublicKey, addrs []net.Addr) error
 }
 
 // Recover attempts to recover the static channel state from a set of static

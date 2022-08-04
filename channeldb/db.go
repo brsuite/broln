@@ -8,9 +8,6 @@ import (
 	"net"
 	"os"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/wire"
-	"github.com/go-errors/errors"
 	mig "github.com/brsuite/broln/channeldb/migration"
 	"github.com/brsuite/broln/channeldb/migration12"
 	"github.com/brsuite/broln/channeldb/migration13"
@@ -24,6 +21,9 @@ import (
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/wire"
+	"github.com/go-errors/errors"
 )
 
 const (
@@ -420,7 +420,7 @@ func (c *ChannelStateDB) LinkNodeDB() *LinkNodeDB {
 // currently active/open channels associated with the target nodeID. In the case
 // that no active channels are known to have been created with this node, then a
 // zero-length slice is returned.
-func (c *ChannelStateDB) FetchOpenChannels(nodeID *btcec.PublicKey) (
+func (c *ChannelStateDB) FetchOpenChannels(nodeID *bronec.PublicKey) (
 	[]*OpenChannel, error) {
 
 	var channels []*OpenChannel
@@ -440,7 +440,7 @@ func (c *ChannelStateDB) FetchOpenChannels(nodeID *btcec.PublicKey) (
 // the case that no active channels are known to have been created with this
 // node, then a zero-length slice is returned.
 func (c *ChannelStateDB) fetchOpenChannels(tx kvdb.RTx,
-	nodeID *btcec.PublicKey) ([]*OpenChannel, error) {
+	nodeID *bronec.PublicKey) ([]*OpenChannel, error) {
 
 	// Get the bucket dedicated to storing the metadata for open channels.
 	openChanBucket := tx.ReadBucket(openChannelBucket)
@@ -945,7 +945,7 @@ func (c *ChannelStateDB) FetchClosedChannelForID(cid lnwire.ChannelID) (
 func (c *ChannelStateDB) MarkChanFullyClosed(chanPoint *wire.OutPoint) error {
 	var (
 		openChannels  []*OpenChannel
-		pruneLinkNode *btcec.PublicKey
+		pruneLinkNode *bronec.PublicKey
 	)
 	err := kvdb.Update(c.backend, func(tx kvdb.RwTx) error {
 		var b bytes.Buffer
@@ -1021,7 +1021,7 @@ func (c *ChannelStateDB) MarkChanFullyClosed(chanPoint *wire.OutPoint) error {
 // the database due to no longer having any open channels with it. If there are
 // any left, then this acts as a no-op.
 func (c *ChannelStateDB) pruneLinkNode(openChannels []*OpenChannel,
-	remotePub *btcec.PublicKey) error {
+	remotePub *bronec.PublicKey) error {
 
 	if len(openChannels) > 0 {
 		return nil
@@ -1122,7 +1122,7 @@ func (c *ChannelStateDB) RestoreChannelShells(channelShells ...*ChannelShell) er
 
 // AddrsForNode consults the graph and channel database for all addresses known
 // to the passed node public key.
-func (d *DB) AddrsForNode(nodePub *btcec.PublicKey) ([]net.Addr,
+func (d *DB) AddrsForNode(nodePub *bronec.PublicKey) ([]net.Addr,
 	error) {
 
 	linkNode, err := d.channelStateDB.linkNodeDB.FetchLinkNode(nodePub)
@@ -1202,7 +1202,7 @@ func (c *ChannelStateDB) AbandonChannel(chanPoint *wire.OutPoint,
 		CloseHeight:             bestHeight,
 		RemotePub:               dbChan.IdentityPub,
 		Capacity:                dbChan.Capacity,
-		SettledBalance:          dbChan.LocalCommitment.LocalBalance.ToSatoshis(),
+		SettledBalance:          dbChan.LocalCommitment.LocalBalance.ToBroneess(),
 		ShortChanID:             dbChan.ShortChanID(),
 		RemoteCurrentRevocation: dbChan.RemoteCurrentRevocation,
 		RemoteNextRevocation:    dbChan.RemoteNextRevocation,

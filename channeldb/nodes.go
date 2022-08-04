@@ -6,9 +6,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/kvdb"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/wire"
 )
 
 var (
@@ -38,7 +38,7 @@ type LinkNode struct {
 	// IdentityPub is the node's current identity public key. Any
 	// channel/topology related information received by this node MUST be
 	// signed by this public key.
-	IdentityPub *btcec.PublicKey
+	IdentityPub *bronec.PublicKey
 
 	// LastSeen tracks the last time this node was seen within the network.
 	// A node should be marked as seen if the daemon either is able to
@@ -63,7 +63,7 @@ type LinkNode struct {
 
 // NewLinkNode creates a new LinkNode from the provided parameters, which is
 // backed by an instance of a link node DB.
-func NewLinkNode(db *LinkNodeDB, bitNet wire.BrocoinNet, pub *btcec.PublicKey,
+func NewLinkNode(db *LinkNodeDB, bitNet wire.BrocoinNet, pub *bronec.PublicKey,
 	addrs ...net.Addr) *LinkNode {
 
 	return &LinkNode{
@@ -135,13 +135,13 @@ type LinkNodeDB struct {
 
 // DeleteLinkNode removes the link node with the given identity from the
 // database.
-func (l *LinkNodeDB) DeleteLinkNode(identity *btcec.PublicKey) error {
+func (l *LinkNodeDB) DeleteLinkNode(identity *bronec.PublicKey) error {
 	return kvdb.Update(l.backend, func(tx kvdb.RwTx) error {
 		return deleteLinkNode(tx, identity)
 	}, func() {})
 }
 
-func deleteLinkNode(tx kvdb.RwTx, identity *btcec.PublicKey) error {
+func deleteLinkNode(tx kvdb.RwTx, identity *bronec.PublicKey) error {
 	nodeMetaBucket := tx.ReadWriteBucket(nodeInfoBucket)
 	if nodeMetaBucket == nil {
 		return ErrLinkNodesNotFound
@@ -154,7 +154,7 @@ func deleteLinkNode(tx kvdb.RwTx, identity *btcec.PublicKey) error {
 // FetchLinkNode attempts to lookup the data for a LinkNode based on a target
 // identity public key. If a particular LinkNode for the passed identity public
 // key cannot be found, then ErrNodeNotFound if returned.
-func (l *LinkNodeDB) FetchLinkNode(identity *btcec.PublicKey) (*LinkNode, error) {
+func (l *LinkNodeDB) FetchLinkNode(identity *bronec.PublicKey) (*LinkNode, error) {
 	var linkNode *LinkNode
 	err := kvdb.View(l.backend, func(tx kvdb.RTx) error {
 		node, err := fetchLinkNode(tx, identity)
@@ -171,7 +171,7 @@ func (l *LinkNodeDB) FetchLinkNode(identity *btcec.PublicKey) (*LinkNode, error)
 	return linkNode, err
 }
 
-func fetchLinkNode(tx kvdb.RTx, targetPub *btcec.PublicKey) (*LinkNode, error) {
+func fetchLinkNode(tx kvdb.RTx, targetPub *bronec.PublicKey) (*LinkNode, error) {
 	// First fetch the bucket for storing node metadata, bailing out early
 	// if it hasn't been created yet.
 	nodeMetaBucket := tx.ReadBucket(nodeInfoBucket)
@@ -298,7 +298,7 @@ func deserializeLinkNode(r io.Reader) (*LinkNode, error) {
 	if _, err := io.ReadFull(r, pub[:]); err != nil {
 		return nil, err
 	}
-	node.IdentityPub, err = btcec.ParsePubKey(pub[:], btcec.S256())
+	node.IdentityPub, err = bronec.ParsePubKey(pub[:], bronec.S256())
 	if err != nil {
 		return nil, err
 	}

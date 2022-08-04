@@ -7,24 +7,24 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/bronutil"
-	"github.com/go-errors/errors"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/clock"
 	"github.com/brsuite/broln/htlcswitch"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/bronutil"
+	"github.com/go-errors/errors"
 	"github.com/stretchr/testify/require"
 )
 
 const stepTimeout = 5 * time.Second
 
 // createTestRoute builds a route a->b->c paying the given amt to c.
-func createTestRoute(amt lnwire.MilliSatoshi,
+func createTestRoute(amt lnwire.MilliBronees,
 	aliasMap map[string]route.Vertex) (*route.Route, error) {
 
-	hopFee := lnwire.NewMSatFromSatoshis(3)
+	hopFee := lnwire.NewMSatFromBroneess(3)
 	hop1 := aliasMap["b"]
 	hop2 := aliasMap["c"]
 	hops := []*route.Hop{
@@ -170,13 +170,13 @@ func TestRouterPaymentStateMachine(t *testing.T) {
 			Expiry:  144,
 			FeeRate: 400,
 			MinHTLC: 1,
-			MaxHTLC: lnwire.NewMSatFromSatoshis(chanCapSat),
+			MaxHTLC: lnwire.NewMSatFromBroneess(chanCapSat),
 		}, 1),
 		symmetricTestChannel("b", "c", chanCapSat, &testChannelPolicy{
 			Expiry:  144,
 			FeeRate: 400,
 			MinHTLC: 1,
-			MaxHTLC: lnwire.NewMSatFromSatoshis(chanCapSat),
+			MaxHTLC: lnwire.NewMSatFromBroneess(chanCapSat),
 		}, 2),
 	}
 
@@ -186,7 +186,7 @@ func TestRouterPaymentStateMachine(t *testing.T) {
 	}
 	defer testGraph.cleanUp()
 
-	paymentAmt := lnwire.NewMSatFromSatoshis(1000)
+	paymentAmt := lnwire.NewMSatFromBroneess(1000)
 
 	// We create a simple route that we will supply every time the router
 	// requests one.
@@ -431,7 +431,7 @@ func TestRouterPaymentStateMachine(t *testing.T) {
 }
 
 func testPaymentLifecycle(t *testing.T, test paymentLifecycleTestCase,
-	paymentAmt lnwire.MilliSatoshi, startingBlockHeight uint32,
+	paymentAmt lnwire.MilliBronees, startingBlockHeight uint32,
 	testGraph *testGraphInstance) {
 
 	// Create a mock control tower with channels set up, that we use to
@@ -809,7 +809,7 @@ func TestPaymentState(t *testing.T) {
 		// statement, to construct 8 test cases so that we can
 		// exhaustively catch all possible states.
 		numShardsInFlight int
-		remainingAmt      lnwire.MilliSatoshi
+		remainingAmt      lnwire.MilliBronees
 		terminate         bool
 
 		expectedTerminated        bool
@@ -822,7 +822,7 @@ func TestPaymentState(t *testing.T) {
 			// to be finished and launch no more shards.
 			name:                      "state 100",
 			numShardsInFlight:         1,
-			remainingAmt:              lnwire.MilliSatoshi(0),
+			remainingAmt:              lnwire.MilliBronees(0),
 			terminate:                 false,
 			expectedTerminated:        false,
 			expectedNeedWaitForShards: true,
@@ -834,7 +834,7 @@ func TestPaymentState(t *testing.T) {
 			// shards.
 			name:                      "state 101",
 			numShardsInFlight:         1,
-			remainingAmt:              lnwire.MilliSatoshi(0),
+			remainingAmt:              lnwire.MilliBronees(0),
 			terminate:                 true,
 			expectedTerminated:        false,
 			expectedNeedWaitForShards: true,
@@ -847,7 +847,7 @@ func TestPaymentState(t *testing.T) {
 			// for shards outcomes and should launch more shards.
 			name:                      "state 110",
 			numShardsInFlight:         1,
-			remainingAmt:              lnwire.MilliSatoshi(1),
+			remainingAmt:              lnwire.MilliBronees(1),
 			terminate:                 false,
 			expectedTerminated:        false,
 			expectedNeedWaitForShards: false,
@@ -859,7 +859,7 @@ func TestPaymentState(t *testing.T) {
 			// shards outcomes because state is terminated.
 			name:                      "state 111",
 			numShardsInFlight:         1,
-			remainingAmt:              lnwire.MilliSatoshi(1),
+			remainingAmt:              lnwire.MilliBronees(1),
 			terminate:                 true,
 			expectedTerminated:        false,
 			expectedNeedWaitForShards: true,
@@ -871,7 +871,7 @@ func TestPaymentState(t *testing.T) {
 			// are no active shards.
 			name:                      "state 000",
 			numShardsInFlight:         0,
-			remainingAmt:              lnwire.MilliSatoshi(0),
+			remainingAmt:              lnwire.MilliBronees(0),
 			terminate:                 false,
 			expectedTerminated:        false,
 			expectedNeedWaitForShards: false,
@@ -882,7 +882,7 @@ func TestPaymentState(t *testing.T) {
 			// wait for shards to be finished.
 			name:                      "state 001",
 			numShardsInFlight:         0,
-			remainingAmt:              lnwire.MilliSatoshi(0),
+			remainingAmt:              lnwire.MilliBronees(0),
 			terminate:                 true,
 			expectedTerminated:        true,
 			expectedNeedWaitForShards: false,
@@ -894,7 +894,7 @@ func TestPaymentState(t *testing.T) {
 			// for shards outcomes and should launch more shards.
 			name:                      "state 010",
 			numShardsInFlight:         0,
-			remainingAmt:              lnwire.MilliSatoshi(1),
+			remainingAmt:              lnwire.MilliBronees(1),
 			terminate:                 false,
 			expectedTerminated:        false,
 			expectedNeedWaitForShards: false,
@@ -905,7 +905,7 @@ func TestPaymentState(t *testing.T) {
 			// wait for shards outcomes.
 			name:                      "state 011",
 			numShardsInFlight:         0,
-			remainingAmt:              lnwire.MilliSatoshi(1),
+			remainingAmt:              lnwire.MilliBronees(1),
 			terminate:                 true,
 			expectedTerminated:        true,
 			expectedNeedWaitForShards: false,
@@ -1060,8 +1060,8 @@ func TestUpdatePaymentState(t *testing.T) {
 			pl := &paymentLifecycle{
 				router:      rt,
 				identifier:  paymentHash,
-				totalAmount: lnwire.MilliSatoshi(tc.totalAmt),
-				feeLimit:    lnwire.MilliSatoshi(tc.feeLimit),
+				totalAmount: lnwire.MilliBronees(tc.totalAmt),
+				feeLimit:    lnwire.MilliBronees(tc.feeLimit),
 			}
 
 			if tc.payment == nil {
@@ -1127,10 +1127,10 @@ func makeFailedAttempt(total, fee int) channeldb.HTLCAttempt {
 }
 
 func makeAttemptInfo(total, amtForwarded int) channeldb.HTLCAttemptInfo {
-	hop := &route.Hop{AmtToForward: lnwire.MilliSatoshi(amtForwarded)}
+	hop := &route.Hop{AmtToForward: lnwire.MilliBronees(amtForwarded)}
 	return channeldb.HTLCAttemptInfo{
 		Route: route.Route{
-			TotalAmount: lnwire.MilliSatoshi(total),
+			TotalAmount: lnwire.MilliBronees(total),
 			Hops:        []*route.Hop{hop},
 		},
 	}

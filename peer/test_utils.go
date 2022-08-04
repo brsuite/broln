@@ -12,10 +12,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/htlcswitch"
@@ -29,6 +25,10 @@ import (
 	"github.com/brsuite/broln/netann"
 	"github.com/brsuite/broln/queue"
 	"github.com/brsuite/broln/shachain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -63,14 +63,14 @@ func createTestPeer(notifier chainntnfs.ChainNotifier,
 	nodeKeyLocator := keychain.KeyLocator{
 		Family: keychain.KeyFamilyNodeKey,
 	}
-	aliceKeyPriv, aliceKeyPub := btcec.PrivKeyFromBytes(
-		btcec.S256(), channels.AlicesPrivKey,
+	aliceKeyPriv, aliceKeyPub := bronec.PrivKeyFromBytes(
+		bronec.S256(), channels.AlicesPrivKey,
 	)
 	aliceKeySigner := keychain.NewPrivKeyMessageSigner(
 		aliceKeyPriv, nodeKeyLocator,
 	)
-	bobKeyPriv, bobKeyPub := btcec.PrivKeyFromBytes(
-		btcec.S256(), channels.BobsPrivKey,
+	bobKeyPriv, bobKeyPub := bronec.PrivKeyFromBytes(
+		bronec.S256(), channels.BobsPrivKey,
 	)
 
 	channelCapacity := bronutil.Amount(10 * 1e8)
@@ -90,9 +90,9 @@ func createTestPeer(notifier chainntnfs.ChainNotifier,
 	aliceCfg := channeldb.ChannelConfig{
 		ChannelConstraints: channeldb.ChannelConstraints{
 			DustLimit:        aliceDustLimit,
-			MaxPendingAmount: lnwire.MilliSatoshi(rand.Int63()),
+			MaxPendingAmount: lnwire.MilliBronees(rand.Int63()),
 			ChanReserve:      bronutil.Amount(rand.Int63()),
-			MinHTLC:          lnwire.MilliSatoshi(rand.Int63()),
+			MinHTLC:          lnwire.MilliBronees(rand.Int63()),
 			MaxAcceptedHtlcs: uint16(rand.Int31()),
 			CsvDelay:         uint16(csvTimeoutAlice),
 		},
@@ -115,9 +115,9 @@ func createTestPeer(notifier chainntnfs.ChainNotifier,
 	bobCfg := channeldb.ChannelConfig{
 		ChannelConstraints: channeldb.ChannelConstraints{
 			DustLimit:        bobDustLimit,
-			MaxPendingAmount: lnwire.MilliSatoshi(rand.Int63()),
+			MaxPendingAmount: lnwire.MilliBronees(rand.Int63()),
 			ChanReserve:      bronutil.Amount(rand.Int63()),
-			MinHTLC:          lnwire.MilliSatoshi(rand.Int63()),
+			MinHTLC:          lnwire.MilliBronees(rand.Int63()),
 			MaxAcceptedHtlcs: uint16(rand.Int31()),
 			CsvDelay:         uint16(csvTimeoutBob),
 		},
@@ -198,8 +198,8 @@ func createTestPeer(notifier chainntnfs.ChainNotifier,
 	// TODO(roasbeef): need to factor in commit fee?
 	aliceCommit := channeldb.ChannelCommitment{
 		CommitHeight:  0,
-		LocalBalance:  lnwire.NewMSatFromSatoshis(channelBal),
-		RemoteBalance: lnwire.NewMSatFromSatoshis(channelBal),
+		LocalBalance:  lnwire.NewMSatFromBroneess(channelBal),
+		RemoteBalance: lnwire.NewMSatFromBroneess(channelBal),
 		FeePerKw:      bronutil.Amount(feePerKw),
 		CommitFee:     feePerKw.FeeForWeight(input.CommitWeight),
 		CommitTx:      aliceCommitTx,
@@ -207,8 +207,8 @@ func createTestPeer(notifier chainntnfs.ChainNotifier,
 	}
 	bobCommit := channeldb.ChannelCommitment{
 		CommitHeight:  0,
-		LocalBalance:  lnwire.NewMSatFromSatoshis(channelBal),
-		RemoteBalance: lnwire.NewMSatFromSatoshis(channelBal),
+		LocalBalance:  lnwire.NewMSatFromBroneess(channelBal),
+		RemoteBalance: lnwire.NewMSatFromBroneess(channelBal),
 		FeePerKw:      bronutil.Amount(feePerKw),
 		CommitFee:     feePerKw.FeeForWeight(input.CommitWeight),
 		CommitTx:      bobCommitTx,
@@ -374,7 +374,7 @@ func createTestPeer(notifier chainntnfs.ChainNotifier,
 		Wallet:         wallet,
 		ChainNotifier:  notifier,
 		ChanStatusMgr:  chanStatusMgr,
-		DisconnectPeer: func(b *btcec.PublicKey) error { return nil },
+		DisconnectPeer: func(b *bronec.PublicKey) error { return nil },
 	}
 
 	alicePeer := NewBrontide(*cfg)
@@ -441,13 +441,13 @@ func (m *mockUpdateHandler) HandleChannelUpdate(msg lnwire.Message) {}
 func (m *mockUpdateHandler) ChanID() lnwire.ChannelID { return m.cid }
 
 // Bandwidth currently returns a dummy value.
-func (m *mockUpdateHandler) Bandwidth() lnwire.MilliSatoshi { return 0 }
+func (m *mockUpdateHandler) Bandwidth() lnwire.MilliBronees { return 0 }
 
 // EligibleToForward currently returns a dummy value.
 func (m *mockUpdateHandler) EligibleToForward() bool { return false }
 
 // MayAddOutgoingHtlc currently returns nil.
-func (m *mockUpdateHandler) MayAddOutgoingHtlc(lnwire.MilliSatoshi) error { return nil }
+func (m *mockUpdateHandler) MayAddOutgoingHtlc(lnwire.MilliBronees) error { return nil }
 
 // ShutdownIfChannelClean currently returns nil.
 func (m *mockUpdateHandler) ShutdownIfChannelClean() error { return nil }

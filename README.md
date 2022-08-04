@@ -12,7 +12,7 @@ The Lightning Network Daemon (`broln`) - is a complete implementation of a
 chain services including [`brond`](https://github.com/brsuite/brond) (a
 full-node), [`brocoind`](https://github.com/brocoin/brocoin), and
 [`neutrino`](https://github.com/brsuite/neutrino) (a new experimental light client). The project's codebase uses the
-[btcsuite](https://github.com/brsuite/) set of Brocoin libraries, and also
+[brsuite](https://github.com/brsuite/) set of Brocoin libraries, and also
 exports a large set of isolated re-usable Lightning Network related libraries
 within it.  In the current state `broln` is capable of:
 * Creating channels.

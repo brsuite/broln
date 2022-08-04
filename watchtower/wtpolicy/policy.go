@@ -4,12 +4,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/watchtower/blob"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 const (
@@ -28,7 +28,7 @@ const (
 	DefaultRewardRate = 10000
 
 	// DefaultSweepFeeRate specifies the fee rate used to construct justice
-	// transactions. The value is expressed in satoshis per kilo-weight.
+	// transactions. The value is expressed in broneess per kilo-weight.
 	DefaultSweepFeeRate = chainfee.SatPerKWeight(2500)
 
 	// MinSweepFeeRate is the minimum sweep fee rate a client may use in its
@@ -211,7 +211,7 @@ func (p *Policy) ComputeRewardOutputs(totalAmt bronutil.Amount,
 // ComputeRewardAmount computes the amount rewarded to the tower using the
 // proportional rate expressed in millionths, e.g. one million is equivalent to
 // one hundred percent of the total amount. The amount is rounded up to the
-// nearest whole satoshi.
+// nearest whole bronees.
 func ComputeRewardAmount(total bronutil.Amount, base, rate uint32) bronutil.Amount {
 	rewardBase := bronutil.Amount(base)
 	rewardRate := bronutil.Amount(rate)

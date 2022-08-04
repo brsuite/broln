@@ -7,17 +7,17 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/chainntnfs"
+	"github.com/brsuite/broln/channeldb"
+	"github.com/brsuite/broln/input"
+	"github.com/brsuite/broln/lnwallet"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/brsuite/broln/chainntnfs"
-	"github.com/brsuite/broln/channeldb"
-	"github.com/brsuite/broln/input"
-	"github.com/brsuite/broln/lnwallet"
 )
 
 const (
@@ -1023,8 +1023,8 @@ func (c *chainWatcher) dispatchLocalForceClose(
 	// commitment transaction, then we'll populate the balances on the
 	// close channel summary.
 	if forceClose.CommitResolution != nil {
-		closeSummary.SettledBalance = chanSnapshot.LocalBalance.ToSatoshis()
-		closeSummary.TimeLockedBalance = chanSnapshot.LocalBalance.ToSatoshis()
+		closeSummary.SettledBalance = chanSnapshot.LocalBalance.ToBroneess()
+		closeSummary.TimeLockedBalance = chanSnapshot.LocalBalance.ToBroneess()
 	}
 	for _, htlc := range forceClose.HtlcResolutions.OutgoingHTLCs {
 		htlcValue := bronutil.Amount(htlc.SweepSignDesc.Output.Value)
@@ -1078,7 +1078,7 @@ func (c *chainWatcher) dispatchLocalForceClose(
 func (c *chainWatcher) dispatchRemoteForceClose(
 	commitSpend *chainntnfs.SpendDetail,
 	remoteCommit channeldb.ChannelCommitment,
-	commitSet CommitSet, commitPoint *btcec.PublicKey) error {
+	commitSet CommitSet, commitPoint *bronec.PublicKey) error {
 
 	log.Infof("Unilateral close of ChannelPoint(%v) "+
 		"detected", c.cfg.chanState.FundingOutpoint)
@@ -1162,7 +1162,7 @@ func (c *chainWatcher) dispatchContractBreach(spendEvent *chainntnfs.SpendDetail
 			return spew.Sdump(retribution)
 		}))
 
-	settledBalance := chainSet.remoteCommit.LocalBalance.ToSatoshis()
+	settledBalance := chainSet.remoteCommit.LocalBalance.ToBroneess()
 	closeSummary := channeldb.ChannelCloseSummary{
 		ChanPoint:               c.cfg.chanState.FundingOutpoint,
 		ChainHash:               c.cfg.chanState.ChainHash,
@@ -1230,7 +1230,7 @@ func (c *chainWatcher) dispatchContractBreach(spendEvent *chainntnfs.SpendDetail
 // waitForCommitmentPoint waits for the commitment point to be inserted into
 // the local database. We'll use this method in the DLP case, to wait for the
 // remote party to send us their point, as we can't proceed until we have that.
-func (c *chainWatcher) waitForCommitmentPoint() *btcec.PublicKey {
+func (c *chainWatcher) waitForCommitmentPoint() *bronec.PublicKey {
 	// If we are lucky, the remote peer sent us the correct commitment
 	// point during channel sync, such that we can sweep our funds. If we
 	// cannot find the commit point, there's not much we can do other than

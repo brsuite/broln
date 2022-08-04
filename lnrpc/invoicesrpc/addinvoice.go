@@ -87,8 +87,8 @@ type AddInvoiceData struct {
 	// htlc will be accepted and held until the preimage becomes known.
 	Hash *lntypes.Hash
 
-	// The value of this invoice in millisatoshis.
-	Value lnwire.MilliSatoshi
+	// The value of this invoice in millibroneess.
+	Value lnwire.MilliBronees
 
 	// Hash (SHA-256) of a description of the payment. Used if the
 	// description of payment (memo) is too long to naturally fit within the
@@ -234,9 +234,9 @@ func AddInvoice(ctx context.Context, cfg *AddInvoiceConfig,
 			len(invoice.DescriptionHash))
 	}
 
-	// We set the max invoice amount to 100k BTC, which itself is several
+	// We set the max invoice amount to 100k BRON, which itself is several
 	// multiples off the current block reward.
-	maxInvoiceAmt := bronutil.Amount(bronutil.SatoshiPerBrocoin * 100000)
+	maxInvoiceAmt := bronutil.Amount(bronutil.BroneesPerBrocoin * 100000)
 
 	switch {
 	// The value of the invoice must not be negative.
@@ -246,9 +246,9 @@ func AddInvoice(ctx context.Context, cfg *AddInvoiceConfig,
 
 	// Also ensure that the invoice is actually realistic, while preventing
 	// any issues due to underflow.
-	case invoice.Value.ToSatoshis() > maxInvoiceAmt:
+	case invoice.Value.ToBroneess() > maxInvoiceAmt:
 		return nil, nil, fmt.Errorf("invoice amount %v is "+
-			"too large, max is %v", invoice.Value.ToSatoshis(),
+			"too large, max is %v", invoice.Value.ToBroneess(),
 			maxInvoiceAmt)
 	}
 
@@ -263,7 +263,7 @@ func AddInvoice(ctx context.Context, cfg *AddInvoiceConfig,
 
 	// We only include the amount in the invoice if it is greater than 0.
 	// By not including the amount, we enable the creation of invoices that
-	// allow the payee to specify the amount of satoshis they wish to send.
+	// allow the payee to specify the amount of broneess they wish to send.
 	if amtMSat > 0 {
 		options = append(options, zpay32.Amount(amtMSat))
 	}
@@ -554,14 +554,14 @@ func addHopHint(hopHints *[]func(*zpay32.Invoice),
 // options that'll append the route hint to the set of all route hints.
 //
 // TODO(roasbeef): do proper sub-set sum max hints usually << numChans
-func SelectHopHints(amtMSat lnwire.MilliSatoshi, cfg *AddInvoiceConfig,
+func SelectHopHints(amtMSat lnwire.MilliBronees, cfg *AddInvoiceConfig,
 	openChannels []*channeldb.OpenChannel,
 	numMaxHophints int) []func(*zpay32.Invoice) {
 
 	// We'll add our hop hints in two passes, first we'll add all channels
 	// that are eligible to be hop hints, and also have a local balance
 	// above the payment amount.
-	var totalHintBandwidth lnwire.MilliSatoshi
+	var totalHintBandwidth lnwire.MilliBronees
 	hopHintChans := make(map[wire.OutPoint]struct{})
 	hopHints := make([]func(*zpay32.Invoice), 0, numMaxHophints)
 	for _, channel := range openChannels {
@@ -596,7 +596,7 @@ func SelectHopHints(amtMSat lnwire.MilliSatoshi, cfg *AddInvoiceConfig,
 	// or if the sum of available bandwidth in the routing hints exceeds 2x
 	// the payment amount. We do 2x here to account for a margin of error
 	// if some of the selected channels no longer become operable.
-	hopHintFactor := lnwire.MilliSatoshi(2)
+	hopHintFactor := lnwire.MilliBronees(2)
 	for i := 0; i < len(openChannels); i++ {
 		// If we hit either of our early termination conditions, then
 		// we'll break the loop here.

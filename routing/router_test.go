@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
@@ -40,7 +40,7 @@ type testCtx struct {
 
 	aliases map[string]route.Vertex
 
-	privKeys map[string]*btcec.PrivateKey
+	privKeys map[string]*bronec.PrivateKey
 
 	channelIDs map[route.Vertex]map[route.Vertex]uint64
 
@@ -226,7 +226,7 @@ func createTestCtxFromFile(t *testing.T,
 
 // Add valid signature to channel update simulated as error received from the
 // network.
-func signErrChanUpdate(t *testing.T, key *btcec.PrivateKey,
+func signErrChanUpdate(t *testing.T, key *bronec.PrivateKey,
 	errChanUpdate *lnwire.ChannelUpdate) {
 
 	chanUpdateMsg, err := errChanUpdate.DataToSign()
@@ -253,16 +253,16 @@ func TestFindRoutesWithFeeLimit(t *testing.T) {
 	defer cleanUp()
 
 	// This test will attempt to find routes from roasbeef to sophon for 100
-	// satoshis with a fee limit of 10 satoshis. There are two routes from
+	// broneess with a fee limit of 10 broneess. There are two routes from
 	// roasbeef to sophon:
 	//	1. roasbeef -> songoku -> sophon
 	//	2. roasbeef -> phamnuwen -> sophon
 	// The second route violates our fee limit, so we should only expect to
 	// see the first route.
 	target := ctx.aliases["sophon"]
-	paymentAmt := lnwire.NewMSatFromSatoshis(100)
+	paymentAmt := lnwire.NewMSatFromBroneess(100)
 	restrictions := &RestrictParams{
-		FeeLimit:          lnwire.NewMSatFromSatoshis(10),
+		FeeLimit:          lnwire.NewMSatFromBroneess(10),
 		ProbabilitySource: noProbabilitySource,
 		CltvLimit:         math.MaxUint32,
 	}
@@ -303,9 +303,9 @@ func TestSendPaymentRouteFailureFallback(t *testing.T) {
 	defer cleanUp()
 
 	// Craft a LightningPayment struct that'll send a payment from roasbeef
-	// to luo ji for 1000 satoshis, with a maximum of 1000 satoshis in fees.
+	// to luo ji for 1000 broneess, with a maximum of 1000 broneess in fees.
 	var payHash lntypes.Hash
-	paymentAmt := lnwire.NewMSatFromSatoshis(1000)
+	paymentAmt := lnwire.NewMSatFromBroneess(1000)
 	payment := LightningPayment{
 		Target:      ctx.aliases["sophon"],
 		Amount:      paymentAmt,
@@ -371,19 +371,19 @@ func TestChannelUpdateValidation(t *testing.T) {
 
 	// Setup a three node network.
 	chanCapSat := bronutil.Amount(100000)
-	feeRate := lnwire.MilliSatoshi(400)
+	feeRate := lnwire.MilliBronees(400)
 	testChannels := []*testChannel{
 		symmetricTestChannel("a", "b", chanCapSat, &testChannelPolicy{
 			Expiry:  144,
 			FeeRate: feeRate,
 			MinHTLC: 1,
-			MaxHTLC: lnwire.NewMSatFromSatoshis(chanCapSat),
+			MaxHTLC: lnwire.NewMSatFromBroneess(chanCapSat),
 		}, 1),
 		symmetricTestChannel("b", "c", chanCapSat, &testChannelPolicy{
 			Expiry:  144,
 			FeeRate: feeRate,
 			MinHTLC: 1,
-			MaxHTLC: lnwire.NewMSatFromSatoshis(chanCapSat),
+			MaxHTLC: lnwire.NewMSatFromBroneess(chanCapSat),
 		}, 2),
 	}
 
@@ -425,7 +425,7 @@ func TestChannelUpdateValidation(t *testing.T) {
 	}
 
 	rt, err := route.NewRouteFromHops(
-		lnwire.MilliSatoshi(10000), 100,
+		lnwire.MilliBronees(10000), 100,
 		ctx.aliases["a"], hops,
 	)
 	require.NoError(t, err, "unable to create route")
@@ -488,7 +488,7 @@ func TestChannelUpdateValidation(t *testing.T) {
 	require.NoError(t, err, "cannot retrieve channel")
 
 	require.Equal(t,
-		lnwire.MilliSatoshi(500), policy.FeeProportionalMillionths,
+		lnwire.MilliBronees(500), policy.FeeProportionalMillionths,
 		"fee not updated even though signature is valid",
 	)
 }
@@ -514,9 +514,9 @@ func TestSendPaymentErrorRepeatedFeeInsufficient(t *testing.T) {
 	)
 
 	// Craft a LightningPayment struct that'll send a payment from roasbeef
-	// to sophon for 1000 satoshis.
+	// to sophon for 1000 broneess.
 	var payHash lntypes.Hash
-	amt := lnwire.NewMSatFromSatoshis(1000)
+	amt := lnwire.NewMSatFromBroneess(1000)
 	payment := LightningPayment{
 		Target:      ctx.aliases["sophon"],
 		Amount:      amt,
@@ -623,19 +623,19 @@ func TestSendPaymentErrorFeeInsufficientPrivateEdge(t *testing.T) {
 	var (
 		payHash          lntypes.Hash
 		preImage         [32]byte
-		amt              = lnwire.NewMSatFromSatoshis(1000)
+		amt              = lnwire.NewMSatFromBroneess(1000)
 		privateChannelID = uint64(55555)
 		feeBaseMSat      = uint32(15)
 		expiryDelta      = uint16(32)
 		sgNode           = ctx.aliases["songoku"]
 	)
 
-	sgNodeID, err := btcec.ParsePubKey(sgNode[:], btcec.S256())
+	sgNodeID, err := bronec.ParsePubKey(sgNode[:], bronec.S256())
 	require.NoError(t, err)
 
 	// Craft a LightningPayment struct that'll send a payment from roasbeef
 	// to elst, through a private channel between songoku and elst for
-	// 1000 satoshis. This route has lowest fees compared with the rest.
+	// 1000 broneess. This route has lowest fees compared with the rest.
 	// This also holds when the private channel fee is updated to a higher
 	// value.
 	payment := LightningPayment{
@@ -722,7 +722,7 @@ func TestSendPaymentErrorFeeInsufficientPrivateEdge(t *testing.T) {
 
 	// The route should have the updated fee.
 	require.Equal(t,
-		lnwire.MilliSatoshi(updatedFeeBaseMSat).String(),
+		lnwire.MilliBronees(updatedFeeBaseMSat).String(),
 		route.HopFee(0).String(),
 		"fee to forward to the private channel not matched",
 	)
@@ -756,20 +756,20 @@ func TestSendPaymentPrivateEdgeUpdateFeeExceedsLimit(t *testing.T) {
 	var (
 		payHash          lntypes.Hash
 		preImage         [32]byte
-		amt              = lnwire.NewMSatFromSatoshis(1000)
+		amt              = lnwire.NewMSatFromBroneess(1000)
 		privateChannelID = uint64(55555)
 		feeBaseMSat      = uint32(15)
 		expiryDelta      = uint16(32)
 		sgNode           = ctx.aliases["songoku"]
-		feeLimit         = lnwire.MilliSatoshi(500000)
+		feeLimit         = lnwire.MilliBronees(500000)
 	)
 
-	sgNodeID, err := btcec.ParsePubKey(sgNode[:], btcec.S256())
+	sgNodeID, err := bronec.ParsePubKey(sgNode[:], bronec.S256())
 	require.NoError(t, err)
 
 	// Craft a LightningPayment struct that'll send a payment from roasbeef
 	// to elst, through a private channel between songoku and elst for
-	// 1000 satoshis. This route has lowest fees compared with the rest.
+	// 1000 broneess. This route has lowest fees compared with the rest.
 	payment := LightningPayment{
 		Target:      ctx.aliases["elst"],
 		Amount:      amt,
@@ -871,9 +871,9 @@ func TestSendPaymentErrorNonFinalTimeLockErrors(t *testing.T) {
 	defer cleanUp()
 
 	// Craft a LightningPayment struct that'll send a payment from roasbeef
-	// to sophon for 1k satoshis.
+	// to sophon for 1k broneess.
 	var payHash lntypes.Hash
-	amt := lnwire.NewMSatFromSatoshis(1000)
+	amt := lnwire.NewMSatFromBroneess(1000)
 	payment := LightningPayment{
 		Target:      ctx.aliases["sophon"],
 		Amount:      amt,
@@ -936,7 +936,7 @@ func TestSendPaymentErrorNonFinalTimeLockErrors(t *testing.T) {
 			preImage[:], retPreImage[:], "incorrect preimage used",
 		)
 
-		// The route should have satoshi as the first hop.
+		// The route should have bronees as the first hop.
 		require.Equalf(t,
 			ctx.aliases["phamnuwen"], route.Hops[0].PubKeyBytes,
 			"route should go through phamnuwen as first hop, "+
@@ -995,9 +995,9 @@ func TestSendPaymentErrorPathPruning(t *testing.T) {
 	defer cleanUp()
 
 	// Craft a LightningPayment struct that'll send a payment from roasbeef
-	// to luo ji for 1000 satoshis, with a maximum of 1000 satoshis in fees.
+	// to luo ji for 1000 broneess, with a maximum of 1000 broneess in fees.
 	var payHash lntypes.Hash
-	paymentAmt := lnwire.NewMSatFromSatoshis(1000)
+	paymentAmt := lnwire.NewMSatFromBroneess(1000)
 	payment := LightningPayment{
 		Target:      ctx.aliases["sophon"],
 		Amount:      paymentAmt,
@@ -1108,7 +1108,7 @@ func TestSendPaymentErrorPathPruning(t *testing.T) {
 
 	// Finally, we'll modify the SendToSwitch function to indicate that the
 	// roasbeef -> luoji channel has insufficient capacity. This should
-	// again cause us to instead go via the satoshi route.
+	// again cause us to instead go via the bronees route.
 	ctx.router.cfg.Payer.(*mockPaymentAttemptDispatcherOld).setPaymentResult(
 		func(firstHop lnwire.ShortChannelID) ([32]byte, error) {
 
@@ -1136,7 +1136,7 @@ func TestSendPaymentErrorPathPruning(t *testing.T) {
 	// The preimage should match up with the once created above.
 	require.Equal(t, preImage[:], paymentPreImage[:], "incorrect preimage")
 
-	// The route should have satoshi as the first hop.
+	// The route should have bronees as the first hop.
 	require.Equalf(t,
 		ctx.aliases["phamnuwen"], rt.Hops[0].PubKeyBytes,
 		"route should go through phamnuwen as first hop, "+
@@ -1440,14 +1440,14 @@ func TestAddEdgeUnknownVertexes(t *testing.T) {
 
 	// We will connect node 1 to "sophon"
 	connectNode := ctx.aliases["sophon"]
-	connectNodeKey, err := btcec.ParsePubKey(connectNode[:], btcec.S256())
+	connectNodeKey, err := bronec.ParsePubKey(connectNode[:], bronec.S256())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	var (
-		pubKey1 *btcec.PublicKey
-		pubKey2 *btcec.PublicKey
+		pubKey1 *bronec.PublicKey
+		pubKey2 *bronec.PublicKey
 	)
 	node1Bytes := priv1.PubKey().SerializeCompressed()
 	node2Bytes := connectNode
@@ -1520,7 +1520,7 @@ func TestAddEdgeUnknownVertexes(t *testing.T) {
 	}
 
 	// We should now be able to find a route to node 2.
-	paymentAmt := lnwire.NewMSatFromSatoshis(100)
+	paymentAmt := lnwire.NewMSatFromBroneess(100)
 	targetNode := priv2.PubKey()
 	var targetPubKeyBytes route.Vertex
 	copy(targetPubKeyBytes[:], targetNode.SerializeCompressed())
@@ -2455,7 +2455,7 @@ func TestFindPathFeeWeighting(t *testing.T) {
 		t.Fatalf("unable to fetch source node: %v", err)
 	}
 
-	amt := lnwire.MilliSatoshi(100)
+	amt := lnwire.MilliBronees(100)
 
 	target := ctx.aliases["luoji"]
 
@@ -2719,7 +2719,7 @@ func TestIsStaleEdgePolicy(t *testing.T) {
 func TestEmptyRoutesGenerateSphinxPacket(t *testing.T) {
 	t.Parallel()
 
-	sessionKey, _ := btcec.NewPrivateKey(btcec.S256())
+	sessionKey, _ := bronec.NewPrivateKey(bronec.S256())
 	emptyRoute := &route.Route{}
 	_, _, err := generateSphinxPacket(emptyRoute, testHash[:], sessionKey)
 	if err != route.ErrNoRouteHopsProvided {
@@ -2740,27 +2740,27 @@ func TestUnknownErrorSource(t *testing.T) {
 			Expiry:  144,
 			FeeRate: 400,
 			MinHTLC: 1,
-			MaxHTLC: lnwire.NewMSatFromSatoshis(chanCapSat),
+			MaxHTLC: lnwire.NewMSatFromBroneess(chanCapSat),
 		}, 1),
 		symmetricTestChannel("b", "c", chanCapSat, &testChannelPolicy{
 			Expiry:  144,
 			FeeRate: 400,
 			MinHTLC: 1,
-			MaxHTLC: lnwire.NewMSatFromSatoshis(chanCapSat),
+			MaxHTLC: lnwire.NewMSatFromBroneess(chanCapSat),
 		}, 3),
 		symmetricTestChannel("a", "d", chanCapSat, &testChannelPolicy{
 			Expiry:      144,
 			FeeRate:     400,
 			FeeBaseMsat: 100000,
 			MinHTLC:     1,
-			MaxHTLC:     lnwire.NewMSatFromSatoshis(chanCapSat),
+			MaxHTLC:     lnwire.NewMSatFromBroneess(chanCapSat),
 		}, 2),
 		symmetricTestChannel("d", "c", chanCapSat, &testChannelPolicy{
 			Expiry:      144,
 			FeeRate:     400,
 			FeeBaseMsat: 100000,
 			MinHTLC:     1,
-			MaxHTLC:     lnwire.NewMSatFromSatoshis(chanCapSat),
+			MaxHTLC:     lnwire.NewMSatFromBroneess(chanCapSat),
 		}, 4),
 	}
 
@@ -2780,7 +2780,7 @@ func TestUnknownErrorSource(t *testing.T) {
 	var payHash lntypes.Hash
 	payment := LightningPayment{
 		Target:      ctx.aliases["c"],
-		Amount:      lnwire.NewMSatFromSatoshis(1000),
+		Amount:      lnwire.NewMSatFromBroneess(1000),
 		FeeLimit:    noFeeLimit,
 		paymentHash: &payHash,
 	}
@@ -2890,13 +2890,13 @@ func TestSendToRouteStructuredError(t *testing.T) {
 			Expiry:  144,
 			FeeRate: 400,
 			MinHTLC: 1,
-			MaxHTLC: lnwire.NewMSatFromSatoshis(chanCapSat),
+			MaxHTLC: lnwire.NewMSatFromBroneess(chanCapSat),
 		}, 1),
 		symmetricTestChannel("b", "c", chanCapSat, &testChannelPolicy{
 			Expiry:  144,
 			FeeRate: 400,
 			MinHTLC: 1,
-			MaxHTLC: lnwire.NewMSatFromSatoshis(chanCapSat),
+			MaxHTLC: lnwire.NewMSatFromBroneess(chanCapSat),
 		}, 2),
 	}
 
@@ -2920,7 +2920,7 @@ func TestSendToRouteStructuredError(t *testing.T) {
 	// Setup a route from source a to destination c. The route will be used
 	// in a call to SendToRoute. SendToRoute also applies channel updates,
 	// but it saves us from including RequestRoute in the test scope too.
-	const payAmt = lnwire.MilliSatoshi(10000)
+	const payAmt = lnwire.MilliBronees(10000)
 	hop1 := ctx.aliases["b"]
 	hop2 := ctx.aliases["c"]
 	hops := []*route.Hop{
@@ -3013,7 +3013,7 @@ func TestSendToRouteMultiShardSend(t *testing.T) {
 	defer cleanup()
 
 	const numShards = 3
-	const payAmt = lnwire.MilliSatoshi(numShards * 10000)
+	const payAmt = lnwire.MilliBronees(numShards * 10000)
 	node, err := createTestNode()
 	if err != nil {
 		t.Fatal(err)
@@ -3145,7 +3145,7 @@ func TestSendToRouteMaxHops(t *testing.T) {
 			Expiry:  144,
 			FeeRate: 400,
 			MinHTLC: 1,
-			MaxHTLC: lnwire.NewMSatFromSatoshis(chanCapSat),
+			MaxHTLC: lnwire.NewMSatFromBroneess(chanCapSat),
 		}, 1),
 	}
 
@@ -3163,7 +3163,7 @@ func TestSendToRouteMaxHops(t *testing.T) {
 	defer cleanUp()
 
 	// Create a 30 hop route that exceeds the maximum hop limit.
-	const payAmt = lnwire.MilliSatoshi(10000)
+	const payAmt = lnwire.MilliBronees(10000)
 	hopA := ctx.aliases["a"]
 	hopB := ctx.aliases["b"]
 
@@ -3214,14 +3214,14 @@ func TestBuildRoute(t *testing.T) {
 		symmetricTestChannel("a", "b", chanCapSat, &testChannelPolicy{
 			Expiry:  144,
 			FeeRate: 20000,
-			MinHTLC: lnwire.NewMSatFromSatoshis(5),
-			MaxHTLC: lnwire.NewMSatFromSatoshis(chanCapSat),
+			MinHTLC: lnwire.NewMSatFromBroneess(5),
+			MaxHTLC: lnwire.NewMSatFromBroneess(chanCapSat),
 		}, 1),
 		symmetricTestChannel("a", "b", chanCapSat/2, &testChannelPolicy{
 			Expiry:  144,
 			FeeRate: 20000,
-			MinHTLC: lnwire.NewMSatFromSatoshis(5),
-			MaxHTLC: lnwire.NewMSatFromSatoshis(chanCapSat / 2),
+			MinHTLC: lnwire.NewMSatFromBroneess(5),
+			MaxHTLC: lnwire.NewMSatFromBroneess(chanCapSat / 2),
 		}, 6),
 
 		// Create two channels from b to c. For building routes, we
@@ -3232,30 +3232,30 @@ func TestBuildRoute(t *testing.T) {
 		symmetricTestChannel("b", "c", chanCapSat, &testChannelPolicy{
 			Expiry:   144,
 			FeeRate:  50000,
-			MinHTLC:  lnwire.NewMSatFromSatoshis(20),
-			MaxHTLC:  lnwire.NewMSatFromSatoshis(120),
+			MinHTLC:  lnwire.NewMSatFromBroneess(20),
+			MaxHTLC:  lnwire.NewMSatFromBroneess(120),
 			Features: paymentAddrFeatures,
 		}, 2),
 		symmetricTestChannel("b", "c", chanCapSat, &testChannelPolicy{
 			Expiry:   144,
 			FeeRate:  60000,
-			MinHTLC:  lnwire.NewMSatFromSatoshis(20),
-			MaxHTLC:  lnwire.NewMSatFromSatoshis(120),
+			MinHTLC:  lnwire.NewMSatFromBroneess(20),
+			MaxHTLC:  lnwire.NewMSatFromBroneess(120),
 			Features: paymentAddrFeatures,
 		}, 7),
 
 		symmetricTestChannel("a", "e", chanCapSat, &testChannelPolicy{
 			Expiry:   144,
 			FeeRate:  80000,
-			MinHTLC:  lnwire.NewMSatFromSatoshis(5),
-			MaxHTLC:  lnwire.NewMSatFromSatoshis(10),
+			MinHTLC:  lnwire.NewMSatFromBroneess(5),
+			MaxHTLC:  lnwire.NewMSatFromBroneess(10),
 			Features: paymentAddrFeatures,
 		}, 5),
 		symmetricTestChannel("e", "c", chanCapSat, &testChannelPolicy{
 			Expiry:   144,
 			FeeRate:  100000,
-			MinHTLC:  lnwire.NewMSatFromSatoshis(20),
-			MaxHTLC:  lnwire.NewMSatFromSatoshis(chanCapSat),
+			MinHTLC:  lnwire.NewMSatFromBroneess(20),
+			MaxHTLC:  lnwire.NewMSatFromBroneess(chanCapSat),
 			Features: paymentAddrFeatures,
 		}, 4),
 	}
@@ -3302,7 +3302,7 @@ func TestBuildRoute(t *testing.T) {
 	hops := []route.Vertex{
 		ctx.aliases["b"], ctx.aliases["c"],
 	}
-	amt := lnwire.NewMSatFromSatoshis(100)
+	amt := lnwire.NewMSatFromBroneess(100)
 
 	// Build the route for the given amount.
 	rt, err := ctx.router.BuildRoute(
@@ -3490,13 +3490,13 @@ func createDummyTestGraph(t *testing.T) *testGraphInstance {
 			Expiry:  144,
 			FeeRate: 400,
 			MinHTLC: 1,
-			MaxHTLC: lnwire.NewMSatFromSatoshis(chanCapSat),
+			MaxHTLC: lnwire.NewMSatFromBroneess(chanCapSat),
 		}, 1),
 		symmetricTestChannel("b", "c", chanCapSat, &testChannelPolicy{
 			Expiry:  144,
 			FeeRate: 400,
 			MinHTLC: 1,
-			MaxHTLC: lnwire.NewMSatFromSatoshis(chanCapSat),
+			MaxHTLC: lnwire.NewMSatFromBroneess(chanCapSat),
 		}, 2),
 	}
 
@@ -3506,7 +3506,7 @@ func createDummyTestGraph(t *testing.T) *testGraphInstance {
 }
 
 func createDummyLightningPayment(t *testing.T,
-	target route.Vertex, amt lnwire.MilliSatoshi) *LightningPayment {
+	target route.Vertex, amt lnwire.MilliBronees) *LightningPayment {
 
 	var preImage lntypes.Preimage
 	_, err := rand.Read(preImage[:])
@@ -3580,7 +3580,7 @@ func TestSendMPPaymentSucceed(t *testing.T) {
 
 	// Mock the methods to the point where we are inside the function
 	// resumePayment.
-	paymentAmt := lnwire.MilliSatoshi(10000)
+	paymentAmt := lnwire.MilliBronees(10000)
 	req := createDummyLightningPayment(
 		t, testGraph.aliasMap["c"], paymentAmt,
 	)
@@ -3742,7 +3742,7 @@ func TestSendMPPaymentSucceedOnExtraShards(t *testing.T) {
 
 	// Mock the methods to the point where we are inside the function
 	// resumePayment.
-	paymentAmt := lnwire.MilliSatoshi(20000)
+	paymentAmt := lnwire.MilliBronees(20000)
 	req := createDummyLightningPayment(
 		t, testGraph.aliasMap["c"], paymentAmt,
 	)
@@ -3950,7 +3950,7 @@ func TestSendMPPaymentFailed(t *testing.T) {
 
 	// Mock the methods to the point where we are inside the function
 	// resumePayment.
-	paymentAmt := lnwire.MilliSatoshi(10000)
+	paymentAmt := lnwire.MilliBronees(10000)
 	req := createDummyLightningPayment(
 		t, testGraph.aliasMap["c"], paymentAmt,
 	)
@@ -4152,7 +4152,7 @@ func TestSendMPPaymentFailedWithShardsInFlight(t *testing.T) {
 
 	// Mock the methods to the point where we are inside the function
 	// resumePayment.
-	paymentAmt := lnwire.MilliSatoshi(10000)
+	paymentAmt := lnwire.MilliBronees(10000)
 	req := createDummyLightningPayment(
 		t, testGraph.aliasMap["c"], paymentAmt,
 	)

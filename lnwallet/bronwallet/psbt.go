@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/input"
+	"github.com/brsuite/broln/lnwallet"
+	"github.com/brsuite/broln/lnwallet/chainfee"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/psbt"
 	"github.com/brsuite/bronwallet/waddrmgr"
-	"github.com/brsuite/broln/input"
-	"github.com/brsuite/broln/lnwallet"
-	"github.com/brsuite/broln/lnwallet/chainfee"
 )
 
 var (
@@ -231,7 +231,7 @@ func prepareScripts(in psbt.PInput) ([]byte, []byte, error) {
 // custom/proprietary PSBT fields and may perform a mapping on the passed
 // private key in order to utilize the tweaks, if populated.
 func maybeTweakPrivKeyPsbt(unknowns []*psbt.Unknown,
-	privKey *btcec.PrivateKey) *btcec.PrivateKey {
+	privKey *bronec.PrivateKey) *bronec.PrivateKey {
 
 	// There can be other custom/unknown keys in a PSBT that we just ignore.
 	// Key tweaking is optional and only one tweak (single _or_ double) can
@@ -243,8 +243,8 @@ func maybeTweakPrivKeyPsbt(unknowns []*psbt.Unknown,
 		}
 
 		if bytes.Equal(u.Key, PsbtKeyTypeInputSignatureTweakDouble) {
-			doubleTweakKey, _ := btcec.PrivKeyFromBytes(
-				btcec.S256(), u.Value,
+			doubleTweakKey, _ := bronec.PrivKeyFromBytes(
+				bronec.S256(), u.Value,
 			)
 			return input.DeriveRevocationPrivKey(
 				privKey, doubleTweakKey,

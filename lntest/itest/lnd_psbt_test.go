@@ -6,17 +6,17 @@ import (
 	"crypto/rand"
 	"fmt"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/brsuite/bronutil/hdkeychain"
-	"github.com/brsuite/bronutil/psbt"
 	"github.com/brsuite/broln/funding"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/signrpc"
 	"github.com/brsuite/broln/lnrpc/walletrpc"
 	"github.com/brsuite/broln/lntest"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/brsuite/bronutil/hdkeychain"
+	"github.com/brsuite/bronutil/psbt"
 	"github.com/stretchr/testify/require"
 )
 
@@ -49,8 +49,8 @@ func runPsbtChanFunding(net *lntest.NetworkHarness, t *harnessTest, carol,
 	ctxt, cancel := context.WithTimeout(ctxb, defaultTimeout)
 	defer cancel()
 
-	const chanSize = funding.MaxBtcFundingAmount
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, dave)
+	const chanSize = funding.MaxBronFundingAmount
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, dave)
 
 	// Before we start the test, we'll ensure both sides are connected so
 	// the funding flow can be properly executed.
@@ -253,7 +253,7 @@ func runPsbtChanFunding(net *lntest.NetworkHarness, t *harnessTest, carol,
 // party.
 func testPsbtChanFundingExternal(net *lntest.NetworkHarness, t *harnessTest) {
 	ctxb := context.Background()
-	const chanSize = funding.MaxBtcFundingAmount
+	const chanSize = funding.MaxBronFundingAmount
 
 	// Everything we do here should be done within a second or two, so we
 	// can just keep a single timeout context around for all calls.
@@ -460,7 +460,7 @@ func testPsbtChanFundingExternal(net *lntest.NetworkHarness, t *harnessTest) {
 // transaction.
 func testPsbtChanFundingSingleStep(net *lntest.NetworkHarness, t *harnessTest) {
 	ctxb := context.Background()
-	const chanSize = funding.MaxBtcFundingAmount
+	const chanSize = funding.MaxBronFundingAmount
 
 	// Everything we do here should be done within a second or two, so we
 	// can just keep a single timeout context around for all calls.
@@ -478,7 +478,7 @@ func testPsbtChanFundingSingleStep(net *lntest.NetworkHarness, t *harnessTest) {
 	dave := net.NewNode(t.t, "dave", args)
 	defer shutdownAndAssert(net, t, dave)
 
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, net.Alice)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, net.Alice)
 
 	// Get new address for anchor reserve.
 	reserveAddrReq := &lnrpc.NewAddressRequest{
@@ -779,7 +779,7 @@ func runSignPsbt(t *harnessTest, net *lntest.NetworkHarness,
 
 	partialSig := signedPacket.Inputs[0].PartialSigs[0]
 	require.Equal(t.t, partialSig.PubKey, addrPubKey.SerializeCompressed())
-	require.Greater(t.t, len(partialSig.Signature), btcec.MinSigLen)
+	require.Greater(t.t, len(partialSig.Signature), bronec.MinSigLen)
 
 	// We should be able to finalize the PSBT and extract the final TX now.
 	err = psbt.MaybeFinalizeAll(signedPacket)

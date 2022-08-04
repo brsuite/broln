@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/kvdb"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/wire"
 )
 
 // LiveChannelSource is an interface that allows us to query for the set of
@@ -28,7 +28,7 @@ type LiveChannelSource interface {
 type AddressSource interface {
 	// AddrsForNode returns all known addresses for the target node public
 	// key.
-	AddrsForNode(nodePub *btcec.PublicKey) ([]net.Addr, error)
+	AddrsForNode(nodePub *bronec.PublicKey) ([]net.Addr, error)
 }
 
 // assembleChanBackup attempts to assemble a static channel backup for the

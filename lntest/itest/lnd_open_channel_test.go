@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/brsuite/brond/btcjson"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/integration/rpctest"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/funding"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lntest/wait"
+	"github.com/brsuite/brond/bronjson"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/integration/rpctest"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -52,7 +52,7 @@ func testOpenChannelAfterReorg(net *lntest.NetworkHarness, t *harnessTest) {
 	// We start by connecting the new miner to our original miner,
 	// such that it will sync to our original chain.
 	err = net.Miner.Client.Node(
-		btcjson.NConnect, tempMiner.P2PAddress(), &temp,
+		bronjson.NConnect, tempMiner.P2PAddress(), &temp,
 	)
 	if err != nil {
 		t.Fatalf("unable to remove node: %v", err)
@@ -68,7 +68,7 @@ func testOpenChannelAfterReorg(net *lntest.NetworkHarness, t *harnessTest) {
 	// We disconnect the two miners, such that we can mine two different
 	// chains and can cause a reorg later.
 	err = net.Miner.Client.Node(
-		btcjson.NDisconnect, tempMiner.P2PAddress(), &temp,
+		bronjson.NDisconnect, tempMiner.P2PAddress(), &temp,
 	)
 	if err != nil {
 		t.Fatalf("unable to remove node: %v", err)
@@ -176,7 +176,7 @@ func testOpenChannelAfterReorg(net *lntest.NetworkHarness, t *harnessTest) {
 	// Connecting to the temporary miner should now cause our original
 	// chain to be re-orged out.
 	err = net.Miner.Client.Node(
-		btcjson.NConnect, tempMiner.P2PAddress(), &temp,
+		bronjson.NConnect, tempMiner.P2PAddress(), &temp,
 	)
 	if err != nil {
 		t.Fatalf("unable to remove node: %v", err)
@@ -193,7 +193,7 @@ func testOpenChannelAfterReorg(net *lntest.NetworkHarness, t *harnessTest) {
 	// Now we disconnect the two miners, and connect our original miner to
 	// our chain backend once again.
 	err = net.Miner.Client.Node(
-		btcjson.NDisconnect, tempMiner.P2PAddress(), &temp,
+		bronjson.NDisconnect, tempMiner.P2PAddress(), &temp,
 	)
 	if err != nil {
 		t.Fatalf("unable to remove node: %v", err)

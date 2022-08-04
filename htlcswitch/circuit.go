@@ -44,11 +44,11 @@ type PaymentCircuit struct {
 	PaymentHash [32]byte
 
 	// IncomingAmount is the value of the HTLC from the incoming link.
-	IncomingAmount lnwire.MilliSatoshi
+	IncomingAmount lnwire.MilliBronees
 
 	// OutgoingAmount specifies the value of the HTLC leaving the switch,
 	// either as a payment or forwarded amount.
-	OutgoingAmount lnwire.MilliSatoshi
+	OutgoingAmount lnwire.MilliBronees
 
 	// ErrorEncrypter is used to re-encrypt the onion failure before
 	// sending it back to the originator of the payment.
@@ -174,13 +174,13 @@ func (c *PaymentCircuit) Decode(r io.Reader) error {
 	if _, err := io.ReadFull(r, scratch[:]); err != nil {
 		return err
 	}
-	c.IncomingAmount = lnwire.MilliSatoshi(
+	c.IncomingAmount = lnwire.MilliBronees(
 		binary.BigEndian.Uint64(scratch[:]))
 
 	if _, err := io.ReadFull(r, scratch[:]); err != nil {
 		return err
 	}
-	c.OutgoingAmount = lnwire.MilliSatoshi(
+	c.OutgoingAmount = lnwire.MilliBronees(
 		binary.BigEndian.Uint64(scratch[:]))
 
 	// Read the encrypter type used for this circuit.

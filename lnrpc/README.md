@@ -21,14 +21,14 @@ The list of defined RPCs on the service `Lightning` are the following (with a br
 description):
 
   * WalletBalance
-     * Returns the wallet's current confirmed balance in BTC.
+     * Returns the wallet's current confirmed balance in BRON.
   * ChannelBalance
-     * Returns the daemons' available aggregate channel balance in BTC.
+     * Returns the daemons' available aggregate channel balance in BRON.
   * GetTransactions
      * Returns a list of on-chain transactions that pay to or are spends from
        `broln`.
   * SendCoins
-     * Sends an amount of satoshis to a specific address.
+     * Sends an amount of broneess to a specific address.
   * ListUnspent
      * Lists available utxos within a range of confirmations.
   * SubscribeTransactions

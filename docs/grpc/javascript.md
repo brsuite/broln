@@ -155,7 +155,7 @@ call.write({ dest: dest_pubkey_bytes, amt: 6969 });
 // Or send a bunch of them like this
 function paymentSender(destination, amount) {
   return function(callback) {
-    console.log("Sending " + amount + " satoshis");
+    console.log("Sending " + amount + " broneess");
     console.log("To: " + destination);
     call.write({
       dest: destination,
@@ -173,7 +173,7 @@ async.series(payment_senders, function() {
 });
 
 ```
-This example will send a payment of 100 satoshis every 2 seconds.
+This example will send a payment of 100 broneess every 2 seconds.
 
 
 ### Using Macaroons

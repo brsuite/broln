@@ -7,9 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/funding"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/labels"
@@ -17,6 +14,9 @@ import (
 	"github.com/brsuite/broln/lnrpc/walletrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -46,7 +46,7 @@ func testBasicChannelFunding(net *lntest.NetworkHarness, t *harnessTest) {
 
 		// Each time, we'll send Carol a new set of coins in order to
 		// fund the channel.
-		net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+		net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 		daveArgs := nodeArgsForCommitType(daveCommitType)
 		dave := net.NewNode(t.t, "Dave", daveArgs)
@@ -161,7 +161,7 @@ func basicChannelFundingTest(t *harnessTest, net *lntest.NetworkHarness,
 	fundingShim *lnrpc.FundingShim) (*lnrpc.Channel, *lnrpc.Channel,
 	func(), error) {
 
-	chanAmt := funding.MaxBtcFundingAmount
+	chanAmt := funding.MaxBronFundingAmount
 	pushAmt := bronutil.Amount(100000)
 	satPerVbyte := bronutil.Amount(1)
 
@@ -179,19 +179,19 @@ func basicChannelFundingTest(t *harnessTest, net *lntest.NetworkHarness,
 
 		newResp.LocalBalance.Sat += uint64(local)
 		newResp.LocalBalance.Msat += uint64(
-			lnwire.NewMSatFromSatoshis(local),
+			lnwire.NewMSatFromBroneess(local),
 		)
 		newResp.RemoteBalance.Sat += uint64(remote)
 		newResp.RemoteBalance.Msat += uint64(
-			lnwire.NewMSatFromSatoshis(remote),
+			lnwire.NewMSatFromBroneess(remote),
 		)
 		// Deprecated fields.
 		newResp.Balance += int64(local) // nolint:staticcheck
 		assertChannelBalanceResp(t, node, newResp)
 	}
 
-	// First establish a channel with a capacity of 0.5 BTC between Alice
-	// and Bob with Alice pushing 100k satoshis to Bob's side during
+	// First establish a channel with a capacity of 0.5 BRON between Alice
+	// and Bob with Alice pushing 100k broneess to Bob's side during
 	// funding. This function will block until the channel itself is fully
 	// open or an error occurs in the funding process. A series of
 	// assertions will be executed to ensure the funding process completed
@@ -248,7 +248,7 @@ func testUnconfirmedChannelFunding(net *lntest.NetworkHarness, t *harnessTest) {
 	ctxb := context.Background()
 
 	const (
-		chanAmt = funding.MaxBtcFundingAmount
+		chanAmt = funding.MaxBronFundingAmount
 		pushAmt = bronutil.Amount(100000)
 	)
 
@@ -301,25 +301,25 @@ func testUnconfirmedChannelFunding(net *lntest.NetworkHarness, t *harnessTest) {
 		expectedResponse := &lnrpc.ChannelBalanceResponse{
 			LocalBalance: &lnrpc.Amount{
 				Sat: uint64(local),
-				Msat: uint64(lnwire.NewMSatFromSatoshis(
+				Msat: uint64(lnwire.NewMSatFromBroneess(
 					local,
 				)),
 			},
 			RemoteBalance: &lnrpc.Amount{
 				Sat: uint64(remote),
-				Msat: uint64(lnwire.NewMSatFromSatoshis(
+				Msat: uint64(lnwire.NewMSatFromBroneess(
 					remote,
 				)),
 			},
 			PendingOpenLocalBalance: &lnrpc.Amount{
 				Sat: uint64(pendingLocal),
-				Msat: uint64(lnwire.NewMSatFromSatoshis(
+				Msat: uint64(lnwire.NewMSatFromBroneess(
 					pendingLocal,
 				)),
 			},
 			PendingOpenRemoteBalance: &lnrpc.Amount{
 				Sat: uint64(pendingRemote),
-				Msat: uint64(lnwire.NewMSatFromSatoshis(
+				Msat: uint64(lnwire.NewMSatFromBroneess(
 					pendingRemote,
 				)),
 			},
@@ -378,7 +378,7 @@ func testExternalFundingChanPoint(net *lntest.NetworkHarness, t *harnessTest) {
 
 	// Carol will be funding the channel, so we'll send some coins over to
 	// her and ensure they have enough confirmations before we proceed.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	// Before we start the test, we'll ensure both sides are connected to
 	// the funding flow can properly be executed.
@@ -388,7 +388,7 @@ func testExternalFundingChanPoint(net *lntest.NetworkHarness, t *harnessTest) {
 	// flow. To start with, we'll create a pending channel with a shim for
 	// a transaction that will never be published.
 	const thawHeight uint32 = 10
-	const chanSize = funding.MaxBtcFundingAmount
+	const chanSize = funding.MaxBronFundingAmount
 	fundingShim1, chanPoint1, _ := deriveFundingShim(
 		net, t, carol, dave, chanSize, thawHeight, false,
 	)
@@ -487,7 +487,7 @@ func testExternalFundingChanPoint(net *lntest.NetworkHarness, t *harnessTest) {
 // testFundingPersistence mirrors testBasicChannelFunding, but adds restarts
 // and checks for the state of channels with unconfirmed funding transactions.
 func testChannelFundingPersistence(net *lntest.NetworkHarness, t *harnessTest) {
-	chanAmt := funding.MaxBtcFundingAmount
+	chanAmt := funding.MaxBronFundingAmount
 	pushAmt := bronutil.Amount(0)
 
 	// As we need to create a channel that requires more than 1

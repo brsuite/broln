@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/bronutil"
 )
 
 // createPubkey return a new test pubkey.
@@ -21,14 +21,14 @@ func createPubkey(id byte) route.Vertex {
 type mockChannel struct {
 	id       uint64
 	capacity bronutil.Amount
-	balance  lnwire.MilliSatoshi
+	balance  lnwire.MilliBronees
 }
 
 // mockNode holds a set of mock channels and routing policies for a node in the
 // mock graph.
 type mockNode struct {
 	channels map[route.Vertex]*mockChannel
-	baseFee  lnwire.MilliSatoshi
+	baseFee  lnwire.MilliBronees
 	pubkey   route.Vertex
 }
 
@@ -146,12 +146,12 @@ func (m *mockGraph) addChannel(id uint64, node1id, node2id byte,
 	m.nodes[node1pubkey].channels[node2pubkey] = &mockChannel{
 		capacity: capacity,
 		id:       id,
-		balance:  lnwire.NewMSatFromSatoshis(capacity / 2),
+		balance:  lnwire.NewMSatFromBroneess(capacity / 2),
 	}
 	m.nodes[node2pubkey].channels[node1pubkey] = &mockChannel{
 		capacity: capacity,
 		id:       id,
-		balance:  lnwire.NewMSatFromSatoshis(capacity / 2),
+		balance:  lnwire.NewMSatFromBroneess(capacity / 2),
 	}
 }
 
@@ -230,7 +230,7 @@ type htlcResult struct {
 // hop describes one hop of a route.
 type hop struct {
 	node     *mockNode
-	amtToFwd lnwire.MilliSatoshi
+	amtToFwd lnwire.MilliBronees
 	next     *hop
 }
 

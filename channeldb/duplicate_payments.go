@@ -7,11 +7,11 @@ import (
 	"io"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/brond/bronec"
 )
 
 var (
@@ -53,7 +53,7 @@ type duplicateHTLCAttemptInfo struct {
 	attemptID uint64
 
 	// sessionKey is the ephemeral key used for this attempt.
-	sessionKey [btcec.PrivKeyBytesLen]byte
+	sessionKey [bronec.PrivKeyBytesLen]byte
 
 	// route is the route attempted to send the HTLC.
 	route route.Route
@@ -106,7 +106,7 @@ func deserializeDuplicatePaymentCreationInfo(r io.Reader) (
 	if _, err := io.ReadFull(r, scratch[:]); err != nil {
 		return nil, err
 	}
-	c.Value = lnwire.MilliSatoshi(byteOrder.Uint64(scratch[:]))
+	c.Value = lnwire.MilliBronees(byteOrder.Uint64(scratch[:]))
 
 	if _, err := io.ReadFull(r, scratch[:]); err != nil {
 		return nil, err

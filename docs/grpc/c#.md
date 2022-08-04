@@ -170,7 +170,7 @@ IEnumerable<SendRequest> SendPayment()
     }
 }
 ```
-This example will send a payment of 100 satoshis every 2 seconds.
+This example will send a payment of 100 broneess every 2 seconds.
 
 #### Using Macaroons
 

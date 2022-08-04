@@ -6,11 +6,11 @@ import (
 	"io"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/wire"
 )
 
 // HTLCAttemptInfo contains static information about a specific HTLC attempt
@@ -23,13 +23,13 @@ type HTLCAttemptInfo struct {
 
 	// sessionKey is the raw bytes ephemeral key used for this attempt.
 	// These bytes are lazily read off disk to save ourselves the expensive
-	// EC operations used by btcec.PrivKeyFromBytes.
-	sessionKey [btcec.PrivKeyBytesLen]byte
+	// EC operations used by bronec.PrivKeyFromBytes.
+	sessionKey [bronec.PrivKeyBytesLen]byte
 
 	// cachedSessionKey is our fully deserialized sesionKey. This value
 	// may be nil if the attempt has just been read from disk and its
 	// session key has not been used yet.
-	cachedSessionKey *btcec.PrivateKey
+	cachedSessionKey *bronec.PrivateKey
 
 	// Route is the route attempted to send the HTLC.
 	Route route.Route
@@ -46,11 +46,11 @@ type HTLCAttemptInfo struct {
 }
 
 // NewHtlcAttemptInfo creates a htlc attempt.
-func NewHtlcAttemptInfo(attemptID uint64, sessionKey *btcec.PrivateKey,
+func NewHtlcAttemptInfo(attemptID uint64, sessionKey *bronec.PrivateKey,
 	route route.Route, attemptTime time.Time,
 	hash *lntypes.Hash) *HTLCAttemptInfo {
 
-	var scratch [btcec.PrivKeyBytesLen]byte
+	var scratch [bronec.PrivKeyBytesLen]byte
 	copy(scratch[:], sessionKey.Serialize())
 
 	return &HTLCAttemptInfo{
@@ -65,10 +65,10 @@ func NewHtlcAttemptInfo(attemptID uint64, sessionKey *btcec.PrivateKey,
 
 // SessionKey returns the ephemeral key used for a htlc attempt. This function
 // performs expensive ec-ops to obtain the session key if it is not cached.
-func (h *HTLCAttemptInfo) SessionKey() *btcec.PrivateKey {
+func (h *HTLCAttemptInfo) SessionKey() *bronec.PrivateKey {
 	if h.cachedSessionKey == nil {
-		h.cachedSessionKey, _ = btcec.PrivKeyFromBytes(
-			btcec.S256(), h.sessionKey[:],
+		h.cachedSessionKey, _ = bronec.PrivKeyFromBytes(
+			bronec.S256(), h.sessionKey[:],
 		)
 	}
 
@@ -191,8 +191,8 @@ func (m *MPPayment) TerminalInfo() (*HTLCSettleInfo, *FailureReason) {
 
 // SentAmt returns the sum of sent amount and fees for HTLCs that are either
 // settled or still in flight.
-func (m *MPPayment) SentAmt() (lnwire.MilliSatoshi, lnwire.MilliSatoshi) {
-	var sent, fees lnwire.MilliSatoshi
+func (m *MPPayment) SentAmt() (lnwire.MilliBronees, lnwire.MilliBronees) {
+	var sent, fees lnwire.MilliBronees
 	for _, h := range m.HTLCs {
 		if h.Failure != nil {
 			continue

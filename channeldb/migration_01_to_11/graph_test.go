@@ -7,8 +7,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
 	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
+	"github.com/brsuite/brond/bronec"
 )
 
 var (
@@ -18,7 +18,7 @@ var (
 		"[2001:db8:85a3:0:0:8a2e:370:7334]:80")
 	testAddrs = []net.Addr{testAddr, anotherAddr}
 
-	testSig = &btcec.Signature{
+	testSig = &bronec.Signature{
 		R: new(big.Int),
 		S: new(big.Int),
 	}
@@ -28,7 +28,7 @@ var (
 	testFeatures = lnwire.NewFeatureVector(nil, nil)
 )
 
-func createLightningNode(db *DB, priv *btcec.PrivateKey) (*LightningNode, error) {
+func createLightningNode(db *DB, priv *bronec.PrivateKey) (*LightningNode, error) {
 	updateTime := prand.Int63()
 
 	pub := priv.PubKey().SerializeCompressed()
@@ -48,7 +48,7 @@ func createLightningNode(db *DB, priv *btcec.PrivateKey) (*LightningNode, error)
 }
 
 func createTestVertex(db *DB) (*LightningNode, error) {
-	priv, err := btcec.NewPrivateKey(btcec.S256())
+	priv, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		return nil, err
 	}

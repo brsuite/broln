@@ -3,20 +3,20 @@ package wtmock
 import (
 	"sync"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/brond/bronec"
 )
 
 // SecretKeyRing is a mock, in-memory implementation for deriving private keys.
 type SecretKeyRing struct {
 	mu   sync.Mutex
-	keys map[keychain.KeyLocator]*btcec.PrivateKey
+	keys map[keychain.KeyLocator]*bronec.PrivateKey
 }
 
 // NewSecretKeyRing creates a new mock SecretKeyRing.
 func NewSecretKeyRing() *SecretKeyRing {
 	return &SecretKeyRing{
-		keys: make(map[keychain.KeyLocator]*btcec.PrivateKey),
+		keys: make(map[keychain.KeyLocator]*bronec.PrivateKey),
 	}
 }
 
@@ -39,7 +39,7 @@ func (m *SecretKeyRing) DeriveKey(
 		}, nil
 	}
 
-	privKey, err := btcec.NewPrivateKey(btcec.S256())
+	privKey, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		return keychain.KeyDescriptor{}, err
 	}
@@ -62,7 +62,7 @@ func (m *SecretKeyRing) DeriveKey(
 //
 // NOTE: This is part of the wtclient.ECDHKeyRing interface.
 func (m *SecretKeyRing) ECDH(keyDesc keychain.KeyDescriptor,
-	pub *btcec.PublicKey) ([32]byte, error) {
+	pub *bronec.PublicKey) ([32]byte, error) {
 
 	_, err := m.DeriveKey(keyDesc.KeyLocator)
 	if err != nil {

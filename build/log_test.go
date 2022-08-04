@@ -3,8 +3,8 @@ package build_test
 import (
 	"testing"
 
-	"github.com/btcsuite/btclog"
 	"github.com/brsuite/broln/build"
+	"github.com/brsuite/bronlog"
 	"github.com/stretchr/testify/require"
 )
 
@@ -15,8 +15,8 @@ type mockSubLogger struct {
 
 func (m *mockSubLogger) SubLoggers() build.SubLoggers {
 	return build.SubLoggers{
-		"PEER": btclog.Disabled,
-		"SRVR": btclog.Disabled,
+		"PEER": bronlog.Disabled,
+		"SRVR": bronlog.Disabled,
 	}
 }
 

@@ -4,12 +4,12 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/zpay32"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg"
 )
 
 // decodePayReq decodes the invoice payment request if present. This is needed,
@@ -74,8 +74,8 @@ func CreateRPCInvoice(invoice *channeldb.Invoice,
 	routeHints := CreateRPCRouteHints(decoded.RouteHints)
 
 	preimage := invoice.Terms.PaymentPreimage
-	satAmt := invoice.Terms.Value.ToSatoshis()
-	satAmtPaid := invoice.AmtPaid.ToSatoshis()
+	satAmt := invoice.Terms.Value.ToBroneess()
+	satAmtPaid := invoice.AmtPaid.ToBroneess()
 
 	isSettled := invoice.State == channeldb.ContractSettled
 
@@ -277,7 +277,7 @@ func CreateZpay32HopHints(routeHints []*lnrpc.RouteHint) ([][]zpay32.HopHint, er
 			if err != nil {
 				return nil, err
 			}
-			p, err := btcec.ParsePubKey(pubKeyBytes, btcec.S256())
+			p, err := bronec.ParsePubKey(pubKeyBytes, bronec.S256())
 			if err != nil {
 				return nil, err
 			}

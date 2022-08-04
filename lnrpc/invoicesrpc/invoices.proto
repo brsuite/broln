@@ -63,14 +63,14 @@ message AddHoldInvoiceRequest {
     bytes hash = 2;
 
     /*
-    The value of this invoice in satoshis
+    The value of this invoice in broneess
 
     The fields value and value_msat are mutually exclusive.
     */
     int64 value = 3;
 
     /*
-    The value of this invoice in millisatoshis
+    The value of this invoice in millibroneess
 
     The fields value and value_msat are mutually exclusive.
     */

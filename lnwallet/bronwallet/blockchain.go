@@ -5,14 +5,14 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/brsuite/broln/lntypes"
+	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronwallet/chain"
 	"github.com/brsuite/neutrino"
 	"github.com/brsuite/neutrino/headerfs"
-	"github.com/brsuite/broln/lntypes"
-	"github.com/brsuite/broln/lnwallet"
 )
 
 var (
@@ -85,8 +85,8 @@ func (b *bronwallet) GetUtxo(op *wire.OutPoint, pkScript []byte,
 			return nil, err
 		}
 
-		// We'll ensure we properly convert the amount given in BTC to
-		// satoshis.
+		// We'll ensure we properly convert the amount given in BRON to
+		// broneess.
 		amt, err := bronutil.NewAmount(txout.Value)
 		if err != nil {
 			return nil, err
@@ -110,8 +110,8 @@ func (b *bronwallet) GetUtxo(op *wire.OutPoint, pkScript []byte,
 			return nil, err
 		}
 
-		// Sadly, gettxout returns the output value in BTC instead of
-		// satoshis.
+		// Sadly, gettxout returns the output value in BRON instead of
+		// broneess.
 		amt, err := bronutil.NewAmount(txout.Value)
 		if err != nil {
 			return nil, err

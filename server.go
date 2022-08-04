@@ -17,14 +17,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/connmgr"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/go-errors/errors"
-	sphinx "github.com/brsuite/lightning-onion"
 	"github.com/brsuite/broln/autopilot"
 	"github.com/brsuite/broln/brontide"
 	"github.com/brsuite/broln/cert"
@@ -72,6 +64,14 @@ import (
 	"github.com/brsuite/broln/watchtower/wtclient"
 	"github.com/brsuite/broln/watchtower/wtpolicy"
 	"github.com/brsuite/broln/watchtower/wtserver"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/connmgr"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	sphinx "github.com/brsuite/lightning-onion"
+	"github.com/go-errors/errors"
 )
 
 const (
@@ -129,7 +129,7 @@ var (
 	// to the value under the Brocoin chain as default.
 	//
 	// TODO(roasbeef): add command line param to modify
-	MaxFundingAmount = funding.MaxBtcFundingAmount
+	MaxFundingAmount = funding.MaxBronFundingAmount
 )
 
 // errPeerAlreadyConnected is an error returned by the server when we're
@@ -623,7 +623,7 @@ func newServer(cfg *Config, listenAddrs []net.Addr,
 	s.htlcNotifier = htlcswitch.NewHtlcNotifier(time.Now)
 
 	thresholdSats := bronutil.Amount(cfg.DustThreshold)
-	thresholdMSats := lnwire.NewMSatFromSatoshis(thresholdSats)
+	thresholdMSats := lnwire.NewMSatFromBroneess(thresholdSats)
 
 	s.htlcSwitch, err = htlcswitch.New(htlcswitch.Config{
 		DB:                   dbs.ChanStateDB,
@@ -869,7 +869,7 @@ func newServer(cfg *Config, listenAddrs []net.Addr,
 		routingConfig.MinRouteProbability)
 
 	pathFindingConfig := routing.PathFindingConfig{
-		AttemptCost: lnwire.NewMSatFromSatoshis(
+		AttemptCost: lnwire.NewMSatFromBroneess(
 			routingConfig.AttemptCost,
 		),
 		AttemptCostPPM: routingConfig.AttemptCostPPM,
@@ -1145,8 +1145,8 @@ func newServer(cfg *Config, listenAddrs []net.Addr,
 	// Litecoin, depending on the primary registered chain.
 	primaryChain := cfg.registeredChains.PrimaryChain()
 	chainCfg := cfg.Brocoin
-	minRemoteDelay := funding.MinBtcRemoteDelay
-	maxRemoteDelay := funding.MaxBtcRemoteDelay
+	minRemoteDelay := funding.MinBronRemoteDelay
+	maxRemoteDelay := funding.MaxBronRemoteDelay
 	if primaryChain == chainreg.LitecoinChain {
 		chainCfg = cfg.Litecoin
 		minRemoteDelay = funding.MinLtcRemoteDelay
@@ -1195,7 +1195,7 @@ func newServer(cfg *Config, listenAddrs []net.Addr,
 		DefaultRoutingPolicy: cc.RoutingPolicy,
 		DefaultMinHtlcIn:     cc.MinHtlcIn,
 		NumRequiredConfs: func(chanAmt bronutil.Amount,
-			pushAmt lnwire.MilliSatoshi) uint16 {
+			pushAmt lnwire.MilliBronees) uint16 {
 			// For large channels we increase the number
 			// of confirmations we require for the
 			// channel to be considered open. As it is
@@ -1229,8 +1229,8 @@ func newServer(cfg *Config, listenAddrs []net.Addr,
 			// between 3 and 6, depending on channel size.
 			// TODO(halseth): Use 1 as minimum?
 			maxChannelSize := uint64(
-				lnwire.NewMSatFromSatoshis(MaxFundingAmount))
-			stake := lnwire.NewMSatFromSatoshis(chanAmt) + pushAmt
+				lnwire.NewMSatFromBroneess(MaxFundingAmount))
+			stake := lnwire.NewMSatFromBroneess(chanAmt) + pushAmt
 			conf := maxConf * uint64(stake) / maxChannelSize
 			if conf < minConf {
 				conf = minConf
@@ -1274,7 +1274,7 @@ func newServer(cfg *Config, listenAddrs []net.Addr,
 			return delay
 		},
 		WatchNewChannel: func(channel *channeldb.OpenChannel,
-			peerKey *btcec.PublicKey) error {
+			peerKey *bronec.PublicKey) error {
 
 			// First, we'll mark this new peer as a persistent peer
 			// for re-connection purposes. If the peer is not yet
@@ -1312,12 +1312,12 @@ func newServer(cfg *Config, listenAddrs []net.Addr,
 
 			return reserve
 		},
-		RequiredRemoteMaxValue: func(chanAmt bronutil.Amount) lnwire.MilliSatoshi {
+		RequiredRemoteMaxValue: func(chanAmt bronutil.Amount) lnwire.MilliBronees {
 			// By default, we'll allow the remote peer to fully
 			// utilize the full bandwidth of the channel, minus our
 			// required reserve.
-			reserve := lnwire.NewMSatFromSatoshis(chanAmt / 100)
-			return lnwire.NewMSatFromSatoshis(chanAmt) - reserve
+			reserve := lnwire.NewMSatFromBroneess(chanAmt / 100)
+			return lnwire.NewMSatFromBroneess(chanAmt) - reserve
 		},
 		RequiredRemoteMaxHTLCs: func(chanAmt bronutil.Amount) uint16 {
 			if cfg.DefaultRemoteMaxHtlcs > 0 {
@@ -1521,7 +1521,7 @@ func (s *server) createLivenessMonitor(cfg *Config, cc *chainreg.ChainControl) {
 		"disk space",
 		func() error {
 			free, err := healthcheck.AvailableDiskSpaceRatio(
-				cfg.brolnDir,
+				cfg.BrolnDir,
 			)
 			if err != nil {
 				return err
@@ -2723,7 +2723,7 @@ func (s *server) genNodeAnnouncement(refresh bool,
 }
 
 type nodeAddresses struct {
-	pubKey    *btcec.PublicKey
+	pubKey    *bronec.PublicKey
 	addresses []net.Addr
 }
 
@@ -3055,7 +3055,7 @@ func (s *server) NotifyWhenOffline(peerPubKey [33]byte) <-chan struct{} {
 // daemon's local representation of the remote peer.
 //
 // NOTE: This function is safe for concurrent access.
-func (s *server) FindPeer(peerKey *btcec.PublicKey) (*peer.Brontide, error) {
+func (s *server) FindPeer(peerKey *bronec.PublicKey) (*peer.Brontide, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -3138,7 +3138,7 @@ func (s *server) nextPeerBackoff(pubStr string,
 // utilize the ordering of the local and remote public key. If we didn't use
 // such a tie breaker, then we risk _both_ connections erroneously being
 // dropped.
-func shouldDropLocalConnection(local, remote *btcec.PublicKey) bool {
+func shouldDropLocalConnection(local, remote *bronec.PublicKey) bool {
 	localPubBytes := local.SerializeCompressed()
 	remotePubPbytes := remote.SerializeCompressed()
 
@@ -4087,7 +4087,7 @@ func (s *server) connectToPeer(addr *lnwire.NetAddress,
 // identified by public key.
 //
 // NOTE: This function is safe for concurrent access.
-func (s *server) DisconnectPeer(pubKey *btcec.PublicKey) error {
+func (s *server) DisconnectPeer(pubKey *bronec.PublicKey) error {
 	pubBytes := pubKey.SerializeCompressed()
 	pubStr := string(pubBytes)
 
@@ -4249,7 +4249,7 @@ func computeNextBackoff(currBackoff, maxBackoff time.Duration) time.Duration {
 var errNoAdvertisedAddr = errors.New("no advertised address found")
 
 // fetchNodeAdvertisedAddrs attempts to fetch the advertised addresses of a node.
-func (s *server) fetchNodeAdvertisedAddrs(pub *btcec.PublicKey) ([]net.Addr, error) {
+func (s *server) fetchNodeAdvertisedAddrs(pub *bronec.PublicKey) ([]net.Addr, error) {
 	vertex, err := route.NewVertexFromBytes(pub.SerializeCompressed())
 	if err != nil {
 		return nil, err

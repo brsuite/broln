@@ -12,9 +12,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/clock"
@@ -22,6 +19,9 @@ import (
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/record"
 	"github.com/brsuite/broln/zpay32"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/stretchr/testify/require"
 )
 
@@ -71,20 +71,20 @@ var (
 	testPrivKeyBytes, _ = hex.DecodeString(
 		"e126f68f7eafcc8b74f54d269fe206be715000f94dac067d1c04a8ca3b2db734")
 
-	testPrivKey, _ = btcec.PrivKeyFromBytes(
-		btcec.S256(), testPrivKeyBytes)
+	testPrivKey, _ = bronec.PrivKeyFromBytes(
+		bronec.S256(), testPrivKeyBytes)
 
 	testInvoiceDescription = "coffee"
 
-	testInvoiceAmount = lnwire.MilliSatoshi(100000)
+	testInvoiceAmount = lnwire.MilliBronees(100000)
 
 	testNetParams = &chaincfg.MainNetParams
 
 	testMessageSigner = zpay32.MessageSigner{
 		SignCompact: func(msg []byte) ([]byte, error) {
 			hash := chainhash.HashB(msg)
-			sig, err := btcec.SignCompact(
-				btcec.S256(), testPrivKey, hash, true,
+			sig, err := bronec.SignCompact(
+				bronec.S256(), testPrivKey, hash, true,
 			)
 			if err != nil {
 				return nil, fmt.Errorf("can't sign the message: %v", err)
@@ -103,7 +103,7 @@ var (
 )
 
 var (
-	testInvoiceAmt = lnwire.MilliSatoshi(100000)
+	testInvoiceAmt = lnwire.MilliBronees(100000)
 	testInvoice    = &channeldb.Invoice{
 		Terms: channeldb.ContractTerm{
 			PaymentPreimage: &testInvoicePreimage,

@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/go-errors/errors"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/htlcswitch"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/brond/bronec"
+	"github.com/go-errors/errors"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -173,12 +173,12 @@ func (m *mockPaymentSessionOld) RequestRoute(_, _ lnwire.MilliSatoshi,
 }
 
 func (m *mockPaymentSessionOld) UpdateAdditionalEdge(_ *lnwire.ChannelUpdate,
-	_ *btcec.PublicKey, _ *channeldb.CachedEdgePolicy) bool {
+	_ *bronec.PublicKey, _ *channeldb.CachedEdgePolicy) bool {
 
 	return false
 }
 
-func (m *mockPaymentSessionOld) GetAdditionalEdgePolicy(_ *btcec.PublicKey,
+func (m *mockPaymentSessionOld) GetAdditionalEdgePolicy(_ *bronec.PublicKey,
 	_ uint64) *channeldb.CachedEdgePolicy {
 
 	return nil
@@ -637,13 +637,13 @@ func (m *mockPaymentSession) RequestRoute(maxAmt, feeLimit lnwire.MilliSatoshi,
 }
 
 func (m *mockPaymentSession) UpdateAdditionalEdge(msg *lnwire.ChannelUpdate,
-	pubKey *btcec.PublicKey, policy *channeldb.CachedEdgePolicy) bool {
+	pubKey *bronec.PublicKey, policy *channeldb.CachedEdgePolicy) bool {
 
 	args := m.Called(msg, pubKey, policy)
 	return args.Bool(0)
 }
 
-func (m *mockPaymentSession) GetAdditionalEdgePolicy(pubKey *btcec.PublicKey,
+func (m *mockPaymentSession) GetAdditionalEdgePolicy(pubKey *bronec.PublicKey,
 	channelID uint64) *channeldb.CachedEdgePolicy {
 
 	args := m.Called(pubKey, channelID)

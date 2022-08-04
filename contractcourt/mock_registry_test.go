@@ -9,7 +9,7 @@ import (
 
 type notifyExitHopData struct {
 	payHash       lntypes.Hash
-	paidAmount    lnwire.MilliSatoshi
+	paidAmount    lnwire.MilliBronees
 	hodlChan      chan<- interface{}
 	expiry        uint32
 	currentHeight int32
@@ -22,7 +22,7 @@ type mockRegistry struct {
 }
 
 func (r *mockRegistry) NotifyExitHopHtlc(payHash lntypes.Hash,
-	paidAmount lnwire.MilliSatoshi, expiry uint32, currentHeight int32,
+	paidAmount lnwire.MilliBronees, expiry uint32, currentHeight int32,
 	circuitKey channeldb.CircuitKey, hodlChan chan<- interface{},
 	payload invoices.Payload) (invoices.HtlcResolution, error) {
 

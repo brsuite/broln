@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lnwallet"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
 )
 
 // ContractResolutions is a wrapper struct around the two forms of resolutions
@@ -1209,7 +1209,7 @@ func decodeSignDetails(r io.Reader) (*input.SignDetails, error) {
 	if err != nil {
 		return nil, err
 	}
-	sig, err := btcec.ParseDERSignature(rawSig, btcec.S256())
+	sig, err := bronec.ParseDERSignature(rawSig, bronec.S256())
 	if err != nil {
 		return nil, err
 	}

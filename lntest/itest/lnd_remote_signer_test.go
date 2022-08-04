@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/brsuite/bronutil"
-	"github.com/brsuite/bronutil/hdkeychain"
-	"github.com/brsuite/bronwallet/waddrmgr"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/walletrpc"
 	"github.com/brsuite/broln/lntest"
+	"github.com/brsuite/bronutil"
+	"github.com/brsuite/bronutil/hdkeychain"
+	"github.com/brsuite/bronwallet/waddrmgr"
 	"github.com/stretchr/testify/require"
 )
 
@@ -168,10 +168,10 @@ func testRemoteSigner(net *lntest.NetworkHarness, t *harnessTest) {
 		require.Equal(t.t, signerNodePubKey, resp.IdentityPubkey)
 
 		if subTest.sendCoins {
-			net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, watchOnly)
+			net.SendCoins(t.t, bronutil.BroneesPerBrocoin, watchOnly)
 			assertAccountBalance(
 				t.t, watchOnly, "default",
-				bronutil.SatoshiPerBrocoin, 0,
+				bronutil.BroneesPerBrocoin, 0,
 			)
 		}
 

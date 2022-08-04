@@ -9,12 +9,12 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/routerrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lntest/wait"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -41,7 +41,7 @@ func testListPayments(net *lntest.NetworkHarness, t *harnessTest) {
 			len(paymentsRespInit.Payments), 0)
 	}
 
-	// Open a channel with 100k satoshis between Alice and Bob with Alice
+	// Open a channel with 100k broneess between Alice and Bob with Alice
 	// being the sole funder of the channel.
 	chanAmt := bronutil.Amount(100000)
 	chanPoint := openChannelAndAssert(
@@ -52,7 +52,7 @@ func testListPayments(net *lntest.NetworkHarness, t *harnessTest) {
 	)
 
 	// Now that the channel is open, create an invoice for Bob which
-	// expects a payment of 1000 satoshis from Alice paid via a particular
+	// expects a payment of 1000 broneess from Alice paid via a particular
 	// preimage.
 	const paymentAmt = 1000
 	preimage := bytes.Repeat([]byte("B"), 32)
@@ -602,7 +602,7 @@ func testInvoiceSubscriptions(net *lntest.NetworkHarness, t *harnessTest) {
 
 	const chanAmt = bronutil.Amount(500000)
 
-	// Open a channel with 500k satoshis between Alice and Bob with Alice
+	// Open a channel with 500k broneess between Alice and Bob with Alice
 	// being the sole funder of the channel.
 	chanPoint := openChannelAndAssert(
 		t, net, net.Alice, net.Bob,
@@ -611,7 +611,7 @@ func testInvoiceSubscriptions(net *lntest.NetworkHarness, t *harnessTest) {
 		},
 	)
 
-	// Next create a new invoice for Bob requesting 1k satoshis.
+	// Next create a new invoice for Bob requesting 1k broneess.
 	// TODO(roasbeef): make global list of invoices for each node to re-use
 	// and avoid collisions
 	const paymentAmt = 1000

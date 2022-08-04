@@ -3,7 +3,7 @@ package keychain
 import (
 	"crypto/sha256"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 )
 
 // NewPubKeyECDH wraps the given key of the key ring so it adheres to the
@@ -27,7 +27,7 @@ type PubKeyECDH struct {
 // the interface.
 //
 // NOTE: This is part of the SingleKeyECDH interface.
-func (p *PubKeyECDH) PubKey() *btcec.PublicKey {
+func (p *PubKeyECDH) PubKey() *bronec.PublicKey {
 	return p.keyDesc.PubKey
 }
 
@@ -41,7 +41,7 @@ func (p *PubKeyECDH) PubKey() *btcec.PublicKey {
 //  s := sha256(sx.SerializeCompressed())
 //
 // NOTE: This is part of the SingleKeyECDH interface.
-func (p *PubKeyECDH) ECDH(pubKey *btcec.PublicKey) ([32]byte, error) {
+func (p *PubKeyECDH) ECDH(pubKey *bronec.PublicKey) ([32]byte, error) {
 	return p.ecdh.ECDH(p.keyDesc, pubKey)
 }
 
@@ -50,14 +50,14 @@ func (p *PubKeyECDH) ECDH(pubKey *btcec.PublicKey) ([32]byte, error) {
 // SingleKeyECDH interface.
 type PrivKeyECDH struct {
 	// PrivKey is the private key that is used for the ECDH operation.
-	PrivKey *btcec.PrivateKey
+	PrivKey *bronec.PrivateKey
 }
 
 // PubKey returns the public key of the private key that is abstracted away by
 // the interface.
 //
 // NOTE: This is part of the SingleKeyECDH interface.
-func (p *PrivKeyECDH) PubKey() *btcec.PublicKey {
+func (p *PrivKeyECDH) PubKey() *bronec.PublicKey {
 	return p.PrivKey.PubKey()
 }
 
@@ -71,9 +71,9 @@ func (p *PrivKeyECDH) PubKey() *btcec.PublicKey {
 //  s := sha256(sx.SerializeCompressed())
 //
 // NOTE: This is part of the SingleKeyECDH interface.
-func (p *PrivKeyECDH) ECDH(pub *btcec.PublicKey) ([32]byte, error) {
-	s := &btcec.PublicKey{}
-	s.X, s.Y = btcec.S256().ScalarMult(pub.X, pub.Y, p.PrivKey.D.Bytes())
+func (p *PrivKeyECDH) ECDH(pub *bronec.PublicKey) ([32]byte, error) {
+	s := &bronec.PublicKey{}
+	s.X, s.Y = bronec.S256().ScalarMult(pub.X, pub.Y, p.PrivKey.D.Bytes())
 
 	return sha256.Sum256(s.SerializeCompressed()), nil
 }

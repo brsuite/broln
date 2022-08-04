@@ -9,12 +9,12 @@ import (
 	"net"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
+	"github.com/brsuite/broln/kvdb"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
-	"github.com/brsuite/broln/kvdb"
 )
 
 var (
@@ -330,7 +330,7 @@ func updateEdgePolicy(tx kvdb.RwTx, edge *ChannelEdgePolicy) (bool, error) {
 type LightningNode struct {
 	// PubKeyBytes is the raw bytes of the public key of the target node.
 	PubKeyBytes [33]byte
-	pubKey      *btcec.PublicKey
+	pubKey      *bronec.PublicKey
 
 	// HaveNodeAnnouncement indicates whether we received a node
 	// announcement for this particular node. If true, the remaining fields
@@ -379,12 +379,12 @@ type LightningNode struct {
 //
 // NOTE: By having this method to access an attribute, we ensure we only need
 // to fully deserialize the pubkey if absolutely necessary.
-func (l *LightningNode) PubKey() (*btcec.PublicKey, error) {
+func (l *LightningNode) PubKey() (*bronec.PublicKey, error) {
 	if l.pubKey != nil {
 		return l.pubKey, nil
 	}
 
-	key, err := btcec.ParsePubKey(l.PubKeyBytes[:], btcec.S256())
+	key, err := bronec.ParsePubKey(l.PubKeyBytes[:], bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -519,20 +519,20 @@ type ChannelEdgePolicy struct {
 	TimeLockDelta uint16
 
 	// MinHTLC is the smallest value HTLC this node will accept, expressed
-	// in millisatoshi.
-	MinHTLC lnwire.MilliSatoshi
+	// in millibronees.
+	MinHTLC lnwire.MilliBronees
 
 	// MaxHTLC is the largest value HTLC this node will accept, expressed
-	// in millisatoshi.
-	MaxHTLC lnwire.MilliSatoshi
+	// in millibronees.
+	MaxHTLC lnwire.MilliBronees
 
 	// FeeBaseMSat is the base HTLC fee that will be charged for forwarding
 	// ANY HTLC, expressed in mSAT's.
-	FeeBaseMSat lnwire.MilliSatoshi
+	FeeBaseMSat lnwire.MilliBronees
 
 	// FeeProportionalMillionths is the rate that the node will charge for
-	// HTLCs for each millionth of a satoshi forwarded.
-	FeeProportionalMillionths lnwire.MilliSatoshi
+	// HTLCs for each millionth of a bronees forwarded.
+	FeeProportionalMillionths lnwire.MilliBronees
 
 	// Node is the LightningNode that this directed edge leads to. Using
 	// this pointer the channel graph can further be traversed.
@@ -1121,17 +1121,17 @@ func deserializeChanEdgePolicy(r io.Reader,
 	if err := binary.Read(r, byteOrder, &n); err != nil {
 		return nil, err
 	}
-	edge.MinHTLC = lnwire.MilliSatoshi(n)
+	edge.MinHTLC = lnwire.MilliBronees(n)
 
 	if err := binary.Read(r, byteOrder, &n); err != nil {
 		return nil, err
 	}
-	edge.FeeBaseMSat = lnwire.MilliSatoshi(n)
+	edge.FeeBaseMSat = lnwire.MilliBronees(n)
 
 	if err := binary.Read(r, byteOrder, &n); err != nil {
 		return nil, err
 	}
-	edge.FeeProportionalMillionths = lnwire.MilliSatoshi(n)
+	edge.FeeProportionalMillionths = lnwire.MilliBronees(n)
 
 	var pub [33]byte
 	if _, err := r.Read(pub[:]); err != nil {
@@ -1171,7 +1171,7 @@ func deserializeChanEdgePolicy(r io.Reader,
 		}
 
 		maxHtlc := byteOrder.Uint64(opq[:8])
-		edge.MaxHTLC = lnwire.MilliSatoshi(maxHtlc)
+		edge.MaxHTLC = lnwire.MilliBronees(maxHtlc)
 
 		// Exclude the parsed field from the rest of the opaque data.
 		edge.ExtraOpaqueData = opq[8:]

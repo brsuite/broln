@@ -3,7 +3,10 @@ package bronwallet
 import (
 	"fmt"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/input"
+	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/broln/lnwallet"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
@@ -12,9 +15,6 @@ import (
 	"github.com/brsuite/bronwallet/waddrmgr"
 	"github.com/brsuite/bronwallet/walletdb"
 	"github.com/go-errors/errors"
-	"github.com/brsuite/broln/input"
-	"github.com/brsuite/broln/keychain"
-	"github.com/brsuite/broln/lnwallet"
 )
 
 // FetchInputInfo queries for the WalletController's knowledge of the passed
@@ -64,7 +64,7 @@ func (b *bronwallet) ScriptForOutput(output *wire.TxOut) (
 // KeyLocator.
 func deriveFromKeyLoc(scopedMgr *waddrmgr.ScopedKeyManager,
 	addrmgrNs walletdb.ReadWriteBucket,
-	keyLoc keychain.KeyLocator) (*btcec.PrivateKey, error) {
+	keyLoc keychain.KeyLocator) (*bronec.PrivateKey, error) {
 
 	path := waddrmgr.DerivationPath{
 		InternalAccount: uint32(keyLoc.Family),
@@ -83,7 +83,7 @@ func deriveFromKeyLoc(scopedMgr *waddrmgr.ScopedKeyManager,
 // deriveKeyByBIP32Path derives a key described by a BIP32 path. We expect the
 // first three elements of the path to be hardened according to BIP44, so they
 // must be a number >= 2^31.
-func (b *bronwallet) deriveKeyByBIP32Path(path []uint32) (*btcec.PrivateKey,
+func (b *bronwallet) deriveKeyByBIP32Path(path []uint32) (*bronec.PrivateKey,
 	error) {
 
 	// Make sure we get a full path with exactly 5 elements. A path is
@@ -210,7 +210,7 @@ func assertHardened(elements ...uint32) error {
 // deriveKeyByLocator attempts to derive a key stored in the wallet given a
 // valid key locator.
 func (b *bronwallet) deriveKeyByLocator(
-	keyLoc keychain.KeyLocator) (*btcec.PrivateKey, error) {
+	keyLoc keychain.KeyLocator) (*bronec.PrivateKey, error) {
 
 	// We'll assume the special lightning key scope in this case.
 	scopedMgr, err := b.wallet.Manager.FetchScopedKeyManager(
@@ -234,7 +234,7 @@ func (b *bronwallet) deriveKeyByLocator(
 		return privKey, nil
 	}
 
-	var key *btcec.PrivateKey
+	var key *bronec.PrivateKey
 	err = walletdb.Update(b.db, func(tx walletdb.ReadWriteTx) error {
 		addrmgrNs := tx.ReadWriteBucket(waddrmgrNamespaceKey)
 
@@ -272,7 +272,7 @@ func (b *bronwallet) deriveKeyByLocator(
 // fetchPrivKey attempts to retrieve the raw private key corresponding to the
 // passed public key if populated, or the key descriptor path (if non-empty).
 func (b *bronwallet) fetchPrivKey(
-	keyDesc *keychain.KeyDescriptor) (*btcec.PrivateKey, error) {
+	keyDesc *keychain.KeyDescriptor) (*bronec.PrivateKey, error) {
 
 	// If the key locator within the descriptor *isn't* empty, then we can
 	// directly derive the keys raw.
@@ -311,9 +311,9 @@ func (b *bronwallet) fetchPrivKey(
 // passed sign descriptor and may perform a mapping on the passed private key
 // in order to utilize the tweaks, if populated.
 func maybeTweakPrivKey(signDesc *input.SignDescriptor,
-	privKey *btcec.PrivateKey) (*btcec.PrivateKey, error) {
+	privKey *bronec.PrivateKey) (*bronec.PrivateKey, error) {
 
-	var retPriv *btcec.PrivateKey
+	var retPriv *bronec.PrivateKey
 	switch {
 
 	case signDesc.SingleTweak != nil:
@@ -367,7 +367,7 @@ func (b *bronwallet) SignOutputRaw(tx *wire.MsgTx,
 	}
 
 	// Chop off the sighash flag at the end of the signature.
-	return btcec.ParseDERSignature(sig[:len(sig)-1], btcec.S256())
+	return bronec.ParseDERSignature(sig[:len(sig)-1], bronec.S256())
 }
 
 // ComputeInputScript generates a complete InputScript for the passed
@@ -382,7 +382,7 @@ func (b *bronwallet) ComputeInputScript(tx *wire.MsgTx,
 	// If a tweak (single or double) is specified, then we'll need to use
 	// this tweak to derive the final private key to be used for signing
 	// this output.
-	privKeyTweaker := func(k *btcec.PrivateKey) (*btcec.PrivateKey, error) {
+	privKeyTweaker := func(k *bronec.PrivateKey) (*bronec.PrivateKey, error) {
 		return maybeTweakPrivKey(signDesc, k)
 	}
 
@@ -412,7 +412,7 @@ var _ input.Signer = (*bronwallet)(nil)
 //
 // NOTE: This is a part of the MessageSigner interface.
 func (b *bronwallet) SignMessage(keyLoc keychain.KeyLocator,
-	msg []byte, doubleHash bool) (*btcec.Signature, error) {
+	msg []byte, doubleHash bool) (*bronec.Signature, error) {
 
 	// First attempt to fetch the private key which corresponds to the
 	// specified public key.

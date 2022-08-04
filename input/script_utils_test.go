@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/brsuite/broln/keychain"
 	"github.com/stretchr/testify/require"
 )
 
@@ -92,12 +92,12 @@ func TestRevocationKeyDerivation(t *testing.T) {
 	// First, we'll generate a commitment point, and a commitment secret.
 	// These will be used to derive the ultimate revocation keys.
 	revocationPreimage := testHdSeed.CloneBytes()
-	commitSecret, commitPoint := btcec.PrivKeyFromBytes(btcec.S256(),
+	commitSecret, commitPoint := bronec.PrivKeyFromBytes(bronec.S256(),
 		revocationPreimage)
 
 	// With the commitment secrets generated, we'll now create the base
 	// keys we'll use to derive the revocation key from.
-	basePriv, basePub := btcec.PrivKeyFromBytes(btcec.S256(),
+	basePriv, basePub := bronec.PrivKeyFromBytes(bronec.S256(),
 		testWalletPrivKey)
 
 	// With the point and key obtained, we can now derive the revocation
@@ -121,7 +121,7 @@ func TestTweakKeyDerivation(t *testing.T) {
 
 	// First, we'll generate a base public key that we'll be "tweaking".
 	baseSecret := testHdSeed.CloneBytes()
-	basePriv, basePub := btcec.PrivKeyFromBytes(btcec.S256(), baseSecret)
+	basePriv, basePub := bronec.PrivKeyFromBytes(bronec.S256(), baseSecret)
 
 	// With the base key create, we'll now create a commitment point, and
 	// from that derive the bytes we'll used to tweak the base public key.
@@ -190,7 +190,7 @@ func TestHTLCSenderSpendValidation(t *testing.T) {
 	// Next we'll the commitment secret for our commitment tx and also the
 	// revocation key that we'll use as well.
 	revokePreimage := testHdSeed.CloneBytes()
-	commitSecret, commitPoint := btcec.PrivKeyFromBytes(btcec.S256(),
+	commitSecret, commitPoint := bronec.PrivKeyFromBytes(bronec.S256(),
 		revokePreimage)
 
 	// Generate a payment preimage to be used below.
@@ -200,9 +200,9 @@ func TestHTLCSenderSpendValidation(t *testing.T) {
 
 	// We'll also need some tests keys for alice and bob, and metadata of
 	// the HTLC output.
-	aliceKeyPriv, aliceKeyPub := btcec.PrivKeyFromBytes(btcec.S256(),
+	aliceKeyPriv, aliceKeyPub := bronec.PrivKeyFromBytes(bronec.S256(),
 		testWalletPrivKey)
-	bobKeyPriv, bobKeyPub := btcec.PrivKeyFromBytes(btcec.S256(),
+	bobKeyPriv, bobKeyPub := bronec.PrivKeyFromBytes(bronec.S256(),
 		bobsPrivKey)
 	paymentAmt := bronutil.Amount(1 * 10e8)
 
@@ -219,15 +219,15 @@ func TestHTLCSenderSpendValidation(t *testing.T) {
 	// Finally, we'll create mock signers for both of them based on their
 	// private keys. This test simplifies a bit and uses the same key as
 	// the base point for all scripts and derivations.
-	bobSigner := &MockSigner{Privkeys: []*btcec.PrivateKey{bobKeyPriv}}
-	aliceSigner := &MockSigner{Privkeys: []*btcec.PrivateKey{aliceKeyPriv}}
+	bobSigner := &MockSigner{Privkeys: []*bronec.PrivateKey{bobKeyPriv}}
+	aliceSigner := &MockSigner{Privkeys: []*bronec.PrivateKey{aliceKeyPriv}}
 
 	var (
 		htlcWitnessScript, htlcPkScript []byte
 		htlcOutput                      *wire.TxOut
 		sweepTxSigHashes                *txscript.TxSigHashes
 		senderCommitTx, sweepTx         *wire.MsgTx
-		bobRecvrSig                     *btcec.Signature
+		bobRecvrSig                     *bronec.Signature
 		bobSigHash                      txscript.SigHashType
 	)
 
@@ -309,8 +309,8 @@ func TestHTLCSenderSpendValidation(t *testing.T) {
 			t.Fatalf("unable to generate alice signature: %v", err)
 		}
 
-		bobRecvrSig, err = btcec.ParseDERSignature(
-			bobSig.Serialize(), btcec.S256(),
+		bobRecvrSig, err = bronec.ParseDERSignature(
+			bobSig.Serialize(), bronec.S256(),
 		)
 		if err != nil {
 			t.Fatalf("unable to parse signature: %v", err)
@@ -592,7 +592,7 @@ func TestHTLCReceiverSpendValidation(t *testing.T) {
 	// Next we'll the commitment secret for our commitment tx and also the
 	// revocation key that we'll use as well.
 	revokePreimage := testHdSeed.CloneBytes()
-	commitSecret, commitPoint := btcec.PrivKeyFromBytes(btcec.S256(),
+	commitSecret, commitPoint := bronec.PrivKeyFromBytes(bronec.S256(),
 		revokePreimage)
 
 	// Generate a payment preimage to be used below.
@@ -602,9 +602,9 @@ func TestHTLCReceiverSpendValidation(t *testing.T) {
 
 	// We'll also need some tests keys for alice and bob, and metadata of
 	// the HTLC output.
-	aliceKeyPriv, aliceKeyPub := btcec.PrivKeyFromBytes(btcec.S256(),
+	aliceKeyPriv, aliceKeyPub := bronec.PrivKeyFromBytes(bronec.S256(),
 		testWalletPrivKey)
-	bobKeyPriv, bobKeyPub := btcec.PrivKeyFromBytes(btcec.S256(),
+	bobKeyPriv, bobKeyPub := bronec.PrivKeyFromBytes(bronec.S256(),
 		bobsPrivKey)
 	paymentAmt := bronutil.Amount(1 * 10e8)
 	cltvTimeout := uint32(8)
@@ -622,15 +622,15 @@ func TestHTLCReceiverSpendValidation(t *testing.T) {
 	// Finally, we'll create mock signers for both of them based on their
 	// private keys. This test simplifies a bit and uses the same key as
 	// the base point for all scripts and derivations.
-	bobSigner := &MockSigner{Privkeys: []*btcec.PrivateKey{bobKeyPriv}}
-	aliceSigner := &MockSigner{Privkeys: []*btcec.PrivateKey{aliceKeyPriv}}
+	bobSigner := &MockSigner{Privkeys: []*bronec.PrivateKey{bobKeyPriv}}
+	aliceSigner := &MockSigner{Privkeys: []*bronec.PrivateKey{aliceKeyPriv}}
 
 	var (
 		htlcWitnessScript, htlcPkScript []byte
 		htlcOutput                      *wire.TxOut
 		receiverCommitTx, sweepTx       *wire.MsgTx
 		sweepTxSigHashes                *txscript.TxSigHashes
-		aliceSenderSig                  *btcec.Signature
+		aliceSenderSig                  *bronec.Signature
 		aliceSigHash                    txscript.SigHashType
 	)
 
@@ -708,8 +708,8 @@ func TestHTLCReceiverSpendValidation(t *testing.T) {
 			t.Fatalf("unable to generate alice signature: %v", err)
 		}
 
-		aliceSenderSig, err = btcec.ParseDERSignature(
-			aliceSig.Serialize(), btcec.S256(),
+		aliceSenderSig, err = bronec.ParseDERSignature(
+			aliceSig.Serialize(), bronec.S256(),
 		)
 		if err != nil {
 			t.Fatalf("unable to parse signature: %v", err)
@@ -984,7 +984,7 @@ func TestHTLCReceiverSpendValidation(t *testing.T) {
 func TestSecondLevelHtlcSpends(t *testing.T) {
 	t.Parallel()
 
-	// We'll start be creating a creating a 2BTC HTLC.
+	// We'll start be creating a creating a 2BRON HTLC.
 	const htlcAmt = bronutil.Amount(2 * 10e8)
 
 	// In all of our scenarios, the CSV timeout to claim a self output will
@@ -993,14 +993,14 @@ func TestSecondLevelHtlcSpends(t *testing.T) {
 
 	// First we'll set up some initial key state for Alice and Bob that
 	// will be used in the scripts we created below.
-	aliceKeyPriv, aliceKeyPub := btcec.PrivKeyFromBytes(btcec.S256(),
+	aliceKeyPriv, aliceKeyPub := bronec.PrivKeyFromBytes(bronec.S256(),
 		testWalletPrivKey)
-	bobKeyPriv, bobKeyPub := btcec.PrivKeyFromBytes(btcec.S256(),
+	bobKeyPriv, bobKeyPub := bronec.PrivKeyFromBytes(bronec.S256(),
 		bobsPrivKey)
 
 	revokePreimage := testHdSeed.CloneBytes()
-	commitSecret, commitPoint := btcec.PrivKeyFromBytes(
-		btcec.S256(), revokePreimage)
+	commitSecret, commitPoint := bronec.PrivKeyFromBytes(
+		bronec.S256(), revokePreimage)
 
 	// As we're modeling this as Bob sweeping the HTLC on-chain from his
 	// commitment transaction after a period of time, we'll be using a
@@ -1058,8 +1058,8 @@ func TestSecondLevelHtlcSpends(t *testing.T) {
 	// Finally, we'll create mock signers for both of them based on their
 	// private keys. This test simplifies a bit and uses the same key as
 	// the base point for all scripts and derivations.
-	bobSigner := &MockSigner{Privkeys: []*btcec.PrivateKey{bobKeyPriv}}
-	aliceSigner := &MockSigner{Privkeys: []*btcec.PrivateKey{aliceKeyPriv}}
+	bobSigner := &MockSigner{Privkeys: []*bronec.PrivateKey{bobKeyPriv}}
+	aliceSigner := &MockSigner{Privkeys: []*bronec.PrivateKey{aliceKeyPriv}}
 
 	testCases := []struct {
 		witness func() wire.TxWitness
@@ -1191,7 +1191,7 @@ func TestSecondLevelHtlcSpends(t *testing.T) {
 func TestLeaseSecondLevelHtlcSpends(t *testing.T) {
 	t.Parallel()
 
-	// We'll start be creating a creating a 2BTC HTLC.
+	// We'll start be creating a creating a 2BRON HTLC.
 	const htlcAmt = bronutil.Amount(2 * 10e8)
 
 	// In all of our scenarios, the CSV timeout to claim a self output will
@@ -1204,16 +1204,16 @@ func TestLeaseSecondLevelHtlcSpends(t *testing.T) {
 
 	// First we'll set up some initial key state for Alice and Bob that
 	// will be used in the scripts we created below.
-	aliceKeyPriv, aliceKeyPub := btcec.PrivKeyFromBytes(
-		btcec.S256(), testWalletPrivKey,
+	aliceKeyPriv, aliceKeyPub := bronec.PrivKeyFromBytes(
+		bronec.S256(), testWalletPrivKey,
 	)
-	bobKeyPriv, bobKeyPub := btcec.PrivKeyFromBytes(
-		btcec.S256(), bobsPrivKey,
+	bobKeyPriv, bobKeyPub := bronec.PrivKeyFromBytes(
+		bronec.S256(), bobsPrivKey,
 	)
 
 	revokePreimage := testHdSeed.CloneBytes()
-	commitSecret, commitPoint := btcec.PrivKeyFromBytes(
-		btcec.S256(), revokePreimage,
+	commitSecret, commitPoint := bronec.PrivKeyFromBytes(
+		bronec.S256(), revokePreimage,
 	)
 
 	// As we're modeling this as Bob sweeping the HTLC on-chain from his
@@ -1265,8 +1265,8 @@ func TestLeaseSecondLevelHtlcSpends(t *testing.T) {
 	// Finally, we'll create mock signers for both of them based on their
 	// private keys. This test simplifies a bit and uses the same key as
 	// the base point for all scripts and derivations.
-	bobSigner := &MockSigner{Privkeys: []*btcec.PrivateKey{bobKeyPriv}}
-	aliceSigner := &MockSigner{Privkeys: []*btcec.PrivateKey{aliceKeyPriv}}
+	bobSigner := &MockSigner{Privkeys: []*bronec.PrivateKey{bobKeyPriv}}
+	aliceSigner := &MockSigner{Privkeys: []*bronec.PrivateKey{aliceKeyPriv}}
 
 	testCases := []struct {
 		witness func() wire.TxWitness
@@ -1439,17 +1439,17 @@ func TestLeaseCommmitSpendToSelf(t *testing.T) {
 
 	// Set up some initial key state for Alice and Bob that will be used in
 	// the scripts we created below.
-	aliceKeyPriv, aliceKeyPub := btcec.PrivKeyFromBytes(
-		btcec.S256(), testWalletPrivKey,
+	aliceKeyPriv, aliceKeyPub := bronec.PrivKeyFromBytes(
+		bronec.S256(), testWalletPrivKey,
 	)
-	bobKeyPriv, bobKeyPub := btcec.PrivKeyFromBytes(
-		btcec.S256(), bobsPrivKey,
+	bobKeyPriv, bobKeyPub := bronec.PrivKeyFromBytes(
+		bronec.S256(), bobsPrivKey,
 	)
 
 	// We'll have Bob take the revocation path in some cases.
 	revokePreimage := testHdSeed.CloneBytes()
-	commitSecret, commitPoint := btcec.PrivKeyFromBytes(
-		btcec.S256(), revokePreimage,
+	commitSecret, commitPoint := bronec.PrivKeyFromBytes(
+		bronec.S256(), revokePreimage,
 	)
 	revocationKey := DeriveRevocationPubkey(bobKeyPub, commitPoint)
 
@@ -1484,8 +1484,8 @@ func TestLeaseCommmitSpendToSelf(t *testing.T) {
 
 	// Create mock signers for both parties to ensure signatures are
 	// produced and verified correctly.
-	aliceSigner := &MockSigner{Privkeys: []*btcec.PrivateKey{aliceKeyPriv}}
-	bobSigner := &MockSigner{Privkeys: []*btcec.PrivateKey{bobKeyPriv}}
+	aliceSigner := &MockSigner{Privkeys: []*bronec.PrivateKey{aliceKeyPriv}}
+	bobSigner := &MockSigner{Privkeys: []*bronec.PrivateKey{bobKeyPriv}}
 
 	testCases := []struct {
 		witness func() wire.TxWitness
@@ -1639,7 +1639,7 @@ func TestCommitSpendToRemoteConfirmed(t *testing.T) {
 
 	const outputVal = bronutil.Amount(2 * 10e8)
 
-	aliceKeyPriv, aliceKeyPub := btcec.PrivKeyFromBytes(btcec.S256(),
+	aliceKeyPriv, aliceKeyPub := bronec.PrivKeyFromBytes(bronec.S256(),
 		testWalletPrivKey)
 
 	txid, err := chainhash.NewHash(testHdSeed.CloneBytes())
@@ -1673,7 +1673,7 @@ func TestCommitSpendToRemoteConfirmed(t *testing.T) {
 		},
 	)
 
-	aliceSigner := &MockSigner{Privkeys: []*btcec.PrivateKey{aliceKeyPriv}}
+	aliceSigner := &MockSigner{Privkeys: []*bronec.PrivateKey{aliceKeyPriv}}
 
 	testCases := []struct {
 		witness func() wire.TxWitness
@@ -1749,8 +1749,8 @@ func TestLeaseCommitSpendToRemoteConfirmed(t *testing.T) {
 		leaseExpiry = 1337
 	)
 
-	aliceKeyPriv, aliceKeyPub := btcec.PrivKeyFromBytes(
-		btcec.S256(), testWalletPrivKey,
+	aliceKeyPriv, aliceKeyPub := bronec.PrivKeyFromBytes(
+		bronec.S256(), testWalletPrivKey,
 	)
 
 	txid, err := chainhash.NewHash(testHdSeed.CloneBytes())
@@ -1780,7 +1780,7 @@ func TestLeaseCommitSpendToRemoteConfirmed(t *testing.T) {
 		},
 	)
 
-	aliceSigner := &MockSigner{Privkeys: []*btcec.PrivateKey{aliceKeyPriv}}
+	aliceSigner := &MockSigner{Privkeys: []*bronec.PrivateKey{aliceKeyPriv}}
 
 	testCases := []struct {
 		witness func() wire.TxWitness
@@ -1888,7 +1888,7 @@ func TestSpendAnchor(t *testing.T) {
 	const anchorSize = 294
 
 	// First we'll set up some initial key state for Alice.
-	aliceKeyPriv, aliceKeyPub := btcec.PrivKeyFromBytes(btcec.S256(),
+	aliceKeyPriv, aliceKeyPub := bronec.PrivKeyFromBytes(bronec.S256(),
 		testWalletPrivKey)
 
 	// Create a fake anchor outpoint that we'll use to generate the
@@ -1928,7 +1928,7 @@ func TestSpendAnchor(t *testing.T) {
 	}
 
 	// Create mock signer for Alice.
-	aliceSigner := &MockSigner{Privkeys: []*btcec.PrivateKey{aliceKeyPriv}}
+	aliceSigner := &MockSigner{Privkeys: []*bronec.PrivateKey{aliceKeyPriv}}
 
 	testCases := []struct {
 		witness func() wire.TxWitness

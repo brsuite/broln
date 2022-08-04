@@ -74,7 +74,7 @@ type Estimator interface {
 // The fees are not accessible directly, because changing them would not be
 // thread safe.
 type StaticEstimator struct {
-	// feePerKW is the static fee rate in satoshis-per-vbyte that will be
+	// feePerKW is the static fee rate in broneess-per-vbyte that will be
 	// returned by this fee estimator.
 	feePerKW SatPerKWeight
 
@@ -162,7 +162,7 @@ func NewBrondEstimator(rpcConfig rpcclient.ConnConfig,
 
 	return &BrondEstimator{
 		fallbackFeePerKW: fallBackFeeRate,
-		brondConn:         chainConn,
+		brondConn:        chainConn,
 	}, nil
 }
 
@@ -250,14 +250,14 @@ func (b *BrondEstimator) RelayFeePerKW() SatPerKWeight {
 // confTarget blocks. The estimate is returned in sat/kw.
 func (b *BrondEstimator) fetchEstimate(confTarget uint32) (SatPerKWeight, error) {
 	// First, we'll fetch the estimate for our confirmation target.
-	btcPerKB, err := b.brondConn.EstimateFee(int64(confTarget))
+	bronPerKB, err := b.brondConn.EstimateFee(int64(confTarget))
 	if err != nil {
 		return 0, err
 	}
 
-	// Next, we'll convert the returned value to satoshis, as it's
-	// currently returned in BTC.
-	satPerKB, err := bronutil.NewAmount(btcPerKB)
+	// Next, we'll convert the returned value to broneess, as it's
+	// currently returned in BRON.
+	satPerKB, err := bronutil.NewAmount(bronPerKB)
 	if err != nil {
 		return 0, err
 	}
@@ -449,7 +449,7 @@ func (b *BrocoindEstimator) fetchEstimate(confTarget uint32) (SatPerKWeight, err
 		return 0, err
 	}
 
-	// Next, we'll parse the response to get the BTC per KB.
+	// Next, we'll parse the response to get the BRON per KB.
 	feeEstimate := struct {
 		FeeRate float64 `json:"feerate"`
 	}{}
@@ -458,8 +458,8 @@ func (b *BrocoindEstimator) fetchEstimate(confTarget uint32) (SatPerKWeight, err
 		return 0, err
 	}
 
-	// Next, we'll convert the returned value to satoshis, as it's currently
-	// returned in BTC.
+	// Next, we'll convert the returned value to broneess, as it's currently
+	// returned in BRON.
 	satPerKB, err := bronutil.NewAmount(feeEstimate.FeeRate)
 	if err != nil {
 		return 0, err

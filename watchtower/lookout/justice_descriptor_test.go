@@ -4,12 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/blockchain"
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/brsuite/bronutil/txsort"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwire"
@@ -18,6 +12,12 @@ import (
 	"github.com/brsuite/broln/watchtower/wtdb"
 	"github.com/brsuite/broln/watchtower/wtmock"
 	"github.com/brsuite/broln/watchtower/wtpolicy"
+	"github.com/brsuite/brond/blockchain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/brsuite/bronutil/txsort"
 	"github.com/stretchr/testify/require"
 )
 
@@ -92,14 +92,14 @@ func testJusticeDescriptor(t *testing.T, blobType blob.Type) {
 	)
 
 	// Parse the key pairs for all keys used in the test.
-	revSK, revPK := btcec.PrivKeyFromBytes(
-		btcec.S256(), revPrivBytes,
+	revSK, revPK := bronec.PrivKeyFromBytes(
+		bronec.S256(), revPrivBytes,
 	)
-	_, toLocalPK := btcec.PrivKeyFromBytes(
-		btcec.S256(), toLocalPrivBytes,
+	_, toLocalPK := bronec.PrivKeyFromBytes(
+		bronec.S256(), toLocalPrivBytes,
 	)
-	toRemoteSK, toRemotePK := btcec.PrivKeyFromBytes(
-		btcec.S256(), toRemotePrivBytes,
+	toRemoteSK, toRemotePK := bronec.PrivKeyFromBytes(
+		bronec.S256(), toRemotePrivBytes,
 	)
 
 	// Create the signer, and add the revocation and to-remote privkeys.

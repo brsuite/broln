@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 )
@@ -114,7 +114,7 @@ func (m *mockHeuristic) NodeScores(g ChannelGraph, chans []LocalChannel,
 var _ AttachmentHeuristic = (*mockHeuristic)(nil)
 
 type openChanIntent struct {
-	target  *btcec.PublicKey
+	target  *bronec.PublicKey
 	amt     bronutil.Amount
 	private bool
 }
@@ -124,7 +124,7 @@ type mockChanController struct {
 	private         bool
 }
 
-func (m *mockChanController) OpenChannel(target *btcec.PublicKey,
+func (m *mockChanController) OpenChannel(target *bronec.PublicKey,
 	amt bronutil.Amount) error {
 
 	m.openChanSignals <- openChanIntent{
@@ -183,7 +183,7 @@ func setup(t *testing.T, initialChans []LocalChannel) (*testContext, func()) {
 
 	// We'll keep track of the funds available to the agent, to make sure
 	// it correctly uses this value when querying the ChannelBudget.
-	var availableFunds bronutil.Amount = 10 * bronutil.SatoshiPerBrocoin
+	var availableFunds bronutil.Amount = 10 * bronutil.BroneesPerBrocoin
 
 	ctx := &testContext{
 		constraints:    constraints,
@@ -205,10 +205,10 @@ func setup(t *testing.T, initialChans []LocalChannel) (*testContext, func()) {
 			defer ctx.Unlock()
 			return ctx.walletBalance, nil
 		},
-		ConnectToPeer: func(*btcec.PublicKey, []net.Addr) (bool, error) {
+		ConnectToPeer: func(*bronec.PublicKey, []net.Addr) (bool, error) {
 			return false, nil
 		},
-		DisconnectPeer: func(*btcec.PublicKey) error {
+		DisconnectPeer: func(*bronec.PublicKey) error {
 			return nil
 		},
 		Graph:       memGraph,
@@ -290,10 +290,10 @@ func TestAgentChannelOpenSignal(t *testing.T) {
 	respondMoreChans(t, testCtx, moreChansResp{0, 0})
 
 	// Next we'll signal a new channel being opened by the backing LN node,
-	// with a capacity of 1 BTC.
+	// with a capacity of 1 BRON.
 	newChan := LocalChannel{
 		ChanID:  randChanID(),
-		Balance: bronutil.SatoshiPerBrocoin,
+		Balance: bronutil.BroneesPerBrocoin,
 	}
 	testCtx.agent.OnChannelOpen(newChan)
 
@@ -303,7 +303,7 @@ func TestAgentChannelOpenSignal(t *testing.T) {
 
 	// At this point, the local state of the agent should
 	// have also been updated to reflect that the LN node
-	// now has an additional channel with one BTC.
+	// now has an additional channel with one BRON.
 	if _, ok := testCtx.agent.chanState[newChan.ChanID]; !ok {
 		t.Fatalf("internal channel state wasn't updated")
 	}
@@ -347,7 +347,7 @@ func TestAgentHeuristicUpdateSignal(t *testing.T) {
 	respondMoreChans(t, testCtx,
 		moreChansResp{
 			numMore: 1,
-			amt:     1 * bronutil.SatoshiPerBrocoin,
+			amt:     1 * bronutil.BroneesPerBrocoin,
 		},
 	)
 
@@ -375,7 +375,7 @@ func TestAgentHeuristicUpdateSignal(t *testing.T) {
 type mockFailingChanController struct {
 }
 
-func (m *mockFailingChanController) OpenChannel(target *btcec.PublicKey,
+func (m *mockFailingChanController) OpenChannel(target *bronec.PublicKey,
 	amt bronutil.Amount) error {
 	return errors.New("failure")
 }
@@ -402,8 +402,8 @@ func TestAgentChannelFailureSignal(t *testing.T) {
 	}
 
 	// First ensure the agent will attempt to open a new channel. Return
-	// that we need more channels, and have 5BTC to use.
-	respondMoreChans(t, testCtx, moreChansResp{1, 5 * bronutil.SatoshiPerBrocoin})
+	// that we need more channels, and have 5BRON to use.
+	respondMoreChans(t, testCtx, moreChansResp{1, 5 * bronutil.BroneesPerBrocoin})
 
 	// At this point, the agent should now be querying the heuristic to
 	// request attachment directives, return a fake so the agent will
@@ -422,7 +422,7 @@ func TestAgentChannelFailureSignal(t *testing.T) {
 	// At this point the agent will attempt to create a channel and fail.
 
 	// Now ensure that the controller loop is re-executed.
-	respondMoreChans(t, testCtx, moreChansResp{1, 5 * bronutil.SatoshiPerBrocoin})
+	respondMoreChans(t, testCtx, moreChansResp{1, 5 * bronutil.BroneesPerBrocoin})
 	respondNodeScores(t, testCtx, map[NodeID]*NodeScore{})
 }
 
@@ -435,11 +435,11 @@ func TestAgentChannelCloseSignal(t *testing.T) {
 	initialChans := []LocalChannel{
 		{
 			ChanID:  randChanID(),
-			Balance: bronutil.SatoshiPerBrocoin,
+			Balance: bronutil.BroneesPerBrocoin,
 		},
 		{
 			ChanID:  randChanID(),
-			Balance: bronutil.SatoshiPerBrocoin * 2,
+			Balance: bronutil.BroneesPerBrocoin * 2,
 		},
 	}
 
@@ -493,9 +493,9 @@ func TestAgentBalanceUpdate(t *testing.T) {
 	respondMoreChans(t, testCtx, moreChansResp{0, 0})
 
 	// Next we'll send a new balance update signal to the agent, adding 5
-	// BTC to the amount of available funds.
+	// BRON to the amount of available funds.
 	testCtx.Lock()
-	testCtx.walletBalance += bronutil.SatoshiPerBrocoin * 5
+	testCtx.walletBalance += bronutil.BroneesPerBrocoin * 5
 	testCtx.Unlock()
 
 	testCtx.agent.OnBalanceChange()
@@ -506,7 +506,7 @@ func TestAgentBalanceUpdate(t *testing.T) {
 
 	// At this point, the local state of the agent should
 	// have also been updated to reflect that the LN node
-	// now has an additional 5BTC available.
+	// now has an additional 5BRON available.
 	if testCtx.agent.totalBalance != testCtx.walletBalance {
 		t.Fatalf("expected %v wallet balance "+
 			"instead have %v", testCtx.agent.totalBalance,
@@ -558,7 +558,7 @@ func TestAgentImmediateAttach(t *testing.T) {
 	respondMoreChans(t, testCtx,
 		moreChansResp{
 			numMore: numChans,
-			amt:     5 * bronutil.SatoshiPerBrocoin,
+			amt:     5 * bronutil.BroneesPerBrocoin,
 		},
 	)
 
@@ -575,9 +575,9 @@ func TestAgentImmediateAttach(t *testing.T) {
 	for i := 0; i < numChans; i++ {
 		select {
 		case openChan := <-chanController.openChanSignals:
-			if openChan.amt != bronutil.SatoshiPerBrocoin {
+			if openChan.amt != bronutil.BroneesPerBrocoin {
 				t.Fatalf("invalid chan amt: expected %v, got %v",
-					bronutil.SatoshiPerBrocoin, openChan.amt)
+					bronutil.BroneesPerBrocoin, openChan.amt)
 			}
 			nodeID := NewNodeID(openChan.target)
 			_, ok := nodeKeys[nodeID]
@@ -625,10 +625,10 @@ func TestAgentPrivateChannels(t *testing.T) {
 	// method on the passed heuristic. So we'll provide it with a response
 	// that will kick off the main loop.  We'll send over a response
 	// indicating that it should establish more channels, and give it a
-	// budget of 5 BTC to do so.
+	// budget of 5 BRON to do so.
 	resp := moreChansResp{
 		numMore: numChans,
-		amt:     5 * bronutil.SatoshiPerBrocoin,
+		amt:     5 * bronutil.BroneesPerBrocoin,
 	}
 	respondMoreChans(t, testCtx, resp)
 
@@ -674,13 +674,13 @@ func TestAgentPendingChannelState(t *testing.T) {
 	}
 
 	// Once again, we'll start by telling the agent as part of its first
-	// query, that it needs more channels and has 3 BTC available for
+	// query, that it needs more channels and has 3 BRON available for
 	// attachment.  We'll send over a response indicating that it should
-	// establish more channels, and give it a budget of 1 BTC to do so.
+	// establish more channels, and give it a budget of 1 BRON to do so.
 	respondMoreChans(t, testCtx,
 		moreChansResp{
 			numMore: 1,
-			amt:     bronutil.SatoshiPerBrocoin,
+			amt:     bronutil.BroneesPerBrocoin,
 		},
 	)
 
@@ -712,7 +712,7 @@ func TestAgentPendingChannelState(t *testing.T) {
 	// we'll trigger a balance update in order to trigger a query to the
 	// heuristic.
 	testCtx.Lock()
-	testCtx.walletBalance += 0.4 * bronutil.SatoshiPerBrocoin
+	testCtx.walletBalance += 0.4 * bronutil.BroneesPerBrocoin
 	testCtx.Unlock()
 
 	testCtx.agent.OnBalanceChange()
@@ -745,7 +745,7 @@ func TestAgentPendingChannelState(t *testing.T) {
 	// We'll send across a response indicating that it *does* need more
 	// channels.
 	select {
-	case testCtx.constraints.moreChansResps <- moreChansResp{1, bronutil.SatoshiPerBrocoin}:
+	case testCtx.constraints.moreChansResps <- moreChansResp{1, bronutil.BroneesPerBrocoin}:
 	case <-time.After(time.Second * 10):
 		t.Fatalf("need more chans wasn't queried in time")
 	}
@@ -857,7 +857,7 @@ func TestAgentSkipPendingConns(t *testing.T) {
 	defer cleanup()
 
 	connect := make(chan chan error)
-	testCtx.agent.cfg.ConnectToPeer = func(*btcec.PublicKey, []net.Addr) (bool, error) {
+	testCtx.agent.cfg.ConnectToPeer = func(*bronec.PublicKey, []net.Addr) (bool, error) {
 		errChan := make(chan error)
 
 		select {
@@ -1043,7 +1043,7 @@ func TestAgentQuitWhenPendingConns(t *testing.T) {
 
 	connect := make(chan chan error)
 
-	testCtx.agent.cfg.ConnectToPeer = func(*btcec.PublicKey, []net.Addr) (bool, error) {
+	testCtx.agent.cfg.ConnectToPeer = func(*bronec.PublicKey, []net.Addr) (bool, error) {
 		errChan := make(chan error)
 
 		select {
@@ -1264,8 +1264,8 @@ func TestAgentChannelSizeAllocation(t *testing.T) {
 	}
 
 	// We'll return a response telling the agent to open 5 channels, with a
-	// total channel budget of 5 BTC.
-	var channelBudget bronutil.Amount = 5 * bronutil.SatoshiPerBrocoin
+	// total channel budget of 5 BRON.
+	var channelBudget bronutil.Amount = 5 * bronutil.BroneesPerBrocoin
 	numExistingChannels := 0
 	numNewChannels := 5
 	respondWithScores(
@@ -1335,11 +1335,11 @@ func TestAgentChannelSizeAllocation(t *testing.T) {
 	// Wait for the agent to have 5 channels.
 	waitForNumChans(numNewChannels)
 
-	// Set the channel budget to 1.5 BTC.
-	channelBudget = bronutil.SatoshiPerBrocoin * 3 / 2
+	// Set the channel budget to 1.5 BRON.
+	channelBudget = bronutil.BroneesPerBrocoin * 3 / 2
 
 	// We'll return a response telling the agent to open 3 channels, with a
-	// total channel budget of 1.5 BTC.
+	// total channel budget of 1.5 BRON.
 	numExistingChannels = 5
 	numNewChannels = 3
 	respondWithScores(
@@ -1361,7 +1361,7 @@ func TestAgentChannelSizeAllocation(t *testing.T) {
 
 	// Finally check that we make maximum channels if we are well within
 	// our budget.
-	channelBudget = bronutil.SatoshiPerBrocoin * 5
+	channelBudget = bronutil.BroneesPerBrocoin * 5
 	numNewChannels = 2
 	respondWithScores(
 		t, testCtx, channelBudget, numExistingChannels,

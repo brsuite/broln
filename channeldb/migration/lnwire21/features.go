@@ -102,11 +102,11 @@ const (
 	MPPOptional FeatureBit = 17
 
 	// WumboChannelsRequired is a required feature bit that signals that a
-	// node is willing to accept channels larger than 2^24 satoshis.
+	// node is willing to accept channels larger than 2^24 broneess.
 	WumboChannelsRequired FeatureBit = 18
 
 	// WumboChannelsOptional is an optional feature bit that signals that a
-	// node is willing to accept channels larger than 2^24 satoshis.
+	// node is willing to accept channels larger than 2^24 broneess.
 	WumboChannelsOptional FeatureBit = 19
 
 	// AnchorsRequired is a required feature bit that signals that the node

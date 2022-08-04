@@ -85,7 +85,7 @@ func TestSettleInvoice(t *testing.T) {
 	require.Equal(t, testCurrentHeight, failResolution.AcceptHeight)
 
 	// Settle invoice with a slightly higher amount.
-	amtPaid := lnwire.MilliSatoshi(100500)
+	amtPaid := lnwire.MilliBronees(100500)
 	resolution, err = ctx.registry.NotifyExitHopHtlc(
 		testInvoicePaymentHash, amtPaid, testHtlcExpiry,
 		testCurrentHeight, getCircuitKey(0), hodlChan,
@@ -222,7 +222,7 @@ func testCancelInvoice(t *testing.T, gc bool) {
 	require.Equal(t, subscription.invoiceRef.PayHash(), &testInvoicePaymentHash)
 
 	// Add the invoice.
-	amt := lnwire.MilliSatoshi(100000)
+	amt := lnwire.MilliBronees(100000)
 	_, err = ctx.registry.AddInvoice(testInvoice, testInvoicePaymentHash)
 	if err != nil {
 		t.Fatal(err)
@@ -400,7 +400,7 @@ func TestSettleHoldInvoice(t *testing.T) {
 	}
 
 	// Use slightly higher amount for accept/settle.
-	amtPaid := lnwire.MilliSatoshi(100500)
+	amtPaid := lnwire.MilliBronees(100500)
 
 	hodlChan := make(chan interface{}, 1)
 
@@ -548,7 +548,7 @@ func TestCancelHoldInvoice(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	amtPaid := lnwire.MilliSatoshi(100000)
+	amtPaid := lnwire.MilliBronees(100000)
 	hodlChan := make(chan interface{}, 1)
 
 	// NotifyExitHopHtlc without a preimage present in the invoice registry
@@ -603,7 +603,7 @@ func TestUnknownInvoice(t *testing.T) {
 	// Notify arrival of a new htlc paying to this invoice. This should
 	// succeed.
 	hodlChan := make(chan interface{})
-	amt := lnwire.MilliSatoshi(100000)
+	amt := lnwire.MilliBronees(100000)
 	resolution, err := ctx.registry.NotifyExitHopHtlc(
 		testInvoicePaymentHash, amt, testHtlcExpiry, testCurrentHeight,
 		getCircuitKey(0), hodlChan, testPayload,
@@ -642,7 +642,7 @@ func testKeySend(t *testing.T, keySendEnabled bool) {
 
 	hodlChan := make(chan interface{}, 1)
 
-	amt := lnwire.MilliSatoshi(1000)
+	amt := lnwire.MilliBronees(1000)
 	expiry := uint32(testCurrentHeight + 20)
 
 	// Create key for keysend.
@@ -770,7 +770,7 @@ func testHoldKeysend(t *testing.T, timeoutKeysend bool) {
 
 	hodlChan := make(chan interface{}, 1)
 
-	amt := lnwire.MilliSatoshi(1000)
+	amt := lnwire.MilliBronees(1000)
 	expiry := uint32(testCurrentHeight + 20)
 
 	// Create key for keysend.
@@ -1167,7 +1167,7 @@ func testHeightExpiryWithRegistry(t *testing.T, numParts int, settle bool) {
 		}
 	}
 
-	htlcAmt := invoice.Terms.Value / lnwire.MilliSatoshi(numParts)
+	htlcAmt := invoice.Terms.Value / lnwire.MilliBronees(numParts)
 	hodlChan := make(chan interface{}, numParts)
 	for i := 0; i < numParts; i++ {
 		// We bump our expiry height for each htlc so that we can test
@@ -1522,7 +1522,7 @@ func TestAMPWithoutMPPPayload(t *testing.T) {
 	ctx.registry.cfg.AcceptAMP = true
 
 	const (
-		shardAmt = lnwire.MilliSatoshi(10)
+		shardAmt = lnwire.MilliBronees(10)
 		expiry   = uint32(testCurrentHeight + 20)
 	)
 
@@ -1612,12 +1612,12 @@ func testSpontaneousAmpPayment(
 	defer allSubscriptions.Cancel()
 
 	const (
-		totalAmt = lnwire.MilliSatoshi(360)
+		totalAmt = lnwire.MilliBronees(360)
 		expiry   = uint32(testCurrentHeight + 20)
 	)
 
 	var (
-		shardAmt = totalAmt / lnwire.MilliSatoshi(numShards)
+		shardAmt = totalAmt / lnwire.MilliBronees(numShards)
 		payAddr  [32]byte
 		setID    [32]byte
 	)

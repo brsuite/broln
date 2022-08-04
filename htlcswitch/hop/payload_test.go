@@ -273,7 +273,7 @@ func TestDecodeHopPayloadRecordValidation(t *testing.T) {
 
 func testDecodeHopPayloadValidation(t *testing.T, test decodePayloadTest) {
 	var (
-		testTotalMsat = lnwire.MilliSatoshi(8)
+		testTotalMsat = lnwire.MilliBronees(8)
 		testAddr      = [32]byte{
 			0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
 			0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,

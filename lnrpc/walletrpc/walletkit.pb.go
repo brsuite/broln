@@ -1332,7 +1332,7 @@ type SendOutputsRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	//
-	//The number of satoshis per kilo weight that should be used when crafting
+	//The number of broneess per kilo weight that should be used when crafting
 	//this transaction.
 	SatPerKw int64 `protobuf:"varint,1,opt,name=sat_per_kw,json=satPerKw,proto3" json:"sat_per_kw,omitempty"`
 	//
@@ -1518,7 +1518,7 @@ type EstimateFeeResponse struct {
 	unknownFields protoimpl.UnknownFields
 
 	//
-	//The amount of satoshis per kw that should be used in order to reach the
+	//The amount of broneess per kw that should be used in order to reach the
 	//confirmation target in the request.
 	SatPerKw int64 `protobuf:"varint,1,opt,name=sat_per_kw,json=satPerKw,proto3" json:"sat_per_kw,omitempty"`
 }

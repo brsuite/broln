@@ -3,10 +3,10 @@ package lnpeer
 import (
 	"net"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/wire"
 )
 
 // Peer is an interface which represents a remote lightning node.
@@ -35,7 +35,7 @@ type Peer interface {
 	PubKey() [33]byte
 
 	// IdentityKey returns the public key of the remote peer.
-	IdentityKey() *btcec.PublicKey
+	IdentityKey() *bronec.PublicKey
 
 	// Address returns the network address of the remote peer.
 	Address() net.Addr

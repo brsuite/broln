@@ -10,18 +10,18 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	_ "github.com/brsuite/bronwallet/walletdb/bdb"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/clock"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lntest/channels"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/shachain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	_ "github.com/brsuite/bronwallet/walletdb/bdb"
+	"github.com/davecgh/go-spew/spew"
 )
 
 var (
@@ -36,7 +36,7 @@ var (
 		0x48, 0x59, 0xe6, 0x96, 0x31, 0x13, 0xa1, 0x17,
 		0x2d, 0xe7, 0x93, 0xe4,
 	}
-	privKey, pubKey = btcec.PrivKeyFromBytes(btcec.S256(), key[:])
+	privKey, pubKey = bronec.PrivKeyFromBytes(bronec.S256(), key[:])
 
 	wireSig, _ = lnwire.NewSigFromSignature(testSig)
 
@@ -83,7 +83,7 @@ type testChannelOption func(params *testChannelParams)
 // commitment height and balances. The local boolean can be used to set these
 // balances on the local or remote commit.
 func channelCommitmentOption(height uint64, localBalance,
-	remoteBalance lnwire.MilliSatoshi, local bool) testChannelOption {
+	remoteBalance lnwire.MilliBronees, local bool) testChannelOption {
 
 	return func(params *testChannelParams) {
 		if local {
@@ -243,9 +243,9 @@ func createTestChannelState(t *testing.T, cdb *ChannelStateDB) *OpenChannel {
 	localCfg := ChannelConfig{
 		ChannelConstraints: ChannelConstraints{
 			DustLimit:        bronutil.Amount(rand.Int63()),
-			MaxPendingAmount: lnwire.MilliSatoshi(rand.Int63()),
+			MaxPendingAmount: lnwire.MilliBronees(rand.Int63()),
 			ChanReserve:      bronutil.Amount(rand.Int63()),
-			MinHTLC:          lnwire.MilliSatoshi(rand.Int63()),
+			MinHTLC:          lnwire.MilliBronees(rand.Int63()),
 			MaxAcceptedHtlcs: uint16(rand.Int31()),
 			CsvDelay:         uint16(rand.Int31()),
 		},
@@ -268,9 +268,9 @@ func createTestChannelState(t *testing.T, cdb *ChannelStateDB) *OpenChannel {
 	remoteCfg := ChannelConfig{
 		ChannelConstraints: ChannelConstraints{
 			DustLimit:        bronutil.Amount(rand.Int63()),
-			MaxPendingAmount: lnwire.MilliSatoshi(rand.Int63()),
+			MaxPendingAmount: lnwire.MilliBronees(rand.Int63()),
 			ChanReserve:      bronutil.Amount(rand.Int63()),
-			MinHTLC:          lnwire.MilliSatoshi(rand.Int63()),
+			MinHTLC:          lnwire.MilliBronees(rand.Int63()),
 			MaxAcceptedHtlcs: uint16(rand.Int31()),
 			CsvDelay:         uint16(rand.Int31()),
 		},
@@ -328,8 +328,8 @@ func createTestChannelState(t *testing.T, cdb *ChannelStateDB) *OpenChannel {
 		TotalMSatReceived: 2,
 		LocalCommitment: ChannelCommitment{
 			CommitHeight:  0,
-			LocalBalance:  lnwire.MilliSatoshi(9000),
-			RemoteBalance: lnwire.MilliSatoshi(3000),
+			LocalBalance:  lnwire.MilliBronees(9000),
+			RemoteBalance: lnwire.MilliBronees(3000),
 			CommitFee:     bronutil.Amount(rand.Int63()),
 			FeePerKw:      bronutil.Amount(5000),
 			CommitTx:      channels.TestFundingTx,
@@ -337,8 +337,8 @@ func createTestChannelState(t *testing.T, cdb *ChannelStateDB) *OpenChannel {
 		},
 		RemoteCommitment: ChannelCommitment{
 			CommitHeight:  0,
-			LocalBalance:  lnwire.MilliSatoshi(3000),
-			RemoteBalance: lnwire.MilliSatoshi(9000),
+			LocalBalance:  lnwire.MilliBronees(3000),
+			RemoteBalance: lnwire.MilliBronees(9000),
 			CommitFee:     bronutil.Amount(rand.Int63()),
 			FeePerKw:      bronutil.Amount(5000),
 			CommitTx:      channels.TestFundingTx,
@@ -413,7 +413,7 @@ func TestOpenChannelPutGetDelete(t *testing.T) {
 	// We'll also test that the channel is properly able to hot swap the
 	// next revocation for the state machine. This tests the initial
 	// post-funding revocation exchange.
-	nextRevKey, err := btcec.NewPrivateKey(btcec.S256())
+	nextRevKey, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to create new private key: %v", err)
 	}
@@ -585,7 +585,7 @@ func TestChannelStateTransition(t *testing.T) {
 	// Half of the HTLCs are incoming, while the other half are outgoing.
 	var (
 		htlcs   []HTLC
-		htlcAmt lnwire.MilliSatoshi
+		htlcAmt lnwire.MilliBronees
 	)
 	for i := uint32(0); i < 10; i++ {
 		var incoming bool
@@ -621,8 +621,8 @@ func TestChannelStateTransition(t *testing.T) {
 		LocalHtlcIndex:  1,
 		RemoteLogIndex:  2,
 		RemoteHtlcIndex: 1,
-		LocalBalance:    lnwire.MilliSatoshi(1e8),
-		RemoteBalance:   lnwire.MilliSatoshi(1e8),
+		LocalBalance:    lnwire.MilliBronees(1e8),
+		RemoteBalance:   lnwire.MilliBronees(1e8),
 		CommitFee:       55,
 		FeePerKw:        99,
 		CommitTx:        newTx,
@@ -691,8 +691,8 @@ func TestChannelStateTransition(t *testing.T) {
 	// To simulate us extending a new state to the remote party, we'll also
 	// create a new commit diff for them.
 	remoteCommit := commitment
-	remoteCommit.LocalBalance = lnwire.MilliSatoshi(2e8)
-	remoteCommit.RemoteBalance = lnwire.MilliSatoshi(3e8)
+	remoteCommit.LocalBalance = lnwire.MilliBronees(2e8)
+	remoteCommit.RemoteBalance = lnwire.MilliBronees(3e8)
 	remoteCommit.CommitHeight = 1
 	commitDiff := &CommitDiff{
 		Commitment: remoteCommit,
@@ -710,7 +710,7 @@ func TestChannelStateTransition(t *testing.T) {
 				LogIndex: 1,
 				UpdateMsg: &lnwire.UpdateAddHTLC{
 					ID:        1,
-					Amount:    lnwire.NewMSatFromSatoshis(100),
+					Amount:    lnwire.NewMSatFromBroneess(100),
 					Expiry:    25,
 					ExtraData: make([]byte, 0),
 				},
@@ -719,7 +719,7 @@ func TestChannelStateTransition(t *testing.T) {
 				LogIndex: 2,
 				UpdateMsg: &lnwire.UpdateAddHTLC{
 					ID:        2,
-					Amount:    lnwire.NewMSatFromSatoshis(200),
+					Amount:    lnwire.NewMSatFromBroneess(200),
 					Expiry:    50,
 					ExtraData: make([]byte, 0),
 				},
@@ -756,7 +756,7 @@ func TestChannelStateTransition(t *testing.T) {
 	// current uncollapsed revocation state to simulate a state transition
 	// by the remote party.
 	channel.RemoteCurrentRevocation = channel.RemoteNextRevocation
-	newPriv, err := btcec.NewPrivateKey(btcec.S256())
+	newPriv, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to generate key: %v", err)
 	}
@@ -989,8 +989,8 @@ func TestFetchClosedChannels(t *testing.T) {
 		ClosingTXID:       rev,
 		RemotePub:         state.IdentityPub,
 		Capacity:          state.Capacity,
-		SettledBalance:    state.LocalCommitment.LocalBalance.ToSatoshis(),
-		TimeLockedBalance: state.RemoteCommitment.LocalBalance.ToSatoshis() + 10000,
+		SettledBalance:    state.LocalCommitment.LocalBalance.ToBroneess(),
+		TimeLockedBalance: state.RemoteCommitment.LocalBalance.ToBroneess() + 10000,
 		CloseType:         RemoteForceClose,
 		IsPending:         true,
 		LocalChanConfig:   state.LocalChanCfg,
@@ -1443,7 +1443,7 @@ func TestBalanceAtHeight(t *testing.T) {
 	// the revocation log bucket to test lookup of balances at heights that
 	// are not our current height.
 	putRevokedState := func(c *OpenChannel, height uint64, local,
-		remote lnwire.MilliSatoshi) error {
+		remote lnwire.MilliBronees) error {
 
 		err := kvdb.Update(c.Db.backend, func(tx kvdb.RwTx) error {
 			chanBucket, err := fetchChanBucketRw(
@@ -1479,8 +1479,8 @@ func TestBalanceAtHeight(t *testing.T) {
 	tests := []struct {
 		name                  string
 		targetHeight          uint64
-		expectedLocalBalance  lnwire.MilliSatoshi
-		expectedRemoteBalance lnwire.MilliSatoshi
+		expectedLocalBalance  lnwire.MilliBronees
+		expectedRemoteBalance lnwire.MilliBronees
 		expectedError         error
 	}{
 		{

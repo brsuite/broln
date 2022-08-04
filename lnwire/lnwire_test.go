@@ -14,11 +14,11 @@ import (
 	"testing/quick"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/tor"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/brsuite/broln/tor"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +26,7 @@ var (
 	shaHash1Bytes, _ = hex.DecodeString("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
 	shaHash1, _      = chainhash.NewHash(shaHash1Bytes)
 	outpoint1        = wire.NewOutPoint(shaHash1, 0)
-	testSig          = &btcec.Signature{
+	testSig          = &bronec.Signature{
 		R: new(big.Int),
 		S: new(big.Int),
 	}
@@ -45,8 +45,8 @@ func randAlias(r *rand.Rand) NodeAlias {
 	return a
 }
 
-func randPubKey() (*btcec.PublicKey, error) {
-	priv, err := btcec.NewPrivateKey(btcec.S256())
+func randPubKey() (*bronec.PublicKey, error) {
+	priv, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func randPubKey() (*btcec.PublicKey, error) {
 func randRawKey() ([33]byte, error) {
 	var n [33]byte
 
-	priv, err := btcec.NewPrivateKey(btcec.S256())
+	priv, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		return n, err
 	}
@@ -307,11 +307,11 @@ func TestLightningWireProtocol(t *testing.T) {
 		MsgOpenChannel: func(v []reflect.Value, r *rand.Rand) {
 			req := OpenChannel{
 				FundingAmount:    bronutil.Amount(r.Int63()),
-				PushAmount:       MilliSatoshi(r.Int63()),
+				PushAmount:       MilliBronees(r.Int63()),
 				DustLimit:        bronutil.Amount(r.Int63()),
-				MaxValueInFlight: MilliSatoshi(r.Int63()),
+				MaxValueInFlight: MilliBronees(r.Int63()),
 				ChannelReserve:   bronutil.Amount(r.Int63()),
-				HtlcMinimum:      MilliSatoshi(r.Int31()),
+				HtlcMinimum:      MilliBronees(r.Int31()),
 				FeePerKiloWeight: uint32(r.Int63()),
 				CsvDelay:         uint16(r.Int31()),
 				MaxAcceptedHTLCs: uint16(r.Int31()),
@@ -387,10 +387,10 @@ func TestLightningWireProtocol(t *testing.T) {
 		MsgAcceptChannel: func(v []reflect.Value, r *rand.Rand) {
 			req := AcceptChannel{
 				DustLimit:        bronutil.Amount(r.Int63()),
-				MaxValueInFlight: MilliSatoshi(r.Int63()),
+				MaxValueInFlight: MilliBronees(r.Int63()),
 				ChannelReserve:   bronutil.Amount(r.Int63()),
 				MinAcceptDepth:   uint32(r.Int31()),
-				HtlcMinimum:      MilliSatoshi(r.Int31()),
+				HtlcMinimum:      MilliBronees(r.Int31()),
 				CsvDelay:         uint16(r.Int31()),
 				MaxAcceptedHTLCs: uint16(r.Int31()),
 			}
@@ -521,7 +521,7 @@ func TestLightningWireProtocol(t *testing.T) {
 		},
 		MsgClosingSigned: func(v []reflect.Value, r *rand.Rand) {
 			req := ClosingSigned{
-				FeeSatoshis: bronutil.Amount(r.Int63()),
+				FeeBroneess: bronutil.Amount(r.Int63()),
 				ExtraData:   make([]byte, 0),
 			}
 			var err error
@@ -701,7 +701,7 @@ func TestLightningWireProtocol(t *testing.T) {
 			var err error
 
 			msgFlags := ChanUpdateMsgFlags(r.Int31())
-			maxHtlc := MilliSatoshi(r.Int63())
+			maxHtlc := MilliBronees(r.Int63())
 
 			// We make the max_htlc field zero if it is not flagged
 			// as being part of the ChannelUpdate, to pass
@@ -717,7 +717,7 @@ func TestLightningWireProtocol(t *testing.T) {
 				MessageFlags:    msgFlags,
 				ChannelFlags:    ChanUpdateChanFlags(r.Int31()),
 				TimeLockDelta:   uint16(r.Int31()),
-				HtlcMinimumMsat: MilliSatoshi(r.Int63()),
+				HtlcMinimumMsat: MilliBronees(r.Int63()),
 				HtlcMaximumMsat: maxHtlc,
 				BaseFee:         uint32(r.Int31()),
 				FeeRate:         uint32(r.Int31()),

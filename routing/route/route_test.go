@@ -5,14 +5,14 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/record"
+	"github.com/brsuite/brond/bronec"
 )
 
 var (
 	testPrivKeyBytes, _ = hex.DecodeString("e126f68f7eafcc8b74f54d269fe206be715000f94dac067d1c04a8ca3b2db734")
-	_, testPubKey       = btcec.PrivKeyFromBytes(btcec.S256(), testPrivKeyBytes)
+	_, testPubKey       = bronec.PrivKeyFromBytes(bronec.S256(), testPrivKeyBytes)
 	testPubKeyBytes, _  = NewVertexFromBytes(testPubKey.SerializeCompressed())
 )
 
@@ -30,7 +30,7 @@ func TestRouteTotalFees(t *testing.T) {
 	}
 
 	// Make sure empty route won't be allowed in the constructor.
-	amt := lnwire.MilliSatoshi(1000)
+	amt := lnwire.MilliBronees(1000)
 	_, err := NewRouteFromHops(amt, 100, Vertex{}, []*Hop{})
 	if err != ErrNoRouteHopsProvided {
 		t.Fatalf("expected ErrNoRouteHopsProvided, got %v", err)
@@ -60,7 +60,7 @@ func TestRouteTotalFees(t *testing.T) {
 	}
 
 	// Append the route with a node, making the first one take a fee.
-	fee := lnwire.MilliSatoshi(100)
+	fee := lnwire.MilliBronees(100)
 	hops = append(hops, &Hop{
 		PubKeyBytes:      Vertex{},
 		ChannelID:        2,
@@ -84,7 +84,7 @@ func TestRouteTotalFees(t *testing.T) {
 }
 
 var (
-	testAmt  = lnwire.MilliSatoshi(1000)
+	testAmt  = lnwire.MilliBronees(1000)
 	testAddr = [32]byte{0x01, 0x02}
 )
 

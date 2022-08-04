@@ -1,11 +1,11 @@
 package chainreg
 
 import (
+	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/brond/chaincfg"
 	brocoinCfg "github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	brocoinWire "github.com/brsuite/brond/wire"
-	"github.com/brsuite/broln/keychain"
 	litecoinCfg "github.com/ltcsuite/ltcd/chaincfg"
 	litecoinWire "github.com/ltcsuite/ltcd/wire"
 )
@@ -98,7 +98,7 @@ var BrocoinRegTestNetParams = BrocoinNetParams{
 }
 
 // ApplyLitecoinParams applies the relevant chain configuration parameters that
-// differ for litecoin to the chain parameters typed for btcsuite derivation.
+// differ for litecoin to the chain parameters typed for brsuite derivation.
 // This function is used in place of using something like interface{} to
 // abstract over _which_ chain (or fork) the parameters are for.
 func ApplyLitecoinParams(params *BrocoinNetParams,

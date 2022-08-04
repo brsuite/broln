@@ -3,11 +3,11 @@ package chanfunding
 import (
 	"fmt"
 
+	"github.com/brsuite/broln/input"
+	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/brsuite/broln/input"
-	"github.com/brsuite/broln/lnwallet/chainfee"
 )
 
 // ErrInsufficientFunds is a type matching the error interface which is
@@ -119,7 +119,7 @@ func sanityCheckFee(totalOut, fee bronutil.Amount) error {
 }
 
 // CoinSelect attempts to select a sufficient amount of coins, including a
-// change output to fund amt satoshis, adhering to the specified fee rate. The
+// change output to fund amt broneess, adhering to the specified fee rate. The
 // specified fee rate should be expressed in sat/kw for coin selection to
 // function properly.
 func CoinSelect(feeRate chainfee.SatPerKWeight, amt, dustLimit bronutil.Amount,

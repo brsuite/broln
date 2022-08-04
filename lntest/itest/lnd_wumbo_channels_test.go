@@ -3,9 +3,9 @@ package itest
 import (
 	"strings"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/funding"
 	"github.com/brsuite/broln/lntest"
+	"github.com/brsuite/bronutil"
 )
 
 // testWumboChannels tests that only a node that signals wumbo channel
@@ -34,7 +34,7 @@ func testWumboChannels(net *lntest.NetworkHarness, t *harnessTest) {
 	// should fail as the node isn't advertising wumbo channels.
 	net.EnsureConnected(t.t, wumboNode, miniNode)
 
-	chanAmt := funding.MaxBtcFundingAmount + 1
+	chanAmt := funding.MaxBronFundingAmount + 1
 	_, err := net.OpenChannel(
 		wumboNode, miniNode, lntest.OpenChannelParams{
 			Amt: chanAmt,

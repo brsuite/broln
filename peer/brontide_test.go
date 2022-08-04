@@ -6,11 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/contractcourt"
@@ -19,6 +14,11 @@ import (
 	"github.com/brsuite/broln/lnwallet/chancloser"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/pool"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -1047,7 +1047,7 @@ func TestPeerCustomMessage(t *testing.T) {
 	dbAlice, err := channeldb.Open(alicePath)
 	require.NoError(t, err)
 
-	aliceKey, err := btcec.NewPrivateKey(btcec.S256())
+	aliceKey, err := bronec.NewPrivateKey(bronec.S256())
 	require.NoError(t, err)
 
 	writeBufferPool := pool.NewWriteBuffer(

@@ -17,9 +17,9 @@ type ProtocolOptions struct {
 	ExperimentalProtocol
 
 	// WumboChans should be set if we want to enable support for wumbo
-	// (channels larger than 0.16 BTC) channels, which is the opposite of
+	// (channels larger than 0.16 BRON) channels, which is the opposite of
 	// mini.
-	WumboChans bool `long:"wumbo-channels" description:"if set, then broln will create and accept requests for channels larger chan 0.16 BTC"`
+	WumboChans bool `long:"wumbo-channels" description:"if set, then broln will create and accept requests for channels larger chan 0.16 BRON"`
 
 	// NoAnchors should be set if we don't want to support opening or accepting
 	// channels having the anchor commitment type.

@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/watchtower/wtdb"
+	"github.com/brsuite/brond/bronec"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func init() {
@@ -34,7 +34,7 @@ func randAddr(t *testing.T) net.Addr {
 }
 
 func randTower(t *testing.T) *wtdb.Tower {
-	priv, err := btcec.NewPrivateKey(btcec.S256())
+	priv, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to create private key: %v", err)
 	}

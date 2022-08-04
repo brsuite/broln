@@ -100,7 +100,7 @@ type ChannelUpdate struct {
 	TimeLockDelta uint16
 
 	// HtlcMinimumMsat is the minimum HTLC value which will be accepted.
-	HtlcMinimumMsat MilliSatoshi
+	HtlcMinimumMsat MilliBronees
 
 	// BaseFee is the base fee that must be used for incoming HTLC's to
 	// this particular channel. This value will be tacked onto the required
@@ -108,11 +108,11 @@ type ChannelUpdate struct {
 	BaseFee uint32
 
 	// FeeRate is the fee rate that will be charged per millionth of a
-	// satoshi.
+	// bronees.
 	FeeRate uint32
 
 	// HtlcMaximumMsat is the maximum HTLC value which will be accepted.
-	HtlcMaximumMsat MilliSatoshi
+	HtlcMaximumMsat MilliBronees
 
 	// ExtraData is the set of data that was appended to this message to
 	// fill out the full maximum transport message size. These fields can
@@ -188,7 +188,7 @@ func (a *ChannelUpdate) Encode(w *bytes.Buffer, pver uint32) error {
 		return err
 	}
 
-	if err := WriteMilliSatoshi(w, a.HtlcMinimumMsat); err != nil {
+	if err := WriteMilliBronees(w, a.HtlcMinimumMsat); err != nil {
 		return err
 	}
 
@@ -203,7 +203,7 @@ func (a *ChannelUpdate) Encode(w *bytes.Buffer, pver uint32) error {
 	// Now append optional fields if they are set. Currently, the only
 	// optional field is max HTLC.
 	if a.MessageFlags.HasMaxHtlc() {
-		err := WriteMilliSatoshi(w, a.HtlcMaximumMsat)
+		err := WriteMilliBronees(w, a.HtlcMaximumMsat)
 		if err != nil {
 			return err
 		}
@@ -251,7 +251,7 @@ func (a *ChannelUpdate) DataToSign() ([]byte, error) {
 		return nil, err
 	}
 
-	if err := WriteMilliSatoshi(buf, a.HtlcMinimumMsat); err != nil {
+	if err := WriteMilliBronees(buf, a.HtlcMinimumMsat); err != nil {
 		return nil, err
 	}
 
@@ -266,7 +266,7 @@ func (a *ChannelUpdate) DataToSign() ([]byte, error) {
 	// Now append optional fields if they are set. Currently, the only
 	// optional field is max HTLC.
 	if a.MessageFlags.HasMaxHtlc() {
-		err := WriteMilliSatoshi(buf, a.HtlcMaximumMsat)
+		err := WriteMilliBronees(buf, a.HtlcMaximumMsat)
 		if err != nil {
 			return nil, err
 		}

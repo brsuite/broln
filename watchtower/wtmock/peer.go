@@ -5,15 +5,15 @@ import (
 	"net"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/watchtower/wtserver"
+	"github.com/brsuite/brond/bronec"
 )
 
 // MockPeer emulates a single endpoint of brontide transport.
 type MockPeer struct {
-	remotePub  *btcec.PublicKey
+	remotePub  *bronec.PublicKey
 	remoteAddr net.Addr
-	localPub   *btcec.PublicKey
+	localPub   *bronec.PublicKey
 	localAddr  net.Addr
 
 	IncomingMsgs chan []byte
@@ -27,7 +27,7 @@ type MockPeer struct {
 }
 
 // NewMockPeer returns a fresh MockPeer.
-func NewMockPeer(lpk, rpk *btcec.PublicKey, addr net.Addr,
+func NewMockPeer(lpk, rpk *bronec.PublicKey, addr net.Addr,
 	bufferSize int) *MockPeer {
 
 	return &MockPeer{
@@ -45,7 +45,7 @@ func NewMockPeer(lpk, rpk *btcec.PublicKey, addr net.Addr,
 }
 
 // NewMockConn establishes a bidirectional connection between two MockPeers.
-func NewMockConn(localPk, remotePk *btcec.PublicKey,
+func NewMockConn(localPk, remotePk *bronec.PublicKey,
 	localAddr, remoteAddr net.Addr,
 	bufferSize int) (*MockPeer, *MockPeer) {
 
@@ -151,7 +151,7 @@ func (p *MockPeer) SetReadDeadline(t time.Time) error {
 }
 
 // RemotePub returns the public key of the remote peer.
-func (p *MockPeer) RemotePub() *btcec.PublicKey {
+func (p *MockPeer) RemotePub() *bronec.PublicKey {
 	return p.remotePub
 }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2017 The btcsuite developers
+// Copyright (c) 2013-2017 The brsuite developers
 // Copyright (c) 2015-2016 The Decred developers
 // Copyright (C) 2015-2017 The Lightning Network Developers
 
@@ -12,11 +12,11 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/build"
 	"github.com/brsuite/broln/lncfg"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/macaroons"
+	"github.com/brsuite/bronutil"
 	"github.com/urfave/cli"
 
 	"golang.org/x/term"
@@ -34,8 +34,8 @@ const (
 )
 
 var (
-	defaultbrolnDir      = bronutil.AppDataDir("broln", false)
-	defaultTLSCertPath = filepath.Join(defaultbrolnDir, defaultTLSCertFilename)
+	defaultBrolnDir    = bronutil.AppDataDir("broln", false)
+	defaultTLSCertPath = filepath.Join(defaultBrolnDir, defaultTLSCertFilename)
 
 	// maxMsgRecvSize is the largest message our client will receive. We
 	// set this to 200MiB atm.
@@ -236,7 +236,7 @@ func extractPathArgs(ctx *cli.Context) (string, string, error) {
 	// override their paths so they can be found within the custom broln
 	// directory set. This allows us to set a custom broln directory, along
 	// with custom paths to the TLS cert and macaroon file.
-	if brolnDir != defaultbrolnDir {
+	if brolnDir != defaultBrolnDir {
 		tlsCertPath = filepath.Join(brolnDir, defaultTLSCertFilename)
 	}
 
@@ -273,7 +273,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  "brolndir",
-			Value: defaultbrolnDir,
+			Value: defaultBrolnDir,
 			Usage: "The path to broln's base directory.",
 		},
 		cli.StringFlag{

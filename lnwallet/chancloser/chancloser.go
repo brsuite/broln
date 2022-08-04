@@ -4,16 +4,16 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/htlcswitch"
 	"github.com/brsuite/broln/labels"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/davecgh/go-spew/spew"
 )
 
 var (
@@ -476,7 +476,7 @@ func (c *ChanCloser) ProcessCloseMsg(msg lnwire.Message) ([]lnwire.Message,
 		// We'll compare the proposed total fee, to what we've proposed during
 		// the negotiations. If it doesn't match any of our prior offers, then
 		// we'll attempt to ratchet the fee closer to
-		remoteProposedFee := closeSignedMsg.FeeSatoshis
+		remoteProposedFee := closeSignedMsg.FeeBroneess
 		if _, ok := c.priorFeeOffers[remoteProposedFee]; !ok {
 			// We'll now attempt to ratchet towards a fee deemed acceptable by
 			// both parties, factoring in our ideal fee rate, and the last

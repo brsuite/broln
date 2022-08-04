@@ -8,15 +8,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/bronutil"
-	"github.com/go-errors/errors"
 	"github.com/brsuite/broln/funding"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/watchtowerrpc"
 	"github.com/brsuite/broln/lnrpc/wtclientrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lntest/wait"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/bronutil"
+	"github.com/go-errors/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,7 +25,7 @@ import (
 // breach txn in the mempool.
 func testRevokedCloseRetribution(net *lntest.NetworkHarness, t *harnessTest) {
 	const (
-		chanAmt     = funding.MaxBtcFundingAmount
+		chanAmt     = funding.MaxBronFundingAmount
 		paymentAmt  = 10000
 		numInvoices = 6
 	)
@@ -47,11 +47,11 @@ func testRevokedCloseRetribution(net *lntest.NetworkHarness, t *harnessTest) {
 
 	// Before we make a channel, we'll load up Carol with some coins sent
 	// directly from the miner.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	// In order to test Carol's response to an uncooperative channel
 	// closure by Bob, we'll first open up a channel between them with a
-	// 0.5 BTC value.
+	// 0.5 BRON value.
 	chanPoint := openChannelAndAssert(
 		t, net, carol, net.Bob,
 		lntest.OpenChannelParams{
@@ -85,7 +85,7 @@ func testRevokedCloseRetribution(net *lntest.NetworkHarness, t *harnessTest) {
 	}
 
 	// Next query for Bob's channel state, as we sent 3 payments of 10k
-	// satoshis each, Bob should now see his balance as being 30k satoshis.
+	// broneess each, Bob should now see his balance as being 30k broneess.
 	var bobChan *lnrpc.Channel
 	var predErr error
 	err = wait.Predicate(func() bool {
@@ -259,7 +259,7 @@ func testRevokedCloseRetributionZeroValueRemoteOutput(net *lntest.NetworkHarness
 	t *harnessTest) {
 
 	const (
-		chanAmt     = funding.MaxBtcFundingAmount
+		chanAmt     = funding.MaxBronFundingAmount
 		paymentAmt  = 10000
 		numInvoices = 6
 	)
@@ -286,11 +286,11 @@ func testRevokedCloseRetributionZeroValueRemoteOutput(net *lntest.NetworkHarness
 
 	// Before we make a channel, we'll load up Dave with some coins sent
 	// directly from the miner.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, dave)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, dave)
 
 	// In order to test Dave's response to an uncooperative channel
 	// closure by Carol, we'll first open up a channel between them with a
-	// 0.5 BTC value.
+	// 0.5 BRON value.
 	chanPoint := openChannelAndAssert(
 		t, net, dave, carol,
 		lntest.OpenChannelParams{
@@ -315,7 +315,7 @@ func testRevokedCloseRetributionZeroValueRemoteOutput(net *lntest.NetworkHarness
 	}
 
 	// Next query for Carol's channel state, as we sent 0 payments, Carol
-	// should now see her balance as being 0 satoshis.
+	// should now see her balance as being 0 broneess.
 	carolChan, err := getChanInfo(carol)
 	if err != nil {
 		t.Fatalf("unable to get carol's channel info: %v", err)
@@ -472,7 +472,7 @@ func testRevokedCloseRetributionRemoteHodl(net *lntest.NetworkHarness,
 	t *harnessTest) {
 
 	const (
-		chanAmt     = funding.MaxBtcFundingAmount
+		chanAmt     = funding.MaxBronFundingAmount
 		pushAmt     = 200000
 		paymentAmt  = 10000
 		numInvoices = 6
@@ -501,11 +501,11 @@ func testRevokedCloseRetributionRemoteHodl(net *lntest.NetworkHarness,
 
 	// Before we make a channel, we'll load up Dave with some coins sent
 	// directly from the miner.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, dave)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, dave)
 
 	// In order to test Dave's response to an uncooperative channel closure
 	// by Carol, we'll first open up a channel between them with a
-	// funding.MaxBtcFundingAmount (2^24) satoshis value.
+	// funding.MaxBronFundingAmount (2^24) broneess value.
 	chanPoint := openChannelAndAssert(
 		t, net, dave, carol,
 		lntest.OpenChannelParams{
@@ -591,8 +591,8 @@ func testRevokedCloseRetributionRemoteHodl(net *lntest.NetworkHarness,
 	}
 
 	// Next query for Carol's channel state, as we sent 3 payments of 10k
-	// satoshis each, however Carol should now see her balance as being
-	// equal to the push amount in satoshis since she has not settled.
+	// broneess each, however Carol should now see her balance as being
+	// equal to the push amount in broneess since she has not settled.
 	carolChan, err := getChanInfo(carol)
 	if err != nil {
 		t.Fatalf("unable to get carol's channel info: %v", err)
@@ -903,7 +903,7 @@ func testRevokedCloseRetributionAltruistWatchtowerCase(
 
 	ctxb := context.Background()
 	const (
-		chanAmt     = funding.MaxBtcFundingAmount
+		chanAmt     = funding.MaxBronFundingAmount
 		paymentAmt  = 10000
 		numInvoices = 6
 		externalIP  = "1.2.3.4"
@@ -987,11 +987,11 @@ func testRevokedCloseRetributionAltruistWatchtowerCase(
 
 	// Before we make a channel, we'll load up Dave with some coins sent
 	// directly from the miner.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, dave)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, dave)
 
 	// In order to test Dave's response to an uncooperative channel
 	// closure by Carol, we'll first open up a channel between them with a
-	// 0.5 BTC value.
+	// 0.5 BRON value.
 	chanPoint := openChannelAndAssert(
 		t, net, dave, carol,
 		lntest.OpenChannelParams{

@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/lnpeer"
 	"github.com/brsuite/broln/lntest/wait"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/davecgh/go-spew/spew"
 )
 
 // newTestReliableSender creates a new reliable sender instance used for
@@ -20,7 +20,7 @@ func newTestReliableSender(t *testing.T) *reliableSender {
 	cfg := &reliableSenderCfg{
 		NotifyWhenOnline: func(pubKey [33]byte,
 			peerChan chan<- lnpeer.Peer) {
-			pk, err := btcec.ParsePubKey(pubKey[:], btcec.S256())
+			pk, err := bronec.ParsePubKey(pubKey[:], bronec.S256())
 			if err != nil {
 				t.Fatalf("unable to parse pubkey: %v", err)
 			}

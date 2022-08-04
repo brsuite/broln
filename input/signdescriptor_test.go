@@ -5,10 +5,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/broln/keychain"
 )
 
 func TestSignDescriptorSerialization(t *testing.T) {
@@ -96,7 +96,7 @@ func TestSignDescriptorSerialization(t *testing.T) {
 	for i := 0; i < len(signDescriptors); i++ {
 		// Parse pubkeys for each sign descriptor.
 		sd := &signDescriptors[i]
-		pubkey, err := btcec.ParsePubKey(keys[i], btcec.S256())
+		pubkey, err := bronec.ParsePubKey(keys[i], bronec.S256())
 		if err != nil {
 			t.Fatalf("unable to parse pubkey: %v", err)
 		}

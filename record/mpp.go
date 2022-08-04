@@ -20,11 +20,11 @@ type MPP struct {
 
 	// totalMsat is the total value of the payment, potentially spread
 	// across more than one HTLC.
-	totalMsat lnwire.MilliSatoshi
+	totalMsat lnwire.MilliBronees
 }
 
 // NewMPP generates a new MPP record with the given total and payment address.
-func NewMPP(total lnwire.MilliSatoshi, addr [32]byte) *MPP {
+func NewMPP(total lnwire.MilliBronees, addr [32]byte) *MPP {
 	return &MPP{
 		paymentAddr: addr,
 		totalMsat:   total,
@@ -37,7 +37,7 @@ func (r *MPP) PaymentAddr() [32]byte {
 }
 
 // TotalMsat returns the total value of an MPP payment in msats.
-func (r *MPP) TotalMsat() lnwire.MilliSatoshi {
+func (r *MPP) TotalMsat() lnwire.MilliBronees {
 	return r.totalMsat
 }
 
@@ -77,7 +77,7 @@ func MPPDecoder(r io.Reader, val interface{}, buf *[8]byte, l uint64) error {
 		if err := tlv.DTUint64(r, &total, buf, l-32); err != nil {
 			return err
 		}
-		v.totalMsat = lnwire.MilliSatoshi(total)
+		v.totalMsat = lnwire.MilliBronees(total)
 
 		return nil
 

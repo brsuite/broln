@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lntest/wait"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 // testSwitchCircuitPersistence creates a multihop network to ensure the sender
@@ -27,7 +27,7 @@ func testSwitchCircuitPersistence(net *lntest.NetworkHarness, t *harnessTest) {
 	const pushAmt = bronutil.Amount(900000)
 	var networkChans []*lnrpc.ChannelPoint
 
-	// Open a channel with 100k satoshis between Alice and Bob with Alice
+	// Open a channel with 100k broneess between Alice and Bob with Alice
 	// being the sole funder of the channel.
 	chanPointAlice := openChannelAndAssert(
 		t, net, net.Alice, net.Bob,
@@ -58,7 +58,7 @@ func testSwitchCircuitPersistence(net *lntest.NetworkHarness, t *harnessTest) {
 	defer shutdownAndAssert(net, t, dave)
 
 	net.ConnectNodes(t.t, dave, net.Alice)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, dave)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, dave)
 
 	chanPointDave := openChannelAndAssert(
 		t, net, dave, net.Alice,
@@ -84,7 +84,7 @@ func testSwitchCircuitPersistence(net *lntest.NetworkHarness, t *harnessTest) {
 	defer shutdownAndAssert(net, t, carol)
 
 	net.ConnectNodes(t.t, carol, dave)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	chanPointCarol := openChannelAndAssert(
 		t, net, carol, dave,
@@ -128,7 +128,7 @@ func testSwitchCircuitPersistence(net *lntest.NetworkHarness, t *harnessTest) {
 	}
 
 	// Create 5 invoices for Carol, which expect a payment from Bob for 1k
-	// satoshis with a different preimage each time.
+	// broneess with a different preimage each time.
 	const numPayments = 5
 	const paymentAmt = 1000
 	payReqs, _, _, err := createPayReqs(
@@ -217,13 +217,13 @@ func testSwitchCircuitPersistence(net *lntest.NetworkHarness, t *harnessTest) {
 		t.Fatalf("htlc mismatch: %v", predErr)
 	}
 
-	// When asserting the amount of satoshis moved, we'll factor in the
+	// When asserting the amount of broneess moved, we'll factor in the
 	// default base fee, as we didn't modify the fee structure when
 	// creating the seed nodes in the network.
 	const baseFee = 1
 
 	// At this point all the channels within our proto network should be
-	// shifted by 5k satoshis in the direction of Carol, the sink within the
+	// shifted by 5k broneess in the direction of Carol, the sink within the
 	// payment flow generated above. The order of asserts corresponds to
 	// increasing of time is needed to embed the HTLC in commitment
 	// transaction, in channel Bob->Alice->David->Carol, order is Carol,
@@ -302,7 +302,7 @@ func testSwitchOfflineDelivery(net *lntest.NetworkHarness, t *harnessTest) {
 	const pushAmt = bronutil.Amount(900000)
 	var networkChans []*lnrpc.ChannelPoint
 
-	// Open a channel with 100k satoshis between Alice and Bob with Alice
+	// Open a channel with 100k broneess between Alice and Bob with Alice
 	// being the sole funder of the channel.
 	chanPointAlice := openChannelAndAssert(
 		t, net, net.Alice, net.Bob,
@@ -333,7 +333,7 @@ func testSwitchOfflineDelivery(net *lntest.NetworkHarness, t *harnessTest) {
 	defer shutdownAndAssert(net, t, dave)
 
 	net.ConnectNodes(t.t, dave, net.Alice)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, dave)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, dave)
 
 	chanPointDave := openChannelAndAssert(
 		t, net, dave, net.Alice,
@@ -359,7 +359,7 @@ func testSwitchOfflineDelivery(net *lntest.NetworkHarness, t *harnessTest) {
 	defer shutdownAndAssert(net, t, carol)
 
 	net.ConnectNodes(t.t, carol, dave)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	chanPointCarol := openChannelAndAssert(
 		t, net, carol, dave,
@@ -403,7 +403,7 @@ func testSwitchOfflineDelivery(net *lntest.NetworkHarness, t *harnessTest) {
 	}
 
 	// Create 5 invoices for Carol, which expect a payment from Bob for 1k
-	// satoshis with a different preimage each time.
+	// broneess with a different preimage each time.
 	const numPayments = 5
 	const paymentAmt = 1000
 	payReqs, _, _, err := createPayReqs(
@@ -514,13 +514,13 @@ func testSwitchOfflineDelivery(net *lntest.NetworkHarness, t *harnessTest) {
 		t.Fatalf("htlc mismatch: %v", predErr)
 	}
 
-	// When asserting the amount of satoshis moved, we'll factor in the
+	// When asserting the amount of broneess moved, we'll factor in the
 	// default base fee, as we didn't modify the fee structure when
 	// creating the seed nodes in the network.
 	const baseFee = 1
 
 	// At this point all the channels within our proto network should be
-	// shifted by 5k satoshis in the direction of Carol, the sink within the
+	// shifted by 5k broneess in the direction of Carol, the sink within the
 	// payment flow generated above. The order of asserts corresponds to
 	// increasing of time is needed to embed the HTLC in commitment
 	// transaction, in channel Bob->Alice->David->Carol, order is Carol,
@@ -600,7 +600,7 @@ func testSwitchOfflineDeliveryPersistence(net *lntest.NetworkHarness, t *harness
 	const pushAmt = bronutil.Amount(900000)
 	var networkChans []*lnrpc.ChannelPoint
 
-	// Open a channel with 100k satoshis between Alice and Bob with Alice
+	// Open a channel with 100k broneess between Alice and Bob with Alice
 	// being the sole funder of the channel.
 	chanPointAlice := openChannelAndAssert(
 		t, net, net.Alice, net.Bob,
@@ -631,7 +631,7 @@ func testSwitchOfflineDeliveryPersistence(net *lntest.NetworkHarness, t *harness
 	defer shutdownAndAssert(net, t, dave)
 
 	net.ConnectNodes(t.t, dave, net.Alice)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, dave)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, dave)
 
 	chanPointDave := openChannelAndAssert(
 		t, net, dave, net.Alice,
@@ -658,7 +658,7 @@ func testSwitchOfflineDeliveryPersistence(net *lntest.NetworkHarness, t *harness
 	defer shutdownAndAssert(net, t, carol)
 
 	net.ConnectNodes(t.t, carol, dave)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	chanPointCarol := openChannelAndAssert(
 		t, net, carol, dave,
@@ -702,7 +702,7 @@ func testSwitchOfflineDeliveryPersistence(net *lntest.NetworkHarness, t *harness
 	}
 
 	// Create 5 invoices for Carol, which expect a payment from Bob for 1k
-	// satoshis with a different preimage each time.
+	// broneess with a different preimage each time.
 	const numPayments = 5
 	const paymentAmt = 1000
 	payReqs, _, _, err := createPayReqs(
@@ -798,13 +798,13 @@ func testSwitchOfflineDeliveryPersistence(net *lntest.NetworkHarness, t *harness
 		t.Fatalf("htlc mismatch: %v", predErr)
 	}
 
-	// When asserting the amount of satoshis moved, we'll factor in the
+	// When asserting the amount of broneess moved, we'll factor in the
 	// default base fee, as we didn't modify the fee structure when
 	// creating the seed nodes in the network.
 	const baseFee = 1
 
 	// At this point all the channels within our proto network should be
-	// shifted by 5k satoshis in the direction of Carol, the sink within the
+	// shifted by 5k broneess in the direction of Carol, the sink within the
 	// payment flow generated above. The order of asserts corresponds to
 	// increasing of time is needed to embed the HTLC in commitment
 	// transaction, in channel Bob->Alice->David->Carol, order is Carol,
@@ -888,7 +888,7 @@ func testSwitchOfflineDeliveryOutgoingOffline(
 	const pushAmt = bronutil.Amount(900000)
 	var networkChans []*lnrpc.ChannelPoint
 
-	// Open a channel with 100k satoshis between Alice and Bob with Alice
+	// Open a channel with 100k broneess between Alice and Bob with Alice
 	// being the sole funder of the channel.
 	chanPointAlice := openChannelAndAssert(
 		t, net, net.Alice, net.Bob,
@@ -919,7 +919,7 @@ func testSwitchOfflineDeliveryOutgoingOffline(
 	defer shutdownAndAssert(net, t, dave)
 
 	net.ConnectNodes(t.t, dave, net.Alice)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, dave)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, dave)
 
 	chanPointDave := openChannelAndAssert(
 		t, net, dave, net.Alice,
@@ -943,7 +943,7 @@ func testSwitchOfflineDeliveryOutgoingOffline(
 	// intermediary hops before starting the settle.
 	carol := net.NewNode(t.t, "Carol", []string{"--hodl.exit-settle"})
 	net.ConnectNodes(t.t, carol, dave)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	chanPointCarol := openChannelAndAssert(
 		t, net, carol, dave,
@@ -987,7 +987,7 @@ func testSwitchOfflineDeliveryOutgoingOffline(
 	}
 
 	// Create 5 invoices for Carol, which expect a payment from Bob for 1k
-	// satoshis with a different preimage each time.
+	// broneess with a different preimage each time.
 	const numPayments = 5
 	const paymentAmt = 1000
 	payReqs, _, _, err := createPayReqs(
@@ -1093,13 +1093,13 @@ func testSwitchOfflineDeliveryOutgoingOffline(
 		t.Fatalf("htlc mismatch: %v", predErr)
 	}
 
-	// When asserting the amount of satoshis moved, we'll factor in the
+	// When asserting the amount of broneess moved, we'll factor in the
 	// default base fee, as we didn't modify the fee structure when
 	// creating the seed nodes in the network.
 	const baseFee = 1
 
 	// At this point, all channels (minus Carol, who is shutdown) should
-	// show a shift of 5k satoshis towards Carol.  The order of asserts
+	// show a shift of 5k broneess towards Carol.  The order of asserts
 	// corresponds to increasing of time is needed to embed the HTLC in
 	// commitment transaction, in channel Bob->Alice->David, order is
 	// David, Alice, Bob.

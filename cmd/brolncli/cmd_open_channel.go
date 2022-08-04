@@ -14,17 +14,17 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/brsuite/broln/lnrpc"
+	"github.com/brsuite/broln/lnwallet/chanfunding"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/brsuite/broln/lnrpc"
-	"github.com/brsuite/broln/lnwallet/chanfunding"
 	"github.com/urfave/cli"
 )
 
 const (
 	userMsgFund = `PSBT funding initiated with peer %x.
-Please create a PSBT that sends %v (%d satoshi) to the funding address %s.
+Please create a PSBT that sends %v (%d bronees) to the funding address %s.
 
 Note: The whole process should be completed within 10 minutes, otherwise there
 is a risk of the remote node timing out and canceling the funding process.
@@ -76,8 +76,8 @@ var openChannelCommand = cli.Command{
 	setting its host:port via the --connect argument. For this to work,
 	the node_key must be provided, rather than the peer_id. This is optional.
 
-	The channel will be initialized with local-amt satoshis local and push-amt
-	satoshis for the remote node. Note that specifying push-amt means you give that
+	The channel will be initialized with local-amt broneess local and push-amt
+	broneess for the remote node. Note that specifying push-amt means you give that
 	amount to the remote node as part of the channel opening. Once the channel is open,
 	a channelPoint (txid:vout) of the funding output is returned.
 
@@ -102,11 +102,11 @@ var openChannelCommand = cli.Command{
 		},
 		cli.IntFlag{
 			Name:  "local_amt",
-			Usage: "the number of satoshis the wallet should commit to the channel",
+			Usage: "the number of broneess the wallet should commit to the channel",
 		},
 		cli.IntFlag{
 			Name: "push_amt",
-			Usage: "the number of satoshis to give the remote side " +
+			Usage: "the number of broneess to give the remote side " +
 				"as part of the initial commitment state, " +
 				"this is equivalent to first opening a " +
 				"channel and sending the remote party funds, " +
@@ -541,7 +541,7 @@ func openChannelPsbt(rpcCtx context.Context, ctx *cli.Context,
 			addr := update.PsbtFund.FundingAddress
 			fmt.Printf(
 				userMsgFund, req.NodePubkey, amt, amt, addr,
-				addr, amt.ToBTC(),
+				addr, amt.ToBRON(),
 				base64.StdEncoding.EncodeToString(
 					update.PsbtFund.Psbt,
 				),
@@ -652,8 +652,8 @@ var batchOpenChannelCommand = cli.Command{
 	All nodes listed must already be connected peers, otherwise funding will
 	fail.
 
-	The channel will be initialized with local-amt satoshis local and
-	push-amt satoshis for the remote node. Note that specifying push-amt
+	The channel will be initialized with local-amt broneess local and
+	push-amt broneess for the remote node. Note that specifying push-amt
 	means you give that amount to the remote node as part of the channel
 	opening. Once the channel is open, a channelPoint (txid:vout) of the
 	funding output is returned.

@@ -11,11 +11,11 @@ import (
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/bronutil"
 
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/discovery"
 	"github.com/brsuite/broln/htlcswitch"
 	"github.com/brsuite/broln/routing"
+	"github.com/brsuite/brond/wire"
 )
 
 // TestManager tests that the local channel manager properly propagates fee
@@ -31,8 +31,8 @@ func TestManager(t *testing.T) {
 		chanPointValid     = wire.OutPoint{Hash: chainhash.Hash{1}, Index: 2}
 		chanCap            = bronutil.Amount(1000)
 		chanPointMissing   = wire.OutPoint{Hash: chainhash.Hash{2}, Index: 2}
-		maxPendingAmount   = lnwire.MilliSatoshi(999000)
-		minHTLC            = lnwire.MilliSatoshi(2000)
+		maxPendingAmount   = lnwire.MilliBronees(999000)
+		minHTLC            = lnwire.MilliBronees(2000)
 		expectedNumUpdates int
 		channelSet         []channel
 	)

@@ -7,10 +7,10 @@ import (
 	"math"
 	"net"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/watchtower/blob"
+	"github.com/brsuite/brond/bronec"
 )
 
 var (
@@ -342,7 +342,7 @@ func (c *ClientDB) CreateTower(lnAddr *lnwire.NetAddress) (*Tower, error) {
 // any sessions at all, it'll be completely removed from the database.
 //
 // NOTE: An error is not returned if the tower doesn't exist.
-func (c *ClientDB) RemoveTower(pubKey *btcec.PublicKey, addr net.Addr) error {
+func (c *ClientDB) RemoveTower(pubKey *bronec.PublicKey, addr net.Addr) error {
 	return kvdb.Update(c.db, func(tx kvdb.RwTx) error {
 		towers := tx.ReadWriteBucket(cTowerBkt)
 		if towers == nil {
@@ -444,7 +444,7 @@ func (c *ClientDB) LoadTowerByID(towerID TowerID) (*Tower, error) {
 }
 
 // LoadTower retrieves a tower by its public key.
-func (c *ClientDB) LoadTower(pubKey *btcec.PublicKey) (*Tower, error) {
+func (c *ClientDB) LoadTower(pubKey *bronec.PublicKey) (*Tower, error) {
 	var tower *Tower
 	err := kvdb.View(c.db, func(tx kvdb.RTx) error {
 		towers := tx.ReadBucket(cTowerBkt)

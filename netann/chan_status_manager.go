@@ -5,12 +5,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/wire"
 )
 
 var (
@@ -42,7 +42,7 @@ var (
 // ChanStatusManager to perform its duty.
 type ChanStatusConfig struct {
 	// OurPubKey is the public key identifying this node on the network.
-	OurPubKey *btcec.PublicKey
+	OurPubKey *bronec.PublicKey
 
 	// OurKeyLoc is the locator for the public key identifying this node on
 	// the network.

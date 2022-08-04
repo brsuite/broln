@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/btcsuite/btclog"
+	"github.com/brsuite/bronlog"
 	"github.com/jrick/logrotate/rotator"
 )
 
@@ -16,7 +16,7 @@ import (
 type RotatingLogWriter struct {
 	logWriter *LogWriter
 
-	backendLog *btclog.Backend
+	backendLog *bronlog.Backend
 
 	logRotator *rotator.Rotator
 
@@ -33,7 +33,7 @@ var _ LeveledSubLogger = (*RotatingLogWriter)(nil)
 // the writer.
 func NewRotatingLogWriter() *RotatingLogWriter {
 	logWriter := &LogWriter{}
-	backendLog := btclog.NewBackend(logWriter)
+	backendLog := bronlog.NewBackend(logWriter)
 	return &RotatingLogWriter{
 		logWriter:        logWriter,
 		backendLog:       backendLog,
@@ -43,14 +43,14 @@ func NewRotatingLogWriter() *RotatingLogWriter {
 
 // GenSubLogger creates a new sublogger. A shutdown callback function
 // is provided to be able to shutdown in case of a critical error.
-func (r *RotatingLogWriter) GenSubLogger(tag string, shutdown func()) btclog.Logger {
+func (r *RotatingLogWriter) GenSubLogger(tag string, shutdown func()) bronlog.Logger {
 	logger := r.backendLog.Logger(tag)
 	return NewShutdownLogger(logger, shutdown)
 }
 
 // RegisterSubLogger registers a new subsystem logger.
 func (r *RotatingLogWriter) RegisterSubLogger(subsystem string,
-	logger btclog.Logger) {
+	logger bronlog.Logger) {
 
 	r.subsystemLoggers[subsystem] = logger
 }
@@ -135,7 +135,7 @@ func (r *RotatingLogWriter) SetLogLevel(subsystemID string, logLevel string) {
 	}
 
 	// Defaults to info if the log level is invalid.
-	level, _ := btclog.LevelFromString(logLevel)
+	level, _ := bronlog.LevelFromString(logLevel)
 	logger.SetLevel(level)
 }
 

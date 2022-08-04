@@ -10,16 +10,16 @@ import (
 
 	prand "math/rand"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lntest/channels"
 	"github.com/brsuite/broln/lnwallet"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/davecgh/go-spew/spew"
 )
 
 var (
@@ -136,7 +136,7 @@ var (
 		LockTime: 123,
 	}
 
-	testSig, _ = btcec.ParseDERSignature(channels.TestSigBytes, btcec.S256())
+	testSig, _ = bronec.ParseDERSignature(channels.TestSigBytes, bronec.S256())
 
 	testSignDetails = &input.SignDetails{
 		SignDesc:    testSignDesc,
@@ -857,7 +857,7 @@ func TestCommitSetStorage(t *testing.T) {
 }
 
 func init() {
-	testSignDesc.KeyDesc.PubKey, _ = btcec.ParsePubKey(key1, btcec.S256())
+	testSignDesc.KeyDesc.PubKey, _ = bronec.ParsePubKey(key1, bronec.S256())
 
 	prand.Seed(time.Now().Unix())
 }

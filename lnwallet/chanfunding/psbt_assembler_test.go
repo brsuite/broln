@@ -10,24 +10,24 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/input"
+	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/psbt"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/brsuite/broln/input"
-	"github.com/brsuite/broln/keychain"
 	"github.com/stretchr/testify/require"
 )
 
 var (
-	localPrivkey                  = []byte{1, 2, 3, 4, 5, 6}
-	remotePrivkey                 = []byte{6, 5, 4, 3, 2, 1}
+	localPrivkey                   = []byte{1, 2, 3, 4, 5, 6}
+	remotePrivkey                  = []byte{6, 5, 4, 3, 2, 1}
 	chanCapacity   bronutil.Amount = 644000
-	params                        = chaincfg.RegressionNetParams
-	defaultTimeout                = 50 * time.Millisecond
+	params                         = chaincfg.RegressionNetParams
+	defaultTimeout                 = 50 * time.Millisecond
 )
 
 // TestPsbtIntent tests the basic happy path of the PSBT assembler and intent.
@@ -54,8 +54,8 @@ func TestPsbtIntent(t *testing.T) {
 	// negotiating with the remote peer and they accept. By accepting, they
 	// send over their multisig key that's going to be used for the funding
 	// output. With that known, we can start crafting a PSBT.
-	_, localPubkey := btcec.PrivKeyFromBytes(btcec.S256(), localPrivkey)
-	_, remotePubkey := btcec.PrivKeyFromBytes(btcec.S256(), remotePrivkey)
+	_, localPubkey := bronec.PrivKeyFromBytes(bronec.S256(), localPrivkey)
+	_, remotePubkey := bronec.PrivKeyFromBytes(bronec.S256(), remotePrivkey)
 	psbtIntent.BindKeys(
 		&keychain.KeyDescriptor{PubKey: localPubkey}, remotePubkey,
 	)
@@ -197,8 +197,8 @@ func TestPsbtIntentBasePsbt(t *testing.T) {
 
 	// Generate the funding multisig keys and the address so we can compare
 	// it to the output of the intent.
-	_, localPubkey := btcec.PrivKeyFromBytes(btcec.S256(), localPrivkey)
-	_, remotePubkey := btcec.PrivKeyFromBytes(btcec.S256(), remotePrivkey)
+	_, localPubkey := bronec.PrivKeyFromBytes(bronec.S256(), localPrivkey)
+	_, remotePubkey := bronec.PrivKeyFromBytes(bronec.S256(), remotePrivkey)
 	// Make sure the output script address is correct.
 	script, _, err := input.GenFundingPkScript(
 		localPubkey.SerializeCompressed(),
@@ -474,8 +474,8 @@ func TestPsbtVerify(t *testing.T) {
 	psbtIntent := intent.(*PsbtIntent)
 
 	// Bind our test keys to get the funding parameters.
-	_, localPubkey := btcec.PrivKeyFromBytes(btcec.S256(), localPrivkey)
-	_, remotePubkey := btcec.PrivKeyFromBytes(btcec.S256(), remotePrivkey)
+	_, localPubkey := bronec.PrivKeyFromBytes(bronec.S256(), localPrivkey)
+	_, remotePubkey := bronec.PrivKeyFromBytes(bronec.S256(), remotePrivkey)
 	psbtIntent.BindKeys(
 		&keychain.KeyDescriptor{PubKey: localPubkey}, remotePubkey,
 	)
@@ -642,8 +642,8 @@ func TestPsbtFinalize(t *testing.T) {
 	psbtIntent := intent.(*PsbtIntent)
 
 	// Bind our test keys to get the funding parameters.
-	_, localPubkey := btcec.PrivKeyFromBytes(btcec.S256(), localPrivkey)
-	_, remotePubkey := btcec.PrivKeyFromBytes(btcec.S256(), remotePrivkey)
+	_, localPubkey := bronec.PrivKeyFromBytes(bronec.S256(), localPrivkey)
+	_, remotePubkey := bronec.PrivKeyFromBytes(bronec.S256(), remotePrivkey)
 	psbtIntent.BindKeys(
 		&keychain.KeyDescriptor{PubKey: localPubkey}, remotePubkey,
 	)

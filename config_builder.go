@@ -13,15 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/btcsuite/btclog"
-	"github.com/brsuite/bronwallet/waddrmgr"
-	"github.com/brsuite/bronwallet/wallet"
-	"github.com/brsuite/bronwallet/walletdb"
-	proxy "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/brsuite/neutrino"
-	"github.com/brsuite/neutrino/headerfs"
 	"github.com/brsuite/broln/blockcache"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/channeldb"
@@ -40,6 +31,15 @@ import (
 	"github.com/brsuite/broln/watchtower"
 	"github.com/brsuite/broln/watchtower/wtclient"
 	"github.com/brsuite/broln/watchtower/wtdb"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/bronlog"
+	"github.com/brsuite/bronwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/wallet"
+	"github.com/brsuite/bronwallet/walletdb"
+	"github.com/brsuite/neutrino"
+	"github.com/brsuite/neutrino/headerfs"
+	proxy "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"gopkg.in/macaroon-bakery.v2/bakery"
 )
@@ -141,7 +141,7 @@ type ImplementationCfg struct {
 // backed configuration.
 type DefaultWalletImpl struct {
 	cfg         *Config
-	logger      btclog.Logger
+	logger      bronlog.Logger
 	interceptor signal.Interceptor
 
 	watchOnly        bool
@@ -150,7 +150,7 @@ type DefaultWalletImpl struct {
 }
 
 // NewDefaultWalletImpl creates a new default wallet implementation.
-func NewDefaultWalletImpl(cfg *Config, logger btclog.Logger,
+func NewDefaultWalletImpl(cfg *Config, logger bronlog.Logger,
 	interceptor signal.Interceptor, watchOnly bool) *DefaultWalletImpl {
 
 	return &DefaultWalletImpl{
@@ -530,7 +530,7 @@ func (d *DefaultWalletImpl) BuildWalletConfig(ctx context.Context,
 		NeutrinoMode:                d.cfg.NeutrinoMode,
 		BrocoindMode:                d.cfg.BrocoindMode,
 		LitecoindMode:               d.cfg.LitecoindMode,
-		BrondMode:                    d.cfg.BrondMode,
+		BrondMode:                   d.cfg.BrondMode,
 		LtcdMode:                    d.cfg.LtcdMode,
 		HeightHintDB:                dbs.HeightHintDB,
 		ChanStateDB:                 dbs.ChanStateDB.ChannelStateDB(),
@@ -651,7 +651,7 @@ type RPCSignerWalletImpl struct {
 
 // NewRPCSignerWalletImpl creates a new instance of the remote signing wallet
 // implementation.
-func NewRPCSignerWalletImpl(cfg *Config, logger btclog.Logger,
+func NewRPCSignerWalletImpl(cfg *Config, logger bronlog.Logger,
 	interceptor signal.Interceptor,
 	migrateWatchOnly bool) *RPCSignerWalletImpl {
 
@@ -775,13 +775,13 @@ type DatabaseInstances struct {
 // to use.
 type DefaultDatabaseBuilder struct {
 	cfg    *Config
-	logger btclog.Logger
+	logger bronlog.Logger
 }
 
 // NewDefaultDatabaseBuilder returns a new instance of the default database
 // builder.
 func NewDefaultDatabaseBuilder(cfg *Config,
-	logger btclog.Logger) *DefaultDatabaseBuilder {
+	logger bronlog.Logger) *DefaultDatabaseBuilder {
 
 	return &DefaultDatabaseBuilder{
 		cfg:    cfg,

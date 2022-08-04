@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/wire"
 )
 
@@ -20,7 +20,7 @@ type NetAddress struct {
 	// authenticate any data sent to the network on behalf of the node, and
 	// additionally to establish a confidential+authenticated connection with
 	// the node.
-	IdentityKey *btcec.PublicKey
+	IdentityKey *bronec.PublicKey
 
 	// Address is the IP address and port of the node. This is left
 	// general so that multiple implementations can be used.

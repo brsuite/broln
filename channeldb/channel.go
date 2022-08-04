@@ -12,16 +12,16 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/shachain"
 	"github.com/brsuite/broln/tlv"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 const (
@@ -319,7 +319,7 @@ func (c ChannelType) HasLeaseExpiration() bool {
 // constraints are static for the duration of the channel, meaning the channel
 // must be torn down for them to change.
 type ChannelConstraints struct {
-	// DustLimit is the threshold (in satoshis) below which any outputs
+	// DustLimit is the threshold (in broneess) below which any outputs
 	// should be trimmed. When an output is trimmed, it isn't materialized
 	// as an actual output, but is instead burned to miner's fees.
 	DustLimit bronutil.Amount
@@ -334,14 +334,14 @@ type ChannelConstraints struct {
 	// MaxPendingAmount is the maximum pending HTLC value that the
 	// owner of these constraints can offer the remote node at a
 	// particular time.
-	MaxPendingAmount lnwire.MilliSatoshi
+	MaxPendingAmount lnwire.MilliBronees
 
 	// MinHTLC is the minimum HTLC value that the owner of these
 	// constraints can offer the remote node. If any HTLCs below this
 	// amount are offered, then the HTLC will be rejected. This, in
 	// tandem with the dust limit allows a node to regulate the
 	// smallest HTLC that it deems economically relevant.
-	MinHTLC lnwire.MilliSatoshi
+	MinHTLC lnwire.MilliBronees
 
 	// MaxAcceptedHtlcs is the maximum number of HTLCs that the owner of
 	// this set of constraints can offer the remote node. This allows each
@@ -438,14 +438,14 @@ type ChannelCommitment struct {
 	//
 	// NOTE: This is the balance *after* subtracting any commitment fee,
 	// AND anchor output values.
-	LocalBalance lnwire.MilliSatoshi
+	LocalBalance lnwire.MilliBronees
 
 	// RemoteBalance is the current available settled balance within the
 	// channel directly spendable by the remote node.
 	//
 	// NOTE: This is the balance *after* subtracting any commitment fee,
 	// AND anchor output values.
-	RemoteBalance lnwire.MilliSatoshi
+	RemoteBalance lnwire.MilliBronees
 
 	// CommitFee is the amount calculated to be paid in fees for the
 	// current set of commitment transactions. The fee amount is persisted
@@ -454,7 +454,7 @@ type ChannelCommitment struct {
 	// happen after a system restart.
 	CommitFee bronutil.Amount
 
-	// FeePerKw is the min satoshis/kilo-weight that should be paid within
+	// FeePerKw is the min broneess/kilo-weight that should be paid within
 	// the commitment transaction for the entire duration of the channel's
 	// lifetime. This field may be updated during normal operation of the
 	// channel as on-chain conditions change.
@@ -644,18 +644,18 @@ type OpenChannel struct {
 
 	// IdentityPub is the identity public key of the remote node this
 	// channel has been established with.
-	IdentityPub *btcec.PublicKey
+	IdentityPub *bronec.PublicKey
 
 	// Capacity is the total capacity of this channel.
 	Capacity bronutil.Amount
 
-	// TotalMSatSent is the total number of milli-satoshis we've sent
+	// TotalMSatSent is the total number of milli-broneess we've sent
 	// within this channel.
-	TotalMSatSent lnwire.MilliSatoshi
+	TotalMSatSent lnwire.MilliBronees
 
-	// TotalMSatReceived is the total number of milli-satoshis we've
+	// TotalMSatReceived is the total number of milli-broneess we've
 	// received within this channel.
-	TotalMSatReceived lnwire.MilliSatoshi
+	TotalMSatReceived lnwire.MilliBronees
 
 	// LocalChanCfg is the channel configuration for the local node.
 	LocalChanCfg ChannelConfig
@@ -679,13 +679,13 @@ type OpenChannel struct {
 	// commitment transaction. However, since this the derived public key,
 	// we don't yet have the private key so we aren't yet able to verify
 	// that it's actually in the hash chain.
-	RemoteCurrentRevocation *btcec.PublicKey
+	RemoteCurrentRevocation *bronec.PublicKey
 
 	// RemoteNextRevocation is the revocation key to be used for the *next*
 	// commitment transaction we create for the local node. Within the
 	// specification, this value is referred to as the
 	// per-commitment-point.
-	RemoteNextRevocation *btcec.PublicKey
+	RemoteNextRevocation *bronec.PublicKey
 
 	// RevocationProducer is used to generate the revocation in such a way
 	// that remote side might store it efficiently and have the ability to
@@ -836,7 +836,7 @@ func (c *OpenChannel) RefreshShortChanID() error {
 // fetchChanBucket is a helper function that returns the bucket where a
 // channel's data resides in given: the public key for the node, the outpoint,
 // and the chainhash that the channel resides on.
-func fetchChanBucket(tx kvdb.RTx, nodeKey *btcec.PublicKey,
+func fetchChanBucket(tx kvdb.RTx, nodeKey *bronec.PublicKey,
 	outPoint *wire.OutPoint, chainHash chainhash.Hash) (kvdb.RBucket, error) {
 
 	// First fetch the top level bucket which stores all data related to
@@ -882,7 +882,7 @@ func fetchChanBucket(tx kvdb.RTx, nodeKey *btcec.PublicKey,
 // channel's data resides in given: the public key for the node, the outpoint,
 // and the chainhash that the channel resides on. This differs from
 // fetchChanBucket in that it returns a writeable bucket.
-func fetchChanBucketRw(tx kvdb.RwTx, nodeKey *btcec.PublicKey, // nolint:interfacer
+func fetchChanBucketRw(tx kvdb.RwTx, nodeKey *bronec.PublicKey, // nolint:interfacer
 	outPoint *wire.OutPoint, chainHash chainhash.Hash) (kvdb.RwBucket, error) {
 
 	// First fetch the top level bucket which stores all data related to
@@ -1036,7 +1036,7 @@ func (c *OpenChannel) MarkAsOpen(openLoc lnwire.ShortChannelID) error {
 // MarkDataLoss marks sets the channel status to LocalDataLoss and stores the
 // passed commitPoint for use to retrieve funds in case the remote force closes
 // the channel.
-func (c *OpenChannel) MarkDataLoss(commitPoint *btcec.PublicKey) error {
+func (c *OpenChannel) MarkDataLoss(commitPoint *bronec.PublicKey) error {
 	c.Lock()
 	defer c.Unlock()
 
@@ -1054,8 +1054,8 @@ func (c *OpenChannel) MarkDataLoss(commitPoint *btcec.PublicKey) error {
 
 // DataLossCommitPoint retrieves the stored commit point set during
 // MarkDataLoss. If not found ErrNoCommitPoint is returned.
-func (c *OpenChannel) DataLossCommitPoint() (*btcec.PublicKey, error) {
-	var commitPoint *btcec.PublicKey
+func (c *OpenChannel) DataLossCommitPoint() (*bronec.PublicKey, error) {
+	var commitPoint *bronec.PublicKey
 
 	err := kvdb.View(c.Db.backend, func(tx kvdb.RTx) error {
 		chanBucket, err := fetchChanBucket(
@@ -1648,8 +1648,8 @@ func (c *OpenChannel) UpdateCommitment(newCommitment *ChannelCommitment,
 //
 // NOTE: these are our balances *after* subtracting the commitment fee and
 // anchor outputs.
-func (c *OpenChannel) BalancesAtHeight(height uint64) (lnwire.MilliSatoshi,
-	lnwire.MilliSatoshi, error) {
+func (c *OpenChannel) BalancesAtHeight(height uint64) (lnwire.MilliBronees,
+	lnwire.MilliBronees, error) {
 
 	if height > c.LocalCommitment.CommitHeight &&
 		height > c.RemoteCommitment.CommitHeight {
@@ -1728,8 +1728,8 @@ type HTLC struct {
 	// RHash is the payment hash of the HTLC.
 	RHash [32]byte
 
-	// Amt is the amount of milli-satoshis this HTLC escrows.
-	Amt lnwire.MilliSatoshi
+	// Amt is the amount of milli-broneess this HTLC escrows.
+	Amt lnwire.MilliBronees
 
 	// RefundTimeout is the absolute timeout on the HTLC that the sender
 	// must wait before reclaiming the funds in limbo.
@@ -2315,7 +2315,7 @@ func (c *OpenChannel) RemoteUnsignedLocalUpdates() ([]LogUpdate, error) {
 //
 // NOTE: If this method isn't called, then the target channel won't be able to
 // propose new states for the commitment state of the remote party.
-func (c *OpenChannel) InsertNextRevocation(revKey *btcec.PublicKey) error {
+func (c *OpenChannel) InsertNextRevocation(revKey *bronec.PublicKey) error {
 	c.Lock()
 	defer c.Unlock()
 
@@ -2795,7 +2795,7 @@ type ChannelCloseSummary struct {
 
 	// RemotePub is the public key of the remote peer that we formerly had
 	// a channel with.
-	RemotePub *btcec.PublicKey
+	RemotePub *bronec.PublicKey
 
 	// Capacity was the total capacity of the channel.
 	Capacity bronutil.Amount
@@ -2836,13 +2836,13 @@ type ChannelCloseSummary struct {
 	// commitment transaction. However, since this is the derived public key,
 	// we don't yet have the private key so we aren't yet able to verify
 	// that it's actually in the hash chain.
-	RemoteCurrentRevocation *btcec.PublicKey
+	RemoteCurrentRevocation *bronec.PublicKey
 
 	// RemoteNextRevocation is the revocation key to be used for the *next*
 	// commitment transaction we create for the local node. Within the
 	// specification, this value is referred to as the
 	// per-commitment-point.
-	RemoteNextRevocation *btcec.PublicKey
+	RemoteNextRevocation *bronec.PublicKey
 
 	// LocalChanCfg is the channel configuration for the local node.
 	LocalChanConfig ChannelConfig
@@ -3012,7 +3012,7 @@ func (c *OpenChannel) CloseChannel(summary *ChannelCloseSummary,
 type ChannelSnapshot struct {
 	// RemoteIdentity is the identity public key of the remote node that we
 	// are maintaining the open channel with.
-	RemoteIdentity btcec.PublicKey
+	RemoteIdentity bronec.PublicKey
 
 	// ChanPoint is the outpoint that created the channel. This output is
 	// found within the funding transaction and uniquely identified the
@@ -3026,13 +3026,13 @@ type ChannelSnapshot struct {
 	// Capacity is the total capacity of the channel.
 	Capacity bronutil.Amount
 
-	// TotalMSatSent is the total number of milli-satoshis we've sent
+	// TotalMSatSent is the total number of milli-broneess we've sent
 	// within this channel.
-	TotalMSatSent lnwire.MilliSatoshi
+	TotalMSatSent lnwire.MilliBronees
 
-	// TotalMSatReceived is the total number of milli-satoshis we've
+	// TotalMSatReceived is the total number of milli-broneess we've
 	// received within this channel.
-	TotalMSatReceived lnwire.MilliSatoshi
+	TotalMSatReceived lnwire.MilliBronees
 
 	// ChannelCommitment is the current up-to-date commitment for the
 	// target channel.

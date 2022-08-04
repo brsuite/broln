@@ -7,13 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/brsuite/neutrino/cache"
-	"github.com/brsuite/neutrino/cache/lru"
 	"github.com/brsuite/broln/batch"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
@@ -27,6 +20,13 @@ import (
 	"github.com/brsuite/broln/routing"
 	"github.com/brsuite/broln/routing/route"
 	"github.com/brsuite/broln/ticker"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/brsuite/neutrino/cache"
+	"github.com/brsuite/neutrino/cache/lru"
+	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/time/rate"
 )
 
@@ -106,7 +106,7 @@ func ChannelPoint(op wire.OutPoint) OptionalMsgField {
 // originally sent it.
 type networkMsg struct {
 	peer              lnpeer.Peer
-	source            *btcec.PublicKey
+	source            *bronec.PublicKey
 	msg               lnwire.Message
 	optionalMsgFields *optionalMsgFields
 
@@ -311,7 +311,7 @@ func newRejectCacheKey(cid uint64, pub [33]byte) rejectCacheKey {
 
 // sourceToPub returns a serialized-compressed public key for use in the reject
 // cache.
-func sourceToPub(pk *btcec.PublicKey) [33]byte {
+func sourceToPub(pk *bronec.PublicKey) [33]byte {
 	var pub [33]byte
 	copy(pub[:], pk.SerializeCompressed())
 	return pub
@@ -380,7 +380,7 @@ type AuthenticatedGossiper struct {
 	chanPolicyUpdates chan *chanPolicyUpdateRequest
 
 	// selfKey is the identity public key of the backing Lightning node.
-	selfKey *btcec.PublicKey
+	selfKey *bronec.PublicKey
 
 	// selfKeyLoc is the locator for the identity public key of the backing
 	// Lightning node.
@@ -1398,7 +1398,7 @@ func (d *AuthenticatedGossiper) retransmitStaleAnns(now time.Time) error {
 			// We'll make sure we support the new max_htlc field if
 			// not already present.
 			edge.MessageFlags |= lnwire.ChanUpdateOptionMaxHtlc
-			edge.MaxHTLC = lnwire.NewMSatFromSatoshis(info.Capacity)
+			edge.MaxHTLC = lnwire.NewMSatFromBroneess(info.Capacity)
 
 			edgesToUpdate = append(edgesToUpdate, updateTuple{
 				info: info,
@@ -2218,7 +2218,7 @@ func (d *AuthenticatedGossiper) processNetworkAnnouncement(
 		// announcement tells us "which" side of the channels directed
 		// edge is being updated.
 		var (
-			pubKey       *btcec.PublicKey
+			pubKey       *bronec.PublicKey
 			edgeToUpdate *channeldb.ChannelEdgePolicy
 		)
 		direction := msg.ChannelFlags & lnwire.ChanUpdateDirection
@@ -2303,8 +2303,8 @@ func (d *AuthenticatedGossiper) processNetworkAnnouncement(
 			TimeLockDelta:             msg.TimeLockDelta,
 			MinHTLC:                   msg.HtlcMinimumMsat,
 			MaxHTLC:                   msg.HtlcMaximumMsat,
-			FeeBaseMSat:               lnwire.MilliSatoshi(msg.BaseFee),
-			FeeProportionalMillionths: lnwire.MilliSatoshi(msg.FeeRate),
+			FeeBaseMSat:               lnwire.MilliBronees(msg.BaseFee),
+			FeeProportionalMillionths: lnwire.MilliBronees(msg.FeeRate),
 			ExtraOpaqueData:           msg.ExtraOpaqueData,
 		}
 
@@ -2719,7 +2719,7 @@ func (d *AuthenticatedGossiper) processZombieUpdate(
 	// have both pubkeys, either party can resurect the channel. If we've
 	// already marked this with the stricter, single-sided resurrection we
 	// will only have the pubkey of the node with the oldest timestamp.
-	var pubKey *btcec.PublicKey
+	var pubKey *bronec.PublicKey
 	switch {
 	case isNode1 && chanInfo.NodeKey1Bytes != emptyPubkey:
 		pubKey, _ = chanInfo.NodeKey1()
@@ -2942,10 +2942,10 @@ func IsKeepAliveUpdate(update *lnwire.ChannelUpdate,
 	if update.ChannelFlags.IsDisabled() != prev.ChannelFlags.IsDisabled() {
 		return false
 	}
-	if lnwire.MilliSatoshi(update.BaseFee) != prev.FeeBaseMSat {
+	if lnwire.MilliBronees(update.BaseFee) != prev.FeeBaseMSat {
 		return false
 	}
-	if lnwire.MilliSatoshi(update.FeeRate) != prev.FeeProportionalMillionths {
+	if lnwire.MilliBronees(update.FeeRate) != prev.FeeProportionalMillionths {
 		return false
 	}
 	if update.TimeLockDelta != prev.TimeLockDelta {

@@ -6,14 +6,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/btcsuite/btclog"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/watchtower/wtdb"
 	"github.com/brsuite/broln/watchtower/wtserver"
 	"github.com/brsuite/broln/watchtower/wtwire"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/bronlog"
 )
 
 // reserveStatus is an enum that signals how full a particular session is.
@@ -74,7 +74,7 @@ type sessionQueueConfig struct {
 
 	// Log specifies the desired log output, which should be prefixed by the
 	// client type, e.g. anchor or legacy.
-	Log btclog.Logger
+	Log bronlog.Logger
 }
 
 // sessionQueue implements a reliable queue that will encrypt and send accepted
@@ -89,7 +89,7 @@ type sessionQueue struct {
 	forced  sync.Once
 
 	cfg *sessionQueueConfig
-	log btclog.Logger
+	log bronlog.Logger
 
 	commitQueue  *list.List
 	pendingQueue *list.List

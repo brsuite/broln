@@ -9,10 +9,10 @@ import (
 	"math"
 	"net"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/tor"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/brsuite/broln/tor"
 )
 
 var (
@@ -104,18 +104,18 @@ func WriteUint64(buf *bytes.Buffer, n uint64) error { // nolint: interfacer
 	return err
 }
 
-// WriteSatoshi appends the Satoshi value to the provided buffer.
-func WriteSatoshi(buf *bytes.Buffer, amount bronutil.Amount) error {
+// WriteBronees appends the Bronees value to the provided buffer.
+func WriteBronees(buf *bytes.Buffer, amount bronutil.Amount) error {
 	return WriteUint64(buf, uint64(amount))
 }
 
-// WriteMilliSatoshi appends the MilliSatoshi value to the provided buffer.
-func WriteMilliSatoshi(buf *bytes.Buffer, amount MilliSatoshi) error {
+// WriteMilliBronees appends the MilliBronees value to the provided buffer.
+func WriteMilliBronees(buf *bytes.Buffer, amount MilliBronees) error {
 	return WriteUint64(buf, uint64(amount))
 }
 
 // WritePublicKey appends the compressed public key to the provided buffer.
-func WritePublicKey(buf *bytes.Buffer, pub *btcec.PublicKey) error {
+func WritePublicKey(buf *bytes.Buffer, pub *bronec.PublicKey) error {
 	if pub == nil {
 		return ErrNilPublicKey
 	}

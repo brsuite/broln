@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/clock"
 	"github.com/brsuite/broln/routing/route"
 	"github.com/brsuite/broln/subscribe"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/wire"
 	"github.com/stretchr/testify/require"
 )
 
@@ -88,10 +88,10 @@ func TestStartStoreError(t *testing.T) {
 // of uptime and lifespan requests, as they are tested in their own tests.
 func TestMonitorChannelEvents(t *testing.T) {
 	var (
-		pubKey = &btcec.PublicKey{
+		pubKey = &bronec.PublicKey{
 			X:     big.NewInt(0),
 			Y:     big.NewInt(1),
-			Curve: btcec.S256(),
+			Curve: bronec.S256(),
 		}
 
 		chan1 = wire.OutPoint{Index: 1}

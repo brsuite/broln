@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/bronutil"
-	"github.com/brsuite/broln/lnwire"
 )
 
 // ReservationError wraps certain errors returned during channel reservation
@@ -88,7 +88,7 @@ func ErrNonZeroPushAmount() ReservationError {
 // ErrMinHtlcTooLarge returns an error indicating that the MinHTLC value the
 // remote required is too large to be accepted.
 func ErrMinHtlcTooLarge(minHtlc,
-	maxMinHtlc lnwire.MilliSatoshi) ReservationError {
+	maxMinHtlc lnwire.MilliBronees) ReservationError {
 	return ReservationError{
 		fmt.Errorf("minimum HTLC value is too large: %v, max is %v",
 			minHtlc, maxMinHtlc),
@@ -116,7 +116,7 @@ func ErrMaxHtlcNumTooSmall(maxHtlc, minMaxHtlc uint16) ReservationError {
 // ErrMaxValueInFlightTooSmall returns an error indicating that the 'max HTLC
 // value in flight' the remote required is too small to be accepted.
 func ErrMaxValueInFlightTooSmall(maxValInFlight,
-	minMaxValInFlight lnwire.MilliSatoshi) ReservationError {
+	minMaxValInFlight lnwire.MilliBronees) ReservationError {
 	return ReservationError{
 		fmt.Errorf("maxValueInFlight too small: %v, min is %v",
 			maxValInFlight, minMaxValInFlight),

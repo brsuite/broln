@@ -1,11 +1,11 @@
 package keychain
 
 import (
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 )
 
-func NewPubKeyMessageSigner(pubKey *btcec.PublicKey, keyLoc KeyLocator,
+func NewPubKeyMessageSigner(pubKey *bronec.PublicKey, keyLoc KeyLocator,
 	signer MessageSignerRing) *PubKeyMessageSigner {
 
 	return &PubKeyMessageSigner{
@@ -16,12 +16,12 @@ func NewPubKeyMessageSigner(pubKey *btcec.PublicKey, keyLoc KeyLocator,
 }
 
 type PubKeyMessageSigner struct {
-	pubKey       *btcec.PublicKey
+	pubKey       *bronec.PublicKey
 	keyLoc       KeyLocator
 	digestSigner MessageSignerRing
 }
 
-func (p *PubKeyMessageSigner) PubKey() *btcec.PublicKey {
+func (p *PubKeyMessageSigner) PubKey() *bronec.PublicKey {
 	return p.pubKey
 }
 
@@ -30,7 +30,7 @@ func (p *PubKeyMessageSigner) KeyLocator() KeyLocator {
 }
 
 func (p *PubKeyMessageSigner) SignMessage(message []byte,
-	doubleHash bool) (*btcec.Signature, error) {
+	doubleHash bool) (*bronec.Signature, error) {
 
 	return p.digestSigner.SignMessage(p.keyLoc, message, doubleHash)
 }
@@ -41,7 +41,7 @@ func (p *PubKeyMessageSigner) SignMessageCompact(msg []byte,
 	return p.digestSigner.SignMessageCompact(p.keyLoc, msg, doubleHash)
 }
 
-func NewPrivKeyMessageSigner(privKey *btcec.PrivateKey,
+func NewPrivKeyMessageSigner(privKey *bronec.PrivateKey,
 	keyLoc KeyLocator) *PrivKeyMessageSigner {
 
 	return &PrivKeyMessageSigner{
@@ -52,10 +52,10 @@ func NewPrivKeyMessageSigner(privKey *btcec.PrivateKey,
 
 type PrivKeyMessageSigner struct {
 	keyLoc  KeyLocator
-	privKey *btcec.PrivateKey
+	privKey *bronec.PrivateKey
 }
 
-func (p *PrivKeyMessageSigner) PubKey() *btcec.PublicKey {
+func (p *PrivKeyMessageSigner) PubKey() *bronec.PublicKey {
 	return p.privKey.PubKey()
 }
 
@@ -64,7 +64,7 @@ func (p *PrivKeyMessageSigner) KeyLocator() KeyLocator {
 }
 
 func (p *PrivKeyMessageSigner) SignMessage(msg []byte,
-	doubleHash bool) (*btcec.Signature, error) {
+	doubleHash bool) (*bronec.Signature, error) {
 
 	var digest []byte
 	if doubleHash {
@@ -84,7 +84,7 @@ func (p *PrivKeyMessageSigner) SignMessageCompact(msg []byte,
 	} else {
 		digest = chainhash.HashB(msg)
 	}
-	return btcec.SignCompact(btcec.S256(), p.privKey, digest, true)
+	return bronec.SignCompact(bronec.S256(), p.privKey, digest, true)
 }
 
 var _ SingleKeyMessageSigner = (*PubKeyMessageSigner)(nil)

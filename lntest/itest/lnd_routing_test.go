@@ -9,14 +9,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/routerrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lntest/wait"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
 )
@@ -94,7 +94,7 @@ func testSingleHopSendToRouteCase(net *lntest.NetworkHarness, t *harnessTest,
 	var networkChans []*lnrpc.ChannelPoint
 
 	// Create Carol and Dave, then establish a channel between them. Carol
-	// is the sole funder of the channel with 100k satoshis. The network
+	// is the sole funder of the channel with 100k broneess. The network
 	// topology should look like:
 	// Carol -> 100k -> Dave
 	carol := net.NewNode(t.t, "Carol", nil)
@@ -104,9 +104,9 @@ func testSingleHopSendToRouteCase(net *lntest.NetworkHarness, t *harnessTest,
 	defer shutdownAndAssert(net, t, dave)
 
 	net.ConnectNodes(t.t, carol, dave)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
-	// Open a channel with 100k satoshis between Carol and Dave with Carol
+	// Open a channel with 100k broneess between Carol and Dave with Carol
 	// being the sole funder of the channel.
 	chanPointCarol := openChannelAndAssert(
 		t, net, carol, dave,
@@ -414,7 +414,7 @@ func testSingleHopSendToRouteCase(net *lntest.NetworkHarness, t *harnessTest,
 	}
 
 	// At this point all the channels within our proto network should be
-	// shifted by 5k satoshis in the direction of Dave, the sink within the
+	// shifted by 5k broneess in the direction of Dave, the sink within the
 	// payment flow generated above. The order of asserts corresponds to
 	// increasing of time is needed to embed the HTLC in commitment
 	// transaction, in channel Carol->Dave, order is Dave and then Carol.
@@ -463,12 +463,12 @@ func runMultiHopSendToRoute(net *lntest.NetworkHarness, t *harnessTest,
 	defer shutdownAndAssert(net, t, alice)
 
 	net.ConnectNodes(t.t, alice, net.Bob)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, alice)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, alice)
 
 	const chanAmt = bronutil.Amount(100000)
 	var networkChans []*lnrpc.ChannelPoint
 
-	// Open a channel with 100k satoshis between Alice and Bob with Alice
+	// Open a channel with 100k broneess between Alice and Bob with Alice
 	// being the sole funder of the channel.
 	chanPointAlice := openChannelAndAssert(
 		t, net, alice, net.Bob,
@@ -488,13 +488,13 @@ func runMultiHopSendToRoute(net *lntest.NetworkHarness, t *harnessTest,
 	}
 
 	// Create Carol and establish a channel from Bob. Bob is the sole funder
-	// of the channel with 100k satoshis. The network topology should look like:
+	// of the channel with 100k broneess. The network topology should look like:
 	// Alice -> Bob -> Carol
 	carol := net.NewNode(t.t, "Carol", nil)
 	defer shutdownAndAssert(net, t, carol)
 
 	net.ConnectNodes(t.t, carol, net.Bob)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, net.Bob)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, net.Bob)
 
 	chanPointBob := openChannelAndAssert(
 		t, net, net.Bob, carol,
@@ -536,7 +536,7 @@ func runMultiHopSendToRoute(net *lntest.NetworkHarness, t *harnessTest,
 	}
 
 	// Create 5 invoices for Carol, which expect a payment from Alice for 1k
-	// satoshis with a different preimage each time.
+	// broneess with a different preimage each time.
 	const (
 		numPayments = 5
 		paymentAmt  = 1000
@@ -585,7 +585,7 @@ func runMultiHopSendToRoute(net *lntest.NetworkHarness, t *harnessTest,
 		route.Hops[len(route.Hops)-1].MppRecord = &lnrpc.MPPRecord{
 			PaymentAddr: invoices[i].PaymentAddr,
 			TotalAmtMsat: int64(
-				lnwire.NewMSatFromSatoshis(paymentAmt),
+				lnwire.NewMSatFromBroneess(paymentAmt),
 			),
 		}
 
@@ -603,13 +603,13 @@ func runMultiHopSendToRoute(net *lntest.NetworkHarness, t *harnessTest,
 		}
 	}
 
-	// When asserting the amount of satoshis moved, we'll factor in the
+	// When asserting the amount of broneess moved, we'll factor in the
 	// default base fee, as we didn't modify the fee structure when
 	// creating the seed nodes in the network.
 	const baseFee = 1
 
 	// At this point all the channels within our proto network should be
-	// shifted by 5k satoshis in the direction of Carol, the sink within the
+	// shifted by 5k broneess in the direction of Carol, the sink within the
 	// payment flow generated above. The order of asserts corresponds to
 	// increasing of time is needed to embed the HTLC in commitment
 	// transaction, in channel Alice->Bob->Carol, order is Carol, Bob,
@@ -635,7 +635,7 @@ func testSendToRouteErrorPropagation(net *lntest.NetworkHarness, t *harnessTest)
 
 	const chanAmt = bronutil.Amount(100000)
 
-	// Open a channel with 100k satoshis between Alice and Bob with Alice
+	// Open a channel with 100k broneess between Alice and Bob with Alice
 	// being the sole funder of the channel.
 	chanPointAlice := openChannelAndAssert(
 		t, net, net.Alice, net.Bob,
@@ -659,12 +659,12 @@ func testSendToRouteErrorPropagation(net *lntest.NetworkHarness, t *harnessTest)
 	carol := net.NewNode(t.t, "Carol", nil)
 	defer shutdownAndAssert(net, t, carol)
 
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	charlie := net.NewNode(t.t, "Charlie", nil)
 	defer shutdownAndAssert(net, t, charlie)
 
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, charlie)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, charlie)
 
 	net.ConnectNodes(t.t, carol, charlie)
 
@@ -692,7 +692,7 @@ func testSendToRouteErrorPropagation(net *lntest.NetworkHarness, t *harnessTest)
 	}
 
 	// Create 1 invoices for Bob, which expect a payment from Alice for 1k
-	// satoshis
+	// broneess
 	const paymentAmt = 1000
 
 	invoice := &lnrpc.Invoice{
@@ -756,7 +756,7 @@ func testPrivateChannels(net *lntest.NetworkHarness, t *harnessTest) {
 	//
 	// where the 100k channel between Carol and Alice is private.
 
-	// Open a channel with 200k satoshis between Alice and Bob.
+	// Open a channel with 200k broneess between Alice and Bob.
 	chanPointAlice := openChannelAndAssert(
 		t, net, net.Alice, net.Bob,
 		lntest.OpenChannelParams{
@@ -779,7 +779,7 @@ func testPrivateChannels(net *lntest.NetworkHarness, t *harnessTest) {
 	defer shutdownAndAssert(net, t, dave)
 
 	net.ConnectNodes(t.t, dave, net.Alice)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, dave)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, dave)
 
 	chanPointDave := openChannelAndAssert(
 		t, net, dave, net.Alice,
@@ -803,7 +803,7 @@ func testPrivateChannels(net *lntest.NetworkHarness, t *harnessTest) {
 	defer shutdownAndAssert(net, t, carol)
 
 	net.ConnectNodes(t.t, carol, dave)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	chanPointCarol := openChannelAndAssert(
 		t, net, carol, dave,
@@ -892,7 +892,7 @@ func testPrivateChannels(net *lntest.NetworkHarness, t *harnessTest) {
 	// We check this by sending payments from Carol to Bob, that
 	// collectively would deplete at least one of Carol's channels.
 
-	// Create 2 invoices for Bob, each of 70k satoshis. Since each of
+	// Create 2 invoices for Bob, each of 70k broneess. Since each of
 	// Carol's channels is of size 100k, these payments cannot succeed
 	// by only using one of the channels.
 	const numPayments = 2
@@ -912,12 +912,12 @@ func testPrivateChannels(net *lntest.NetworkHarness, t *harnessTest) {
 		t.Fatalf("unable to send payments: %v", err)
 	}
 
-	// When asserting the amount of satoshis moved, we'll factor in the
+	// When asserting the amount of broneess moved, we'll factor in the
 	// default base fee, as we didn't modify the fee structure when
 	// creating the seed nodes in the network.
 	const baseFee = 1
 
-	// Bob should have received 140k satoshis from Alice.
+	// Bob should have received 140k broneess from Alice.
 	assertAmountPaid(t, "Alice(local) => Bob(remote)", net.Bob,
 		aliceFundPoint, int64(0), 2*paymentAmt)
 
@@ -1322,7 +1322,7 @@ func testMultiHopOverPrivateChannels(net *lntest.NetworkHarness, t *harnessTest)
 	defer shutdownAndAssert(net, t, dave)
 
 	net.ConnectNodes(t.t, carol, dave)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	chanPointCarol := openChannelAndAssert(
 		t, net, carol, dave,
@@ -1360,7 +1360,7 @@ func testMultiHopOverPrivateChannels(net *lntest.NetworkHarness, t *harnessTest)
 
 	// Now that all the channels are set up according to the topology from
 	// above, we can proceed to test payments. We'll create an invoice for
-	// Dave of 20k satoshis and pay it with Alice. Since there is no public
+	// Dave of 20k broneess and pay it with Alice. Since there is no public
 	// route from Alice to Dave, we'll need to use the private channel
 	// between Carol and Dave as a routing hint encoded in the invoice.
 	const paymentAmt = 20000
@@ -1387,32 +1387,32 @@ func testMultiHopOverPrivateChannels(net *lntest.NetworkHarness, t *harnessTest)
 		t.Fatalf("unable to send payments from alice to dave: %v", err)
 	}
 
-	// When asserting the amount of satoshis moved, we'll factor in the
+	// When asserting the amount of broneess moved, we'll factor in the
 	// default base fee, as we didn't modify the fee structure when opening
 	// the channels.
 	const baseFee = 1
 
-	// Dave should have received 20k satoshis from Carol.
+	// Dave should have received 20k broneess from Carol.
 	assertAmountPaid(t, "Carol(local) [private=>] Dave(remote)",
 		dave, carolFundPoint, 0, paymentAmt)
 
-	// Carol should have sent 20k satoshis to Dave.
+	// Carol should have sent 20k broneess to Dave.
 	assertAmountPaid(t, "Carol(local) [private=>] Dave(remote)",
 		carol, carolFundPoint, paymentAmt, 0)
 
-	// Carol should have received 20k satoshis + fee for one hop from Bob.
+	// Carol should have received 20k broneess + fee for one hop from Bob.
 	assertAmountPaid(t, "Bob(local) => Carol(remote)",
 		carol, bobFundPoint, 0, paymentAmt+baseFee)
 
-	// Bob should have sent 20k satoshis + fee for one hop to Carol.
+	// Bob should have sent 20k broneess + fee for one hop to Carol.
 	assertAmountPaid(t, "Bob(local) => Carol(remote)",
 		net.Bob, bobFundPoint, paymentAmt+baseFee, 0)
 
-	// Bob should have received 20k satoshis + fee for two hops from Alice.
+	// Bob should have received 20k broneess + fee for two hops from Alice.
 	assertAmountPaid(t, "Alice(local) [private=>] Bob(remote)", net.Bob,
 		aliceFundPoint, 0, paymentAmt+baseFee*2)
 
-	// Alice should have sent 20k satoshis + fee for two hops to Bob.
+	// Alice should have sent 20k broneess + fee for two hops to Bob.
 	assertAmountPaid(t, "Alice(local) [private=>] Bob(remote)", net.Alice,
 		aliceFundPoint, paymentAmt+baseFee*2, 0)
 
@@ -1424,7 +1424,7 @@ func testMultiHopOverPrivateChannels(net *lntest.NetworkHarness, t *harnessTest)
 }
 
 // computeFee calculates the payment fee as specified in BOLT07
-func computeFee(baseFee, feeRate, amt lnwire.MilliSatoshi) lnwire.MilliSatoshi {
+func computeFee(baseFee, feeRate, amt lnwire.MilliBronees) lnwire.MilliBronees {
 	return baseFee + amt*feeRate/1000000
 }
 
@@ -1452,7 +1452,7 @@ func testQueryRoutes(net *lntest.NetworkHarness, t *harnessTest) {
 	defer shutdownAndAssert(net, t, carol)
 
 	net.ConnectNodes(t.t, carol, net.Bob)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, net.Bob)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, net.Bob)
 
 	chanPointBob := openChannelAndAssert(
 		t, net, net.Bob, carol,
@@ -1467,7 +1467,7 @@ func testQueryRoutes(net *lntest.NetworkHarness, t *harnessTest) {
 	defer shutdownAndAssert(net, t, dave)
 
 	net.ConnectNodes(t.t, dave, carol)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	chanPointCarol := openChannelAndAssert(
 		t, net, carol, dave,
@@ -1517,7 +1517,7 @@ func testQueryRoutes(net *lntest.NetworkHarness, t *harnessTest) {
 
 	for i, route := range routesRes.Routes {
 		expectedTotalFeesMSat :=
-			lnwire.MilliSatoshi(len(route.Hops)-1) * feePerHopMSat
+			lnwire.MilliBronees(len(route.Hops)-1) * feePerHopMSat
 		expectedTotalAmtMSat := (paymentAmt * mSat) + expectedTotalFeesMSat
 
 		if route.TotalFees != route.TotalFeesMsat/mSat { // nolint:staticcheck
@@ -1719,7 +1719,7 @@ func testRouteFeeCutoff(net *lntest.NetworkHarness, t *harnessTest) {
 	//
 	// Alice will attempt to send payments to Dave that should not incur a
 	// fee greater than the fee limit expressed as a percentage of the
-	// amount and as a fixed amount of satoshis.
+	// amount and as a fixed amount of broneess.
 	const chanAmt = bronutil.Amount(100000)
 
 	// Open a channel between Alice and Bob.
@@ -1736,7 +1736,7 @@ func testRouteFeeCutoff(net *lntest.NetworkHarness, t *harnessTest) {
 	defer shutdownAndAssert(net, t, carol)
 
 	net.ConnectNodes(t.t, carol, net.Alice)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	chanPointAliceCarol := openChannelAndAssert(
 		t, net, net.Alice, carol,
@@ -1877,9 +1877,9 @@ func testRouteFeeCutoff(net *lntest.NetworkHarness, t *harnessTest) {
 
 	// We'll be attempting to send two payments from Alice to Dave. One will
 	// have a fee cutoff expressed as a percentage of the amount and the
-	// other will have it expressed as a fixed amount of satoshis.
+	// other will have it expressed as a fixed amount of broneess.
 	const paymentAmt = 100
-	carolFee := computeFee(lnwire.MilliSatoshi(baseFee), 1, paymentAmt)
+	carolFee := computeFee(lnwire.MilliBronees(baseFee), 1, paymentAmt)
 
 	// testFeeCutoff is a helper closure that will ensure the different
 	// types of fee limits work as intended when querying routes and sending
@@ -1937,7 +1937,7 @@ func testRouteFeeCutoff(net *lntest.NetworkHarness, t *harnessTest) {
 	// use a smaller value in order to invalidate that route.
 	feeLimitFixed := &lnrpc.FeeLimit{
 		Limit: &lnrpc.FeeLimit_Fixed{
-			Fixed: int64(carolFee.ToSatoshis()) - 1,
+			Fixed: int64(carolFee.ToBroneess()) - 1,
 		},
 	}
 	testFeeCutoff(feeLimitFixed)

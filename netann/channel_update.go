@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
 )
 
 // ErrUnableToExtractChanUpdate is returned when a channel update cannot be
@@ -90,7 +90,7 @@ func ExtractChannelUpdate(ownerPubKey []byte,
 
 	// Helper function to extract the owner of the given policy.
 	owner := func(edge *channeldb.ChannelEdgePolicy) []byte {
-		var pubKey *btcec.PublicKey
+		var pubKey *bronec.PublicKey
 		if edge.ChannelFlags&lnwire.ChanUpdateDirection == 0 {
 			pubKey, _ = info.NodeKey1()
 		} else {

@@ -141,10 +141,10 @@ type HtlcInfo struct {
 	OutgoingTimeLock uint32
 
 	// IncomingAmt is the amount of the htlc on our incoming channel.
-	IncomingAmt lnwire.MilliSatoshi
+	IncomingAmt lnwire.MilliBronees
 
 	// OutgoingAmt is the amount of the htlc on our outgoing channel.
-	OutgoingAmt lnwire.MilliSatoshi
+	OutgoingAmt lnwire.MilliBronees
 }
 
 // String returns a string representation of a htlc.

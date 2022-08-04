@@ -3,13 +3,13 @@ package routing
 import (
 	"fmt"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/btcsuite/btclog"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/build"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/bronlog"
+	"github.com/davecgh/go-spew/spew"
 )
 
 // BlockPadding is used to increment the finalCltvDelta value for the last hop
@@ -69,7 +69,7 @@ var (
 	// DefaultShardMinAmt is the default amount beyond which we won't try to
 	// further split the payment if no route is found. It is the minimum
 	// amount that we use as the shard size when splitting.
-	DefaultShardMinAmt = lnwire.NewMSatFromSatoshis(10000)
+	DefaultShardMinAmt = lnwire.NewMSatFromBroneess(10000)
 )
 
 // Error returns the string representation of the noRouteError
@@ -136,20 +136,20 @@ type PaymentSession interface {
 	//
 	// A noRouteError is returned if a non-critical error is encountered
 	// during path finding.
-	RequestRoute(maxAmt, feeLimit lnwire.MilliSatoshi,
+	RequestRoute(maxAmt, feeLimit lnwire.MilliBronees,
 		activeShards, height uint32) (*route.Route, error)
 
 	// UpdateAdditionalEdge takes an additional channel edge policy
 	// (private channels) and applies the update from the message. Returns
 	// a boolean to indicate whether the update has been applied without
 	// error.
-	UpdateAdditionalEdge(msg *lnwire.ChannelUpdate, pubKey *btcec.PublicKey,
+	UpdateAdditionalEdge(msg *lnwire.ChannelUpdate, pubKey *bronec.PublicKey,
 		policy *channeldb.CachedEdgePolicy) bool
 
 	// GetAdditionalEdgePolicy uses the public key and channel ID to query
 	// the ephemeral channel edge policy for additional edges. Returns a nil
 	// if nothing found.
-	GetAdditionalEdgePolicy(pubKey *btcec.PublicKey,
+	GetAdditionalEdgePolicy(pubKey *bronec.PublicKey,
 		channelID uint64) *channeldb.CachedEdgePolicy
 }
 
@@ -184,10 +184,10 @@ type paymentSession struct {
 	// the payment if no route is found. If the maximum number of htlcs
 	// specified in the payment is one, under no circumstances splitting
 	// will happen and this value remains unused.
-	minShardAmt lnwire.MilliSatoshi
+	minShardAmt lnwire.MilliBronees
 
 	// log is a payment session-specific logger.
-	log btclog.Logger
+	log bronlog.Logger
 }
 
 // newPaymentSession instantiates a new payment session.
@@ -226,7 +226,7 @@ func newPaymentSession(p *LightningPayment,
 //
 // NOTE: This function is safe for concurrent access.
 // NOTE: Part of the PaymentSession interface.
-func (p *paymentSession) RequestRoute(maxAmt, feeLimit lnwire.MilliSatoshi,
+func (p *paymentSession) RequestRoute(maxAmt, feeLimit lnwire.MilliBronees,
 	activeShards, height uint32) (*route.Route, error) {
 
 	if p.empty {
@@ -403,7 +403,7 @@ func (p *paymentSession) RequestRoute(maxAmt, feeLimit lnwire.MilliSatoshi,
 // updates to the supplied policy. It returns a boolean to indicate whether
 // there's an error when applying the updates.
 func (p *paymentSession) UpdateAdditionalEdge(msg *lnwire.ChannelUpdate,
-	pubKey *btcec.PublicKey, policy *channeldb.CachedEdgePolicy) bool {
+	pubKey *bronec.PublicKey, policy *channeldb.CachedEdgePolicy) bool {
 
 	// Validate the message signature.
 	if err := VerifyChannelUpdateSignature(msg, pubKey); err != nil {
@@ -415,8 +415,8 @@ func (p *paymentSession) UpdateAdditionalEdge(msg *lnwire.ChannelUpdate,
 
 	// Update channel policy for the additional edge.
 	policy.TimeLockDelta = msg.TimeLockDelta
-	policy.FeeBaseMSat = lnwire.MilliSatoshi(msg.BaseFee)
-	policy.FeeProportionalMillionths = lnwire.MilliSatoshi(msg.FeeRate)
+	policy.FeeBaseMSat = lnwire.MilliBronees(msg.BaseFee)
+	policy.FeeProportionalMillionths = lnwire.MilliBronees(msg.FeeRate)
 
 	log.Debugf("New private channel update applied: %v",
 		newLogClosure(func() string { return spew.Sdump(msg) }))
@@ -427,7 +427,7 @@ func (p *paymentSession) UpdateAdditionalEdge(msg *lnwire.ChannelUpdate,
 // GetAdditionalEdgePolicy uses the public key and channel ID to query the
 // ephemeral channel edge policy for additional edges. Returns a nil if nothing
 // found.
-func (p *paymentSession) GetAdditionalEdgePolicy(pubKey *btcec.PublicKey,
+func (p *paymentSession) GetAdditionalEdgePolicy(pubKey *bronec.PublicKey,
 	channelID uint64) *channeldb.CachedEdgePolicy {
 
 	target := route.NewVertex(pubKey)

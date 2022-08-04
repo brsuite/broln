@@ -10,16 +10,6 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/brsuite/brond/blockchain"
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/brsuite/bronutil/psbt"
-	"github.com/brsuite/bronutil/txsort"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
@@ -28,6 +18,16 @@ import (
 	"github.com/brsuite/broln/lnwallet/chanvalidate"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/shachain"
+	"github.com/brsuite/brond/blockchain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/brsuite/bronutil/psbt"
+	"github.com/brsuite/bronutil/txsort"
+	"github.com/davecgh/go-spew/spew"
 )
 
 const (
@@ -99,7 +99,7 @@ type InitFundingReserveMsg struct {
 
 	// NodeID is the ID of the remote node we would like to open a channel
 	// with.
-	NodeID *btcec.PublicKey
+	NodeID *bronec.PublicKey
 
 	// NodeAddr is the address port that we used to either establish or
 	// accept the connection which led to the negotiation of this funding
@@ -121,7 +121,7 @@ type InitFundingReserveMsg struct {
 	// to this channel.
 	RemoteFundingAmt bronutil.Amount
 
-	// CommitFeePerKw is the starting accepted satoshis/Kw fee for the set
+	// CommitFeePerKw is the starting accepted broneess/Kw fee for the set
 	// of initial commitment transactions. In order to ensure timely
 	// confirmation, it is recommended that this fee should be generous,
 	// paying some multiple of the accepted base fee rate of the network.
@@ -131,9 +131,9 @@ type InitFundingReserveMsg struct {
 	// funding transaction.
 	FundingFeePerKw chainfee.SatPerKWeight
 
-	// PushMSat is the number of milli-satoshis that should be pushed over
+	// PushMSat is the number of milli-broneess that should be pushed over
 	// the responder as part of the initial channel creation.
-	PushMSat lnwire.MilliSatoshi
+	PushMSat lnwire.MilliBronees
 
 	// Flags are the channel flags specified by the initiator in the
 	// open_channel message.
@@ -1121,7 +1121,7 @@ func (l *LightningWallet) CheckReservedValueTx(req CheckReservedValueTxReq) (
 // channel.
 func (l *LightningWallet) initOurContribution(reservation *ChannelReservation,
 	fundingIntent chanfunding.Intent, nodeAddr net.Addr,
-	nodeID *btcec.PublicKey, keyRing keychain.KeyRing) error {
+	nodeID *bronec.PublicKey, keyRing keychain.KeyRing) error {
 
 	// Grab the mutex on the ChannelReservation to ensure thread-safety
 	reservation.Lock()
@@ -1256,7 +1256,7 @@ func (l *LightningWallet) handleFundingCancelRequest(req *fundingReserveCancelMs
 // version of the commitment transaction.
 func CreateCommitmentTxns(localBalance, remoteBalance bronutil.Amount,
 	ourChanCfg, theirChanCfg *channeldb.ChannelConfig,
-	localCommitPoint, remoteCommitPoint *btcec.PublicKey,
+	localCommitPoint, remoteCommitPoint *bronec.PublicKey,
 	fundingTxIn wire.TxIn, chanType channeldb.ChannelType, initiator bool,
 	leaseExpiry uint32) (*wire.MsgTx, *wire.MsgTx, error) {
 
@@ -1533,8 +1533,8 @@ func (l *LightningWallet) handleChanPointReady(req *continueContributionMsg) {
 	}
 
 	// With the funding tx complete, create both commitment transactions.
-	localBalance := pendingReservation.partialState.LocalCommitment.LocalBalance.ToSatoshis()
-	remoteBalance := pendingReservation.partialState.LocalCommitment.RemoteBalance.ToSatoshis()
+	localBalance := pendingReservation.partialState.LocalCommitment.LocalBalance.ToBroneess()
+	remoteBalance := pendingReservation.partialState.LocalCommitment.RemoteBalance.ToBroneess()
 	var leaseExpiry uint32
 	if pendingReservation.partialState.ChanType.HasLeaseExpiration() {
 		leaseExpiry = pendingReservation.partialState.ThawHeight
@@ -1910,8 +1910,8 @@ func (l *LightningWallet) handleSingleFunderSigs(req *addSingleFunderSigsMsg) {
 	// Now that we have the funding outpoint, we can generate both versions
 	// of the commitment transaction, and generate a signature for the
 	// remote node's commitment transactions.
-	localBalance := pendingReservation.partialState.LocalCommitment.LocalBalance.ToSatoshis()
-	remoteBalance := pendingReservation.partialState.LocalCommitment.RemoteBalance.ToSatoshis()
+	localBalance := pendingReservation.partialState.LocalCommitment.LocalBalance.ToBroneess()
+	remoteBalance := pendingReservation.partialState.LocalCommitment.RemoteBalance.ToBroneess()
 	var leaseExpiry uint32
 	if pendingReservation.partialState.ChanType.HasLeaseExpiration() {
 		leaseExpiry = pendingReservation.partialState.ThawHeight
@@ -2080,7 +2080,7 @@ func (l *LightningWallet) WithCoinSelectLock(f func() error) error {
 //     * where both keys are the multi-sig keys of the respective parties
 //
 // The first 6 bytes of the resulting hash are used as the state hint.
-func DeriveStateHintObfuscator(key1, key2 *btcec.PublicKey) [StateHintSize]byte {
+func DeriveStateHintObfuscator(key1, key2 *bronec.PublicKey) [StateHintSize]byte {
 	h := sha256.New()
 	h.Write(key1.SerializeCompressed())
 	h.Write(key2.SerializeCompressed())

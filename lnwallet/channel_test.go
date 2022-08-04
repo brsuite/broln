@@ -11,24 +11,24 @@ import (
 	"testing"
 	"testing/quick"
 
-	"github.com/brsuite/brond/blockchain"
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/blockchain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
 )
 
 // createHTLC is a utility function for generating an HTLC with a given
 // preimage and a given amount.
-func createHTLC(id int, amount lnwire.MilliSatoshi) (*lnwire.UpdateAddHTLC, [32]byte) {
+func createHTLC(id int, amount lnwire.MilliBronees) (*lnwire.UpdateAddHTLC, [32]byte) {
 	preimage := bytes.Repeat([]byte{byte(id)}, 32)
 	paymentHash := sha256.Sum256(preimage)
 
@@ -60,8 +60,8 @@ func assertOutputExistsByValue(t *testing.T, commitTx *wire.MsgTx,
 // add, the settle an HTLC between themselves.
 func testAddSettleWorkflow(t *testing.T, tweakless bool) {
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	chanType := channeldb.SingleFunderTweaklessBit
 	if !tweakless {
 		chanType = channeldb.SingleFunderBit
@@ -75,7 +75,7 @@ func testAddSettleWorkflow(t *testing.T, tweakless bool) {
 
 	paymentPreimage := bytes.Repeat([]byte{1}, 32)
 	paymentHash := sha256.Sum256(paymentPreimage)
-	htlcAmt := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
+	htlcAmt := lnwire.NewMSatFromBroneess(bronutil.BroneesPerBrocoin)
 	htlc := &lnwire.UpdateAddHTLC{
 		PaymentHash: paymentHash,
 		Amount:      htlcAmt,
@@ -175,26 +175,26 @@ func testAddSettleWorkflow(t *testing.T, tweakless bool) {
 			"should forward none", len(fwdPkg.SettleFails))
 	}
 
-	// At this point, both sides should have the proper number of satoshis
+	// At this point, both sides should have the proper number of broneess
 	// sent, and commitment height updated within their local channel
 	// state.
-	aliceSent := lnwire.MilliSatoshi(0)
-	bobSent := lnwire.MilliSatoshi(0)
+	aliceSent := lnwire.MilliBronees(0)
+	bobSent := lnwire.MilliBronees(0)
 
 	if aliceChannel.channelState.TotalMSatSent != aliceSent {
-		t.Fatalf("alice has incorrect milli-satoshis sent: %v vs %v",
+		t.Fatalf("alice has incorrect milli-broneess sent: %v vs %v",
 			aliceChannel.channelState.TotalMSatSent, aliceSent)
 	}
 	if aliceChannel.channelState.TotalMSatReceived != bobSent {
-		t.Fatalf("alice has incorrect milli-satoshis received %v vs %v",
+		t.Fatalf("alice has incorrect milli-broneess received %v vs %v",
 			aliceChannel.channelState.TotalMSatReceived, bobSent)
 	}
 	if bobChannel.channelState.TotalMSatSent != bobSent {
-		t.Fatalf("bob has incorrect milli-satoshis sent %v vs %v",
+		t.Fatalf("bob has incorrect milli-broneess sent %v vs %v",
 			bobChannel.channelState.TotalMSatSent, bobSent)
 	}
 	if bobChannel.channelState.TotalMSatReceived != aliceSent {
-		t.Fatalf("bob has incorrect milli-satoshis received %v vs %v",
+		t.Fatalf("bob has incorrect milli-broneess received %v vs %v",
 			bobChannel.channelState.TotalMSatReceived, aliceSent)
 	}
 	if bobChannel.currentHeight != 1 {
@@ -220,10 +220,10 @@ func testAddSettleWorkflow(t *testing.T, tweakless bool) {
 	}
 	assertOutputExistsByValue(t,
 		aliceChannel.channelState.LocalCommitment.CommitTx,
-		htlcAmt.ToSatoshis())
+		htlcAmt.ToBroneess())
 	assertOutputExistsByValue(t,
 		bobChannel.channelState.LocalCommitment.CommitTx,
-		htlcAmt.ToSatoshis())
+		htlcAmt.ToBroneess())
 
 	// Now we'll repeat a similar exchange, this time with Bob settling the
 	// HTLC once he learns of the preimage.
@@ -295,27 +295,27 @@ func testAddSettleWorkflow(t *testing.T, tweakless bool) {
 			"instead forwarding: %v", len(fwdPkg.SettleFails))
 	}
 
-	// At this point, Bob should have 6 BTC settled, with Alice still
-	// having 4 BTC. Alice's channel should show 1 BTC sent and Bob's
-	// channel should show 1 BTC received. They should also be at
+	// At this point, Bob should have 6 BRON settled, with Alice still
+	// having 4 BRON. Alice's channel should show 1 BRON sent and Bob's
+	// channel should show 1 BRON received. They should also be at
 	// commitment height two, with the revocation window extended by 1 (5).
-	mSatTransferred := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
+	mSatTransferred := lnwire.NewMSatFromBroneess(bronutil.BroneesPerBrocoin)
 	if aliceChannel.channelState.TotalMSatSent != mSatTransferred {
-		t.Fatalf("alice satoshis sent incorrect %v vs %v expected",
+		t.Fatalf("alice broneess sent incorrect %v vs %v expected",
 			aliceChannel.channelState.TotalMSatSent,
 			mSatTransferred)
 	}
 	if aliceChannel.channelState.TotalMSatReceived != 0 {
-		t.Fatalf("alice satoshis received incorrect %v vs %v expected",
+		t.Fatalf("alice broneess received incorrect %v vs %v expected",
 			aliceChannel.channelState.TotalMSatReceived, 0)
 	}
 	if bobChannel.channelState.TotalMSatReceived != mSatTransferred {
-		t.Fatalf("bob satoshis received incorrect %v vs %v expected",
+		t.Fatalf("bob broneess received incorrect %v vs %v expected",
 			bobChannel.channelState.TotalMSatReceived,
 			mSatTransferred)
 	}
 	if bobChannel.channelState.TotalMSatSent != 0 {
-		t.Fatalf("bob satoshis sent incorrect %v vs %v expected",
+		t.Fatalf("bob broneess sent incorrect %v vs %v expected",
 			bobChannel.channelState.TotalMSatSent, 0)
 	}
 	if bobChannel.currentHeight != 2 {
@@ -400,7 +400,7 @@ func TestChannelZeroAddLocalHeight(t *testing.T) {
 	defer cleanUp()
 
 	// First we create an HTLC that Alice sends to Bob.
-	htlc, _ := createHTLC(0, lnwire.MilliSatoshi(500000))
+	htlc, _ := createHTLC(0, lnwire.MilliBronees(500000))
 
 	// -----add----->
 	_, err = aliceChannel.AddHTLC(htlc, nil)
@@ -449,7 +449,7 @@ func TestChannelZeroAddLocalHeight(t *testing.T) {
 	require.NoError(t, err)
 
 	// Bob now sends an htlc to Alice
-	htlc2, _ := createHTLC(0, lnwire.MilliSatoshi(500000))
+	htlc2, _ := createHTLC(0, lnwire.MilliBronees(500000))
 
 	// <----add-----
 	_, err = bobChannel.AddHTLC(htlc2, nil)
@@ -495,8 +495,8 @@ func TestCheckCommitTxSize(t *testing.T) {
 	}
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -513,7 +513,7 @@ func TestCheckCommitTxSize(t *testing.T) {
 	// Adding HTLCs and check that size stays in allowable estimation
 	// error window.
 	for i := 0; i <= 10; i++ {
-		htlc, _ := createHTLC(i, lnwire.MilliSatoshi(1e7))
+		htlc, _ := createHTLC(i, lnwire.MilliBronees(1e7))
 
 		if _, err := aliceChannel.AddHTLC(htlc, nil); err != nil {
 			t.Fatalf("alice unable to add htlc: %v", err)
@@ -532,7 +532,7 @@ func TestCheckCommitTxSize(t *testing.T) {
 	// Settle HTLCs and check that estimation is counting cost of settle
 	// HTLCs properly.
 	for i := 10; i >= 0; i-- {
-		_, preimage := createHTLC(i, lnwire.MilliSatoshi(1e7))
+		_, preimage := createHTLC(i, lnwire.MilliBronees(1e7))
 
 		err := bobChannel.SettleHTLC(preimage, uint64(i), nil, nil, nil)
 		if err != nil {
@@ -576,7 +576,7 @@ func testCommitHTLCSigTieBreak(t *testing.T, restart bool) {
 	defer cleanUp()
 
 	const (
-		htlcAmt  = lnwire.MilliSatoshi(20000000)
+		htlcAmt  = lnwire.MilliBronees(20000000)
 		numHtlcs = 2
 	)
 
@@ -712,8 +712,8 @@ func testCoopClose(t *testing.T, testCase *coopCloseTestCase) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		testCase.chanType,
 	)
@@ -778,7 +778,7 @@ func testCoopClose(t *testing.T, testCase *coopCloseTestCase) {
 	// Finally, make sure the final balances are correct from both's
 	// perspective.
 	aliceBalance := aliceChannel.channelState.LocalCommitment.
-		LocalBalance.ToSatoshis()
+		LocalBalance.ToBroneess()
 
 	// The commit balance have had the initiator's (Alice) commitfee and
 	// any anchors subtracted, so add that back to the final expected
@@ -795,7 +795,7 @@ func testCoopClose(t *testing.T, testCase *coopCloseTestCase) {
 	// Bob is not the initiator, so his final balance should simply be
 	// equal to the latest commitment balance.
 	expBalanceBob := bobChannel.channelState.LocalCommitment.
-		LocalBalance.ToSatoshis()
+		LocalBalance.ToBroneess()
 	if bobTxBalance != expBalanceBob {
 		t.Fatalf("expected bob's balance to be %v got %v",
 			expBalanceBob, bobTxBalance)
@@ -834,8 +834,8 @@ func testForceClose(t *testing.T, testCase *forceCloseTestCase) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		testCase.chanType,
 	)
@@ -849,7 +849,7 @@ func testForceClose(t *testing.T, testCase *forceCloseTestCase) {
 	// First, we'll add an outgoing HTLC from Alice to Bob, such that it
 	// will still be present within the broadcast commitment transaction.
 	// We'll ensure that the HTLC amount is above Alice's dust limit.
-	htlcAmount := lnwire.NewMSatFromSatoshis(20000)
+	htlcAmount := lnwire.NewMSatFromBroneess(20000)
 	htlcAlice, _ := createHTLC(0, htlcAmount)
 	if _, err := aliceChannel.AddHTLC(htlcAlice, nil); err != nil {
 		t.Fatalf("alice unable to add htlc: %v", err)
@@ -960,7 +960,7 @@ func testForceClose(t *testing.T, testCase *forceCloseTestCase) {
 	commitFee := feePerKw.FeeForWeight(totalCommitWeight)
 
 	expectedAmount := (aliceChannel.Capacity / 2) -
-		htlcAmount.ToSatoshis() - commitFee - testCase.anchorAmt
+		htlcAmount.ToBroneess() - commitFee - testCase.anchorAmt
 
 	if aliceCommitResolution.SelfOutputSignDesc.Output.Value != int64(expectedAmount) {
 		t.Fatalf("alice incorrect output value in SelfOutputSignDesc, "+
@@ -992,7 +992,7 @@ func testForceClose(t *testing.T, testCase *forceCloseTestCase) {
 	timeoutTx := htlcResolution.SignedTimeoutTx
 	vm, err := txscript.NewEngine(senderHtlcPkScript,
 		timeoutTx, 0, txscript.StandardVerifyFlags, nil,
-		nil, int64(htlcAmount.ToSatoshis()))
+		nil, int64(htlcAmount.ToBroneess()))
 	if err != nil {
 		t.Fatalf("unable to create engine: %v", err)
 	}
@@ -1059,7 +1059,7 @@ func testForceClose(t *testing.T, testCase *forceCloseTestCase) {
 	successTx.TxIn[0].Witness[3] = preimageBob[:]
 	vm, err = txscript.NewEngine(receiverHtlcScript,
 		successTx, 0, txscript.StandardVerifyFlags, nil,
-		nil, int64(htlcAmount.ToSatoshis()))
+		nil, int64(htlcAmount.ToBroneess()))
 	if err != nil {
 		t.Fatalf("unable to create engine: %v", err)
 	}
@@ -1113,11 +1113,11 @@ func testForceClose(t *testing.T, testCase *forceCloseTestCase) {
 		t.Fatalf("bob incorrect pubkey in SelfOutputSignDesc")
 	}
 	if bobCommitResolution.SelfOutputSignDesc.Output.Value !=
-		int64(bobAmount.ToSatoshis()-htlcAmount.ToSatoshis()) {
+		int64(bobAmount.ToBroneess()-htlcAmount.ToBroneess()) {
 
 		t.Fatalf("bob incorrect output value in SelfOutputSignDesc, "+
 			"expected %v, got %v",
-			bobAmount.ToSatoshis(),
+			bobAmount.ToBroneess(),
 			int64(bobCommitResolution.SelfOutputSignDesc.Output.Value))
 	}
 	if bobCommitResolution.MaturityDelay !=
@@ -1161,8 +1161,8 @@ func TestForceCloseDustOutput(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -1179,7 +1179,7 @@ func TestForceCloseDustOutput(t *testing.T) {
 	aliceChannel.channelState.RemoteChanCfg.ChanReserve = 0
 	bobChannel.channelState.RemoteChanCfg.ChanReserve = 0
 
-	htlcAmount := lnwire.NewMSatFromSatoshis(500)
+	htlcAmount := lnwire.NewMSatFromBroneess(500)
 
 	aliceAmount := aliceChannel.channelState.LocalCommitment.LocalBalance
 	bobAmount := bobChannel.channelState.LocalCommitment.LocalBalance
@@ -1233,10 +1233,10 @@ func TestForceCloseDustOutput(t *testing.T) {
 		t.Fatalf("alice incorrect pubkey in SelfOutputSignDesc")
 	}
 	if commitResolution.SelfOutputSignDesc.Output.Value !=
-		int64(aliceAmount.ToSatoshis()) {
+		int64(aliceAmount.ToBroneess()) {
 		t.Fatalf("alice incorrect output value in SelfOutputSignDesc, "+
 			"expected %v, got %v",
-			aliceChannel.channelState.LocalCommitment.LocalBalance.ToSatoshis(),
+			aliceChannel.channelState.LocalCommitment.LocalBalance.ToBroneess(),
 			commitResolution.SelfOutputSignDesc.Output.Value)
 	}
 
@@ -1281,8 +1281,8 @@ func TestDustHTLCFees(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -1294,7 +1294,7 @@ func TestDustHTLCFees(t *testing.T) {
 	aliceStartingBalance := aliceChannel.channelState.LocalCommitment.LocalBalance
 
 	// This HTLC amount should be lower than the dust limits of both nodes.
-	htlcAmount := lnwire.NewMSatFromSatoshis(100)
+	htlcAmount := lnwire.NewMSatFromBroneess(100)
 	htlc, _ := createHTLC(0, htlcAmount)
 	if _, err := aliceChannel.AddHTLC(htlc, nil); err != nil {
 		t.Fatalf("alice unable to add htlc: %v", err)
@@ -1310,20 +1310,20 @@ func TestDustHTLCFees(t *testing.T) {
 	// properly. Namely, the local+remote+commitfee values should add up to
 	// the total capacity of the channel. This same should hold for both
 	// sides.
-	totalSatoshisAlice := (aliceChannel.channelState.LocalCommitment.LocalBalance +
+	totalBroneessAlice := (aliceChannel.channelState.LocalCommitment.LocalBalance +
 		aliceChannel.channelState.LocalCommitment.RemoteBalance +
-		lnwire.NewMSatFromSatoshis(aliceChannel.channelState.LocalCommitment.CommitFee))
-	if totalSatoshisAlice+htlcAmount != lnwire.NewMSatFromSatoshis(aliceChannel.Capacity) {
-		t.Fatalf("alice's funds leaked: total satoshis are %v, but channel "+
-			"capacity is %v", int64(totalSatoshisAlice),
+		lnwire.NewMSatFromBroneess(aliceChannel.channelState.LocalCommitment.CommitFee))
+	if totalBroneessAlice+htlcAmount != lnwire.NewMSatFromBroneess(aliceChannel.Capacity) {
+		t.Fatalf("alice's funds leaked: total broneess are %v, but channel "+
+			"capacity is %v", int64(totalBroneessAlice),
 			int64(aliceChannel.Capacity))
 	}
-	totalSatoshisBob := (bobChannel.channelState.LocalCommitment.LocalBalance +
+	totalBroneessBob := (bobChannel.channelState.LocalCommitment.LocalBalance +
 		bobChannel.channelState.LocalCommitment.RemoteBalance +
-		lnwire.NewMSatFromSatoshis(bobChannel.channelState.LocalCommitment.CommitFee))
-	if totalSatoshisBob+htlcAmount != lnwire.NewMSatFromSatoshis(bobChannel.Capacity) {
-		t.Fatalf("bob's funds leaked: total satoshis are %v, but channel "+
-			"capacity is %v", int64(totalSatoshisBob),
+		lnwire.NewMSatFromBroneess(bobChannel.channelState.LocalCommitment.CommitFee))
+	if totalBroneessBob+htlcAmount != lnwire.NewMSatFromBroneess(bobChannel.Capacity) {
+		t.Fatalf("bob's funds leaked: total broneess are %v, but channel "+
+			"capacity is %v", int64(totalBroneessBob),
 			int64(bobChannel.Capacity))
 	}
 
@@ -1360,8 +1360,8 @@ func TestHTLCDustLimit(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -1378,7 +1378,7 @@ func TestHTLCDustLimit(t *testing.T) {
 			aliceChannel.channelState.LocalCommitment.FeePerKw,
 		),
 	))
-	htlcAmount := lnwire.NewMSatFromSatoshis(htlcSat)
+	htlcAmount := lnwire.NewMSatFromBroneess(htlcSat)
 
 	htlc, preimage := createHTLC(0, htlcAmount)
 	aliceHtlcIndex, err := aliceChannel.AddHTLC(htlc, nil)
@@ -1428,14 +1428,14 @@ func TestHTLCDustLimit(t *testing.T) {
 	}
 
 	// At this point, for Alice's commitment chains, the value of the HTLC
-	// should have been added to Alice's balance and TotalSatoshisSent.
+	// should have been added to Alice's balance and TotalBroneessSent.
 	commitment := aliceChannel.localCommitChain.tip()
 	if len(commitment.txn.TxOut) != 2 {
 		t.Fatalf("incorrect # of outputs: expected %v, got %v",
 			2, len(commitment.txn.TxOut))
 	}
 	if aliceChannel.channelState.TotalMSatSent != htlcAmount {
-		t.Fatalf("alice satoshis sent incorrect: expected %v, got %v",
+		t.Fatalf("alice broneess sent incorrect: expected %v, got %v",
 			htlcAmount, aliceChannel.channelState.TotalMSatSent)
 	}
 }
@@ -1450,8 +1450,8 @@ func TestHTLCSigNumber(t *testing.T) {
 	createChanWithHTLC := func(htlcValues ...bronutil.Amount) (
 		*LightningChannel, *LightningChannel, func()) {
 
-		// Create a test channel funded evenly with Alice having 5 BTC,
-		// and Bob having 5 BTC. Alice's dustlimit is 200 sat, while
+		// Create a test channel funded evenly with Alice having 5 BRON,
+		// and Bob having 5 BRON. Alice's dustlimit is 200 sat, while
 		// Bob has 1300 sat.
 		aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 			channeldb.SingleFunderTweaklessBit,
@@ -1461,7 +1461,7 @@ func TestHTLCSigNumber(t *testing.T) {
 		}
 
 		for i, htlcSat := range htlcValues {
-			htlcMsat := lnwire.NewMSatFromSatoshis(htlcSat)
+			htlcMsat := lnwire.NewMSatFromBroneess(htlcSat)
 			htlc, _ := createHTLC(i, htlcMsat)
 			_, err := aliceChannel.AddHTLC(htlc, nil)
 			if err != nil {
@@ -1627,8 +1627,8 @@ func TestChannelBalanceDustLimit(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -1646,7 +1646,7 @@ func TestChannelBalanceDustLimit(t *testing.T) {
 	// once fees have been subtracted, but smaller than Bob's dust limit.
 	// We account in fees for the HTLC we will be adding.
 	defaultFee := calcStaticFee(channeldb.SingleFunderTweaklessBit, 1)
-	aliceBalance := aliceChannel.channelState.LocalCommitment.LocalBalance.ToSatoshis()
+	aliceBalance := aliceChannel.channelState.LocalCommitment.LocalBalance.ToBroneess()
 	htlcSat := aliceBalance - defaultFee
 	htlcSat += HtlcSuccessFee(
 		aliceChannel.channelState.ChanType,
@@ -1655,7 +1655,7 @@ func TestChannelBalanceDustLimit(t *testing.T) {
 		),
 	)
 
-	htlcAmount := lnwire.NewMSatFromSatoshis(htlcSat)
+	htlcAmount := lnwire.NewMSatFromBroneess(htlcSat)
 
 	htlc, preimage := createHTLC(0, htlcAmount)
 	aliceHtlcIndex, err := aliceChannel.AddHTLC(htlc, nil)
@@ -1691,7 +1691,7 @@ func TestChannelBalanceDustLimit(t *testing.T) {
 			1, len(commitment.txn.TxOut))
 	}
 	if aliceChannel.channelState.TotalMSatSent != htlcAmount {
-		t.Fatalf("alice satoshis sent incorrect: expected %v, got %v",
+		t.Fatalf("alice broneess sent incorrect: expected %v, got %v",
 			htlcAmount, aliceChannel.channelState.TotalMSatSent)
 	}
 }
@@ -1700,8 +1700,8 @@ func TestStateUpdatePersistence(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -1710,7 +1710,7 @@ func TestStateUpdatePersistence(t *testing.T) {
 	}
 	defer cleanUp()
 
-	htlcAmt := lnwire.NewMSatFromSatoshis(5000)
+	htlcAmt := lnwire.NewMSatFromBroneess(5000)
 
 	var fakeOnionBlob [lnwire.OnionPacketSize]byte
 	copy(fakeOnionBlob[:], bytes.Repeat([]byte{0x05}, lnwire.OnionPacketSize))
@@ -2003,19 +2003,19 @@ func TestStateUpdatePersistence(t *testing.T) {
 	// The amounts transferred should been updated as per the amounts in
 	// the HTLCs
 	if aliceChannelNew.channelState.TotalMSatSent != htlcAmt*3 {
-		t.Fatalf("expected %v alice satoshis sent, got %v",
+		t.Fatalf("expected %v alice broneess sent, got %v",
 			htlcAmt*3, aliceChannelNew.channelState.TotalMSatSent)
 	}
 	if aliceChannelNew.channelState.TotalMSatReceived != htlcAmt {
-		t.Fatalf("expected %v alice satoshis received, got %v",
+		t.Fatalf("expected %v alice broneess received, got %v",
 			htlcAmt, aliceChannelNew.channelState.TotalMSatReceived)
 	}
 	if bobChannelNew.channelState.TotalMSatSent != htlcAmt {
-		t.Fatalf("expected %v bob satoshis sent, got %v",
+		t.Fatalf("expected %v bob broneess sent, got %v",
 			htlcAmt, bobChannel.channelState.TotalMSatSent)
 	}
 	if bobChannelNew.channelState.TotalMSatReceived != htlcAmt*3 {
-		t.Fatalf("expected %v bob satoshis sent, got %v",
+		t.Fatalf("expected %v bob broneess sent, got %v",
 			htlcAmt*3, bobChannel.channelState.TotalMSatReceived)
 	}
 
@@ -2043,8 +2043,8 @@ func TestCancelHTLC(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -2055,7 +2055,7 @@ func TestCancelHTLC(t *testing.T) {
 
 	// Add a new HTLC from Alice to Bob, then trigger a new state
 	// transition in order to include it in the latest state.
-	htlcAmt := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
+	htlcAmt := lnwire.NewMSatFromBroneess(bronutil.BroneesPerBrocoin)
 
 	var preImage [32]byte
 	copy(preImage[:], bytes.Repeat([]byte{0xaa}, 32))
@@ -2079,13 +2079,13 @@ func TestCancelHTLC(t *testing.T) {
 
 	// With the HTLC committed, Alice's balance should reflect the clearing
 	// of the new HTLC.
-	aliceExpectedBalance := bronutil.Amount(bronutil.SatoshiPerBrocoin*4) -
+	aliceExpectedBalance := bronutil.Amount(bronutil.BroneesPerBrocoin*4) -
 		calcStaticFee(channeldb.SingleFunderTweaklessBit, 1)
-	if aliceChannel.channelState.LocalCommitment.LocalBalance.ToSatoshis() !=
+	if aliceChannel.channelState.LocalCommitment.LocalBalance.ToBroneess() !=
 		aliceExpectedBalance {
 		t.Fatalf("Alice's balance is wrong: expected %v, got %v",
 			aliceExpectedBalance,
-			aliceChannel.channelState.LocalCommitment.LocalBalance.ToSatoshis())
+			aliceChannel.channelState.LocalCommitment.LocalBalance.ToBroneess())
 	}
 
 	// Now, with the HTLC committed on both sides, trigger a cancellation
@@ -2124,34 +2124,34 @@ func TestCancelHTLC(t *testing.T) {
 		t.Fatalf("htlc's still active from bob's POV")
 	}
 
-	expectedBalance := bronutil.Amount(bronutil.SatoshiPerBrocoin * 5)
+	expectedBalance := bronutil.Amount(bronutil.BroneesPerBrocoin * 5)
 	staticFee := calcStaticFee(channeldb.SingleFunderTweaklessBit, 0)
-	if aliceChannel.channelState.LocalCommitment.LocalBalance.ToSatoshis() !=
+	if aliceChannel.channelState.LocalCommitment.LocalBalance.ToBroneess() !=
 		expectedBalance-staticFee {
 
 		t.Fatalf("balance is wrong: expected %v, got %v",
-			aliceChannel.channelState.LocalCommitment.LocalBalance.ToSatoshis(),
+			aliceChannel.channelState.LocalCommitment.LocalBalance.ToBroneess(),
 			expectedBalance-staticFee)
 	}
-	if aliceChannel.channelState.LocalCommitment.RemoteBalance.ToSatoshis() !=
+	if aliceChannel.channelState.LocalCommitment.RemoteBalance.ToBroneess() !=
 		expectedBalance {
 
 		t.Fatalf("balance is wrong: expected %v, got %v",
-			aliceChannel.channelState.LocalCommitment.RemoteBalance.ToSatoshis(),
+			aliceChannel.channelState.LocalCommitment.RemoteBalance.ToBroneess(),
 			expectedBalance)
 	}
-	if bobChannel.channelState.LocalCommitment.LocalBalance.ToSatoshis() !=
+	if bobChannel.channelState.LocalCommitment.LocalBalance.ToBroneess() !=
 		expectedBalance {
 
 		t.Fatalf("balance is wrong: expected %v, got %v",
-			bobChannel.channelState.LocalCommitment.LocalBalance.ToSatoshis(),
+			bobChannel.channelState.LocalCommitment.LocalBalance.ToBroneess(),
 			expectedBalance)
 	}
-	if bobChannel.channelState.LocalCommitment.RemoteBalance.ToSatoshis() !=
+	if bobChannel.channelState.LocalCommitment.RemoteBalance.ToBroneess() !=
 		expectedBalance-staticFee {
 
 		t.Fatalf("balance is wrong: expected %v, got %v",
-			bobChannel.channelState.LocalCommitment.RemoteBalance.ToSatoshis(),
+			bobChannel.channelState.LocalCommitment.RemoteBalance.ToBroneess(),
 			expectedBalance-staticFee)
 	}
 }
@@ -2160,8 +2160,8 @@ func TestCooperativeCloseDustAdherence(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -2189,7 +2189,7 @@ func TestCooperativeCloseDustAdherence(t *testing.T) {
 		bobChannel.status = channelOpen
 	}
 
-	setBalances := func(aliceBalance, bobBalance lnwire.MilliSatoshi) {
+	setBalances := func(aliceBalance, bobBalance lnwire.MilliBronees) {
 		aliceChannel.channelState.LocalCommitment.LocalBalance = aliceBalance
 		aliceChannel.channelState.LocalCommitment.RemoteBalance = bobBalance
 		bobChannel.channelState.LocalCommitment.LocalBalance = bobBalance
@@ -2200,11 +2200,11 @@ func TestCooperativeCloseDustAdherence(t *testing.T) {
 	bobDeliveryScript := testHdSeed[:]
 
 	// We'll start be initializing the limit of both Alice and Bob to 10k
-	// satoshis.
+	// broneess.
 	dustLimit := bronutil.Amount(10000)
 	setDustLimit(dustLimit)
 
-	// Both sides currently have over 1 BTC settled as part of their
+	// Both sides currently have over 1 BRON settled as part of their
 	// balances. As a result, performing a cooperative closure now result
 	// in both sides having an output within the closure transaction.
 	aliceFee := bronutil.Amount(aliceChannel.CalcFee(aliceFeeRate)) + 1000
@@ -2242,8 +2242,8 @@ func TestCooperativeCloseDustAdherence(t *testing.T) {
 
 	// Next we'll modify the current balances and dust limits such that
 	// Bob's current balance is _below_ his dust limit.
-	aliceBal := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
-	bobBal := lnwire.NewMSatFromSatoshis(250)
+	aliceBal := lnwire.NewMSatFromBroneess(bronutil.BroneesPerBrocoin)
+	bobBal := lnwire.NewMSatFromBroneess(250)
 	setBalances(aliceBal, bobBal)
 
 	// Attempt another cooperative channel closure. It should succeed
@@ -2277,7 +2277,7 @@ func TestCooperativeCloseDustAdherence(t *testing.T) {
 			"got %v", 1, len(closeTx.TxOut))
 	}
 	commitFee := aliceChannel.channelState.LocalCommitment.CommitFee
-	aliceExpectedBalance := aliceBal.ToSatoshis() - aliceFee + commitFee
+	aliceExpectedBalance := aliceBal.ToBroneess() - aliceFee + commitFee
 	if closeTx.TxOut[0].Value != int64(aliceExpectedBalance) {
 		t.Fatalf("alice's balance is incorrect: expected %v, got %v",
 			aliceExpectedBalance,
@@ -2300,7 +2300,7 @@ func TestCooperativeCloseDustAdherence(t *testing.T) {
 
 	// Finally, we'll modify the current balances and dust limits such that
 	// Alice's balance after paying the coop fee is _below_ her dust limit.
-	lowBalance := lnwire.NewMSatFromSatoshis(aliceFee) + 1000
+	lowBalance := lnwire.NewMSatFromBroneess(aliceFee) + 1000
 	setBalances(lowBalance, aliceBal)
 	resetChannelState()
 
@@ -2334,9 +2334,9 @@ func TestCooperativeCloseDustAdherence(t *testing.T) {
 		t.Fatalf("close tx has wrong number of outputs: expected %v "+
 			"got %v", 1, len(closeTx.TxOut))
 	}
-	if closeTx.TxOut[0].Value != int64(aliceBal.ToSatoshis()) {
+	if closeTx.TxOut[0].Value != int64(aliceBal.ToBroneess()) {
 		t.Fatalf("bob's balance is incorrect: expected %v, got %v",
-			aliceBal.ToSatoshis(), closeTx.TxOut[0].Value)
+			aliceBal.ToBroneess(), closeTx.TxOut[0].Value)
 	}
 }
 
@@ -2450,7 +2450,7 @@ func TestUpdateFeeConcurrentSig(t *testing.T) {
 	paymentHash := sha256.Sum256(paymentPreimage)
 	htlc := &lnwire.UpdateAddHTLC{
 		PaymentHash: paymentHash,
-		Amount:      bronutil.SatoshiPerBrocoin,
+		Amount:      bronutil.BroneesPerBrocoin,
 		Expiry:      uint32(5),
 	}
 
@@ -2524,8 +2524,8 @@ func TestUpdateFeeSenderCommits(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -2538,7 +2538,7 @@ func TestUpdateFeeSenderCommits(t *testing.T) {
 	paymentHash := sha256.Sum256(paymentPreimage)
 	htlc := &lnwire.UpdateAddHTLC{
 		PaymentHash: paymentHash,
-		Amount:      bronutil.SatoshiPerBrocoin,
+		Amount:      bronutil.BroneesPerBrocoin,
 		Expiry:      uint32(5),
 	}
 
@@ -2648,8 +2648,8 @@ func TestUpdateFeeReceiverCommits(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -2662,7 +2662,7 @@ func TestUpdateFeeReceiverCommits(t *testing.T) {
 	paymentHash := sha256.Sum256(paymentPreimage)
 	htlc := &lnwire.UpdateAddHTLC{
 		PaymentHash: paymentHash,
-		Amount:      bronutil.SatoshiPerBrocoin,
+		Amount:      bronutil.BroneesPerBrocoin,
 		Expiry:      uint32(5),
 	}
 
@@ -2799,8 +2799,8 @@ func TestUpdateFeeReceiverSendsUpdate(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -2830,8 +2830,8 @@ func TestUpdateFeeMultipleUpdates(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -2953,7 +2953,7 @@ func TestAddHTLCNegativeBalance(t *testing.T) {
 	t.Parallel()
 
 	// We'll kick off the test by creating our channels which both are
-	// loaded with 5 BTC each.
+	// loaded with 5 BRON each.
 	aliceChannel, _, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -2966,9 +2966,9 @@ func TestAddHTLCNegativeBalance(t *testing.T) {
 	// way to a negative balance.
 	aliceChannel.channelState.LocalChanCfg.ChanReserve = 0
 
-	// First, we'll add 3 HTLCs of 1 BTC each to Alice's commitment.
+	// First, we'll add 3 HTLCs of 1 BRON each to Alice's commitment.
 	const numHTLCs = 3
-	htlcAmt := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
+	htlcAmt := lnwire.NewMSatFromBroneess(bronutil.BroneesPerBrocoin)
 	for i := 0; i < numHTLCs; i++ {
 		htlc, _ := createHTLC(i, htlcAmt)
 		if _, err := aliceChannel.AddHTLC(htlc, nil); err != nil {
@@ -2976,10 +2976,10 @@ func TestAddHTLCNegativeBalance(t *testing.T) {
 		}
 	}
 
-	// Alice now has an available balance of 2 BTC. We'll add a new HTLC of
-	// value 2 BTC, which should make Alice's balance negative (since she
+	// Alice now has an available balance of 2 BRON. We'll add a new HTLC of
+	// value 2 BRON, which should make Alice's balance negative (since she
 	// has to pay a commitment fee).
-	htlcAmt = lnwire.NewMSatFromSatoshis(2 * bronutil.SatoshiPerBrocoin)
+	htlcAmt = lnwire.NewMSatFromBroneess(2 * bronutil.BroneesPerBrocoin)
 	htlc, _ := createHTLC(numHTLCs+1, htlcAmt)
 	_, err = aliceChannel.AddHTLC(htlc, nil)
 	if err != ErrBelowChanReserve {
@@ -3035,8 +3035,8 @@ func TestChanSyncFullySynced(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -3053,7 +3053,7 @@ func TestChanSyncFullySynced(t *testing.T) {
 	var paymentPreimage [32]byte
 	copy(paymentPreimage[:], bytes.Repeat([]byte{1}, 32))
 	paymentHash := sha256.Sum256(paymentPreimage[:])
-	htlcAmt := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
+	htlcAmt := lnwire.NewMSatFromBroneess(bronutil.BroneesPerBrocoin)
 	htlc := &lnwire.UpdateAddHTLC{
 		PaymentHash: paymentHash,
 		Amount:      htlcAmt,
@@ -3157,8 +3157,8 @@ func TestChanSyncOweCommitment(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -3172,7 +3172,7 @@ func TestChanSyncOweCommitment(t *testing.T) {
 
 	// We'll start off the scenario with Bob sending 3 HTLC's to Alice in a
 	// single state update.
-	htlcAmt := lnwire.NewMSatFromSatoshis(20000)
+	htlcAmt := lnwire.NewMSatFromBroneess(20000)
 	const numBobHtlcs = 3
 	var bobPreimage [32]byte
 	copy(bobPreimage[:], bytes.Repeat([]byte{0xbb}, 32))
@@ -3490,7 +3490,7 @@ func TestChanSyncOweCommitmentPendingRemote(t *testing.T) {
 	var preimages []lntypes.Preimage
 	const numHtlcs = 2
 	for id := byte(0); id < numHtlcs; id++ {
-		htlcAmt := lnwire.NewMSatFromSatoshis(20000)
+		htlcAmt := lnwire.NewMSatFromBroneess(20000)
 		var bobPreimage [32]byte
 		copy(bobPreimage[:], bytes.Repeat([]byte{id}, 32))
 		rHash := sha256.Sum256(bobPreimage[:])
@@ -3597,8 +3597,8 @@ func TestChanSyncOweRevocation(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -3613,7 +3613,7 @@ func TestChanSyncOweRevocation(t *testing.T) {
 
 	// We'll start the test with Bob extending a single HTLC to Alice, and
 	// then initiating a state transition.
-	htlcAmt := lnwire.NewMSatFromSatoshis(20000)
+	htlcAmt := lnwire.NewMSatFromBroneess(20000)
 	var bobPreimage [32]byte
 	copy(bobPreimage[:], bytes.Repeat([]byte{0xaa}, 32))
 	rHash := sha256.Sum256(bobPreimage[:])
@@ -3789,8 +3789,8 @@ func TestChanSyncOweRevocationAndCommit(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -3799,7 +3799,7 @@ func TestChanSyncOweRevocationAndCommit(t *testing.T) {
 	}
 	defer cleanUp()
 
-	htlcAmt := lnwire.NewMSatFromSatoshis(20000)
+	htlcAmt := lnwire.NewMSatFromBroneess(20000)
 
 	// We'll kick off the test by having Bob send Alice an HTLC, then lock
 	// it in with a state transition.
@@ -3960,8 +3960,8 @@ func TestChanSyncOweRevocationAndCommitForceTransition(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -3970,7 +3970,7 @@ func TestChanSyncOweRevocationAndCommitForceTransition(t *testing.T) {
 	}
 	defer cleanUp()
 
-	htlcAmt := lnwire.NewMSatFromSatoshis(20000)
+	htlcAmt := lnwire.NewMSatFromBroneess(20000)
 
 	// We'll kick off the test by having Bob send Alice an HTLC, then lock
 	// it in with a state transition.
@@ -4191,8 +4191,8 @@ func TestChanSyncFailure(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderBit,
 	)
@@ -4201,7 +4201,7 @@ func TestChanSyncFailure(t *testing.T) {
 	}
 	defer cleanUp()
 
-	htlcAmt := lnwire.NewMSatFromSatoshis(20000)
+	htlcAmt := lnwire.NewMSatFromBroneess(20000)
 	index := byte(0)
 
 	// advanceState is a helper method to fully advance the channel state
@@ -4403,7 +4403,7 @@ func TestChanSyncFailure(t *testing.T) {
 	}
 	p := bobSyncMsg.LocalUnrevokedCommitPoint.SerializeCompressed()
 	p[4] ^= 0x01
-	modCommitPoint, err := btcec.ParsePubKey(p, btcec.S256())
+	modCommitPoint, err := bronec.ParsePubKey(p, bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to parse pubkey: %v", err)
 	}
@@ -4446,8 +4446,8 @@ func TestFeeUpdateRejectInsaneFee(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, _, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -4476,8 +4476,8 @@ func TestChannelRetransmissionFeeUpdate(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -4647,7 +4647,7 @@ func TestChannelRetransmissionFeeUpdate(t *testing.T) {
 	rHash := sha256.Sum256(bobPreimage[:])
 	bobHtlc := &lnwire.UpdateAddHTLC{
 		PaymentHash: rHash,
-		Amount:      lnwire.NewMSatFromSatoshis(20000),
+		Amount:      lnwire.NewMSatFromBroneess(20000),
 		Expiry:      uint32(10),
 	}
 	if _, err := bobChannel.AddHTLC(bobHtlc, nil); err != nil {
@@ -4667,8 +4667,8 @@ func TestFeeUpdateOldDiskFormat(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -4725,7 +4725,7 @@ func TestFeeUpdateOldDiskFormat(t *testing.T) {
 	newFeeRate := startingFeeRate
 
 	// We will send a few HTLCs and a fee update.
-	htlcAmt := lnwire.NewMSatFromSatoshis(0.1 * bronutil.SatoshiPerBrocoin)
+	htlcAmt := lnwire.NewMSatFromBroneess(0.1 * bronutil.BroneesPerBrocoin)
 	const numHTLCs = 30
 	var htlcs []*lnwire.UpdateAddHTLC
 	for i := 0; i < numHTLCs; i++ {
@@ -4896,8 +4896,8 @@ func TestChanSyncUnableToSync(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderBit,
 	)
@@ -4935,8 +4935,8 @@ func TestChanSyncInvalidLastSecret(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderBit,
 	)
@@ -4959,7 +4959,7 @@ func TestChanSyncInvalidLastSecret(t *testing.T) {
 	var paymentPreimage [32]byte
 	copy(paymentPreimage[:], bytes.Repeat([]byte{1}, 32))
 	paymentHash := sha256.Sum256(paymentPreimage[:])
-	htlcAmt := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
+	htlcAmt := lnwire.NewMSatFromBroneess(bronutil.BroneesPerBrocoin)
 	htlc := &lnwire.UpdateAddHTLC{
 		PaymentHash: paymentHash,
 		Amount:      htlcAmt,
@@ -5027,8 +5027,8 @@ func TestChanAvailableBandwidth(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -5037,13 +5037,13 @@ func TestChanAvailableBandwidth(t *testing.T) {
 	}
 	defer cleanUp()
 
-	aliceReserve := lnwire.NewMSatFromSatoshis(
+	aliceReserve := lnwire.NewMSatFromBroneess(
 		aliceChannel.channelState.LocalChanCfg.ChanReserve,
 	)
 	feeRate := chainfee.SatPerKWeight(
 		aliceChannel.channelState.LocalCommitment.FeePerKw,
 	)
-	htlcFee := lnwire.NewMSatFromSatoshis(
+	htlcFee := lnwire.NewMSatFromBroneess(
 		feeRate.FeeForWeight(input.HTLCWeight),
 	)
 
@@ -5087,7 +5087,7 @@ func TestChanAvailableBandwidth(t *testing.T) {
 
 	// First, we'll add 3 outgoing HTLC's from Alice to Bob.
 	const numHtlcs = 3
-	var htlcAmt lnwire.MilliSatoshi = 100000
+	var htlcAmt lnwire.MilliBronees = 100000
 	alicePreimages := make([][32]byte, numHtlcs)
 	for i := 0; i < numHtlcs; i++ {
 		htlc, preImage := createHTLC(i, htlcAmt)
@@ -5106,7 +5106,7 @@ func TestChanAvailableBandwidth(t *testing.T) {
 	// We'll repeat the same exercise, but with non-dust HTLCs. So we'll
 	// crank up the value of the HTLC's we're adding to the commitment
 	// transaction.
-	htlcAmt = lnwire.NewMSatFromSatoshis(30000)
+	htlcAmt = lnwire.NewMSatFromBroneess(30000)
 	for i := 0; i < numHtlcs; i++ {
 		htlc, preImage := createHTLC(numHtlcs+i, htlcAmt)
 		if _, err := aliceChannel.AddHTLC(htlc, nil); err != nil {
@@ -5165,8 +5165,8 @@ func TestChanAvailableBalanceNearHtlcFee(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -5176,38 +5176,38 @@ func TestChanAvailableBalanceNearHtlcFee(t *testing.T) {
 	defer cleanUp()
 
 	// Alice and Bob start with half the channel capacity.
-	aliceBalance := lnwire.NewMSatFromSatoshis(5 * bronutil.SatoshiPerBrocoin)
-	bobBalance := lnwire.NewMSatFromSatoshis(5 * bronutil.SatoshiPerBrocoin)
+	aliceBalance := lnwire.NewMSatFromBroneess(5 * bronutil.BroneesPerBrocoin)
+	bobBalance := lnwire.NewMSatFromBroneess(5 * bronutil.BroneesPerBrocoin)
 
-	aliceReserve := lnwire.NewMSatFromSatoshis(
+	aliceReserve := lnwire.NewMSatFromBroneess(
 		aliceChannel.channelState.LocalChanCfg.ChanReserve,
 	)
-	bobReserve := lnwire.NewMSatFromSatoshis(
+	bobReserve := lnwire.NewMSatFromBroneess(
 		bobChannel.channelState.LocalChanCfg.ChanReserve,
 	)
 
-	aliceDustlimit := lnwire.NewMSatFromSatoshis(
+	aliceDustlimit := lnwire.NewMSatFromBroneess(
 		aliceChannel.channelState.LocalChanCfg.DustLimit,
 	)
 	feeRate := chainfee.SatPerKWeight(
 		aliceChannel.channelState.LocalCommitment.FeePerKw,
 	)
-	htlcFee := lnwire.NewMSatFromSatoshis(
+	htlcFee := lnwire.NewMSatFromBroneess(
 		feeRate.FeeForWeight(input.HTLCWeight),
 	)
-	commitFee := lnwire.NewMSatFromSatoshis(
+	commitFee := lnwire.NewMSatFromBroneess(
 		aliceChannel.channelState.LocalCommitment.CommitFee,
 	)
-	htlcTimeoutFee := lnwire.NewMSatFromSatoshis(
+	htlcTimeoutFee := lnwire.NewMSatFromBroneess(
 		HtlcTimeoutFee(aliceChannel.channelState.ChanType, feeRate),
 	)
-	htlcSuccessFee := lnwire.NewMSatFromSatoshis(
+	htlcSuccessFee := lnwire.NewMSatFromBroneess(
 		HtlcSuccessFee(aliceChannel.channelState.ChanType, feeRate),
 	)
 
 	// Helper method to check the current reported balance.
 	checkBalance := func(t *testing.T, expBalanceAlice,
-		expBalanceBob lnwire.MilliSatoshi) {
+		expBalanceBob lnwire.MilliBronees) {
 
 		t.Helper()
 		aliceBalance := aliceChannel.AvailableBalance()
@@ -5226,7 +5226,7 @@ func TestChanAvailableBalanceNearHtlcFee(t *testing.T) {
 	// Helper method to send an HTLC from Alice to Bob, decreasing Alice's
 	// balance.
 	htlcIndex := uint64(0)
-	sendHtlc := func(htlcAmt lnwire.MilliSatoshi) {
+	sendHtlc := func(htlcAmt lnwire.MilliBronees) {
 		t.Helper()
 
 		htlc, preImage := createHTLC(int(htlcIndex), htlcAmt)
@@ -5346,8 +5346,8 @@ func TestChanCommitWeightDustHtlcs(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -5356,26 +5356,26 @@ func TestChanCommitWeightDustHtlcs(t *testing.T) {
 	}
 	defer cleanUp()
 
-	aliceDustlimit := lnwire.NewMSatFromSatoshis(
+	aliceDustlimit := lnwire.NewMSatFromBroneess(
 		aliceChannel.channelState.LocalChanCfg.DustLimit,
 	)
-	bobDustlimit := lnwire.NewMSatFromSatoshis(
+	bobDustlimit := lnwire.NewMSatFromBroneess(
 		bobChannel.channelState.LocalChanCfg.DustLimit,
 	)
 
 	feeRate := chainfee.SatPerKWeight(
 		aliceChannel.channelState.LocalCommitment.FeePerKw,
 	)
-	htlcTimeoutFee := lnwire.NewMSatFromSatoshis(
+	htlcTimeoutFee := lnwire.NewMSatFromBroneess(
 		HtlcTimeoutFee(aliceChannel.channelState.ChanType, feeRate),
 	)
-	htlcSuccessFee := lnwire.NewMSatFromSatoshis(
+	htlcSuccessFee := lnwire.NewMSatFromBroneess(
 		HtlcSuccessFee(aliceChannel.channelState.ChanType, feeRate),
 	)
 
 	// Helper method to add an HTLC from Alice to Bob.
 	htlcIndex := uint64(0)
-	addHtlc := func(htlcAmt lnwire.MilliSatoshi) lntypes.Preimage {
+	addHtlc := func(htlcAmt lnwire.MilliBronees) lntypes.Preimage {
 		t.Helper()
 
 		htlc, preImage := createHTLC(int(htlcIndex), htlcAmt)
@@ -5481,8 +5481,8 @@ func TestSignCommitmentFailNotLockedIn(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, _, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -5520,7 +5520,7 @@ func TestLockedInHtlcForwardingSkipAfterRestart(t *testing.T) {
 
 	// We'll now add two HTLC's from Alice to Bob, then Alice will initiate
 	// a state transition.
-	var htlcAmt lnwire.MilliSatoshi = 100000
+	var htlcAmt lnwire.MilliBronees = 100000
 	htlc, _ := createHTLC(0, htlcAmt)
 	if _, err := aliceChannel.AddHTLC(htlc, nil); err != nil {
 		t.Fatalf("unable to add htlc: %v", err)
@@ -5836,7 +5836,7 @@ func TestInvalidCommitSigError(t *testing.T) {
 
 	// With the channel established, we'll now send a single HTLC from
 	// Alice to Bob.
-	var htlcAmt lnwire.MilliSatoshi = 100000
+	var htlcAmt lnwire.MilliBronees = 100000
 	htlc, _ := createHTLC(0, htlcAmt)
 	if _, err := aliceChannel.AddHTLC(htlc, nil); err != nil {
 		t.Fatalf("unable to add htlc: %v", err)
@@ -5873,8 +5873,8 @@ func TestChannelUnilateralCloseHtlcResolution(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -5885,7 +5885,7 @@ func TestChannelUnilateralCloseHtlcResolution(t *testing.T) {
 
 	// We'll start off the test by adding an HTLC in both directions, then
 	// initiating enough state transitions to lock both of them in.
-	htlcAmount := lnwire.NewMSatFromSatoshis(20000)
+	htlcAmount := lnwire.NewMSatFromBroneess(20000)
 	htlcAlice, _ := createHTLC(0, htlcAmount)
 	if _, err := aliceChannel.AddHTLC(htlcAlice, nil); err != nil {
 		t.Fatalf("alice unable to add htlc: %v", err)
@@ -6033,8 +6033,8 @@ func TestChannelUnilateralClosePendingCommit(t *testing.T) {
 	t.Parallel()
 
 	// Create a test channel which will be used for the duration of this
-	// unittest. The channel will be funded evenly with Alice having 5 BTC,
-	// and Bob having 5 BTC.
+	// unittest. The channel will be funded evenly with Alice having 5 BRON,
+	// and Bob having 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderBit,
 	)
@@ -6045,7 +6045,7 @@ func TestChannelUnilateralClosePendingCommit(t *testing.T) {
 
 	// First, we'll add an HTLC from Alice to Bob, just to be be able to
 	// create a new state transition.
-	htlcAmount := lnwire.NewMSatFromSatoshis(20000)
+	htlcAmount := lnwire.NewMSatFromBroneess(20000)
 	htlcAlice, _ := createHTLC(0, htlcAmount)
 	if _, err := aliceChannel.AddHTLC(htlcAlice, nil); err != nil {
 		t.Fatalf("alice unable to add htlc: %v", err)
@@ -6162,7 +6162,7 @@ func TestDesyncHTLCs(t *testing.T) {
 	t.Parallel()
 
 	// We'll kick off the test by creating our channels which both are
-	// loaded with 5 BTC each.
+	// loaded with 5 BRON each.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -6171,8 +6171,8 @@ func TestDesyncHTLCs(t *testing.T) {
 	}
 	defer cleanUp()
 
-	// First add one HTLC of value 4.1 BTC.
-	htlcAmt := lnwire.NewMSatFromSatoshis(4.1 * bronutil.SatoshiPerBrocoin)
+	// First add one HTLC of value 4.1 BRON.
+	htlcAmt := lnwire.NewMSatFromBroneess(4.1 * bronutil.BroneesPerBrocoin)
 	htlc, _ := createHTLC(0, htlcAmt)
 	aliceIndex, err := aliceChannel.AddHTLC(htlc, nil)
 	if err != nil {
@@ -6197,15 +6197,15 @@ func TestDesyncHTLCs(t *testing.T) {
 		t.Fatalf("unable to recv htlc cancel: %v", err)
 	}
 
-	// Alice now has gotten all her original balance (5 BTC) back, however,
+	// Alice now has gotten all her original balance (5 BRON) back, however,
 	// adding a new HTLC at this point SHOULD fail, since if she adds the
 	// HTLC and signs the next state, Bob cannot assume she received the
 	// FailHTLC, and must assume she doesn't have the necessary balance
 	// available.
 	//
-	// We try adding an HTLC of value 1 BTC, which should fail because the
+	// We try adding an HTLC of value 1 BRON, which should fail because the
 	// balance is unavailable.
-	htlcAmt = lnwire.NewMSatFromSatoshis(1 * bronutil.SatoshiPerBrocoin)
+	htlcAmt = lnwire.NewMSatFromBroneess(1 * bronutil.BroneesPerBrocoin)
 	htlc, _ = createHTLC(1, htlcAmt)
 	if _, err = aliceChannel.AddHTLC(htlc, nil); err != ErrBelowChanReserve {
 		t.Fatalf("expected ErrInsufficientBalance, instead received: %v",
@@ -6231,7 +6231,7 @@ func TestMaxAcceptedHTLCs(t *testing.T) {
 	t.Parallel()
 
 	// We'll kick off the test by creating our channels which both are
-	// loaded with 5 BTC each.
+	// loaded with 5 BRON each.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -6254,8 +6254,8 @@ func TestMaxAcceptedHTLCs(t *testing.T) {
 	aliceChannel.channelState.RemoteChanCfg.MaxAcceptedHtlcs = numHTLCs
 	bobChannel.channelState.LocalChanCfg.MaxAcceptedHtlcs = numHTLCs
 
-	// Each HTLC amount is 0.1 BTC.
-	htlcAmt := lnwire.NewMSatFromSatoshis(0.1 * bronutil.SatoshiPerBrocoin)
+	// Each HTLC amount is 0.1 BRON.
+	htlcAmt := lnwire.NewMSatFromBroneess(0.1 * bronutil.BroneesPerBrocoin)
 
 	// htlcID is used to keep track of the HTLC that Bob will fail back to
 	// Alice.
@@ -6365,7 +6365,7 @@ func TestMaxAsynchronousHtlcs(t *testing.T) {
 	t.Parallel()
 
 	// We'll kick off the test by creating our channels which both are
-	// loaded with 5 BTC each.
+	// loaded with 5 BRON each.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -6388,8 +6388,8 @@ func TestMaxAsynchronousHtlcs(t *testing.T) {
 	aliceChannel.channelState.RemoteChanCfg.MaxAcceptedHtlcs = numHTLCs
 	bobChannel.channelState.LocalChanCfg.MaxAcceptedHtlcs = numHTLCs
 
-	// Each HTLC amount is 0.1 BTC.
-	htlcAmt := lnwire.NewMSatFromSatoshis(0.1 * bronutil.SatoshiPerBrocoin)
+	// Each HTLC amount is 0.1 BRON.
+	htlcAmt := lnwire.NewMSatFromBroneess(0.1 * bronutil.BroneesPerBrocoin)
 
 	var htlcID uint64
 
@@ -6502,7 +6502,7 @@ func TestMaxPendingAmount(t *testing.T) {
 	t.Parallel()
 
 	// We'll kick off the test by creating our channels which both are
-	// loaded with 5 BTC each.
+	// loaded with 5 BRON each.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -6511,10 +6511,10 @@ func TestMaxPendingAmount(t *testing.T) {
 	}
 	defer cleanUp()
 
-	// We set the remote required MaxPendingAmount to 3 BTC. We will
+	// We set the remote required MaxPendingAmount to 3 BRON. We will
 	// attempt to overflow this value and see if it gives us the
 	// ErrMaxPendingAmount error.
-	maxPending := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin * 3)
+	maxPending := lnwire.NewMSatFromBroneess(bronutil.BroneesPerBrocoin * 3)
 
 	// We set the max pending amount of Alice's config. This mean that she
 	// cannot offer Bob HTLCs with a total value above this limit at a given
@@ -6522,10 +6522,10 @@ func TestMaxPendingAmount(t *testing.T) {
 	aliceChannel.channelState.LocalChanCfg.MaxPendingAmount = maxPending
 	bobChannel.channelState.RemoteChanCfg.MaxPendingAmount = maxPending
 
-	// First, we'll add 2 HTLCs of 1.5 BTC each to Alice's commitment.
+	// First, we'll add 2 HTLCs of 1.5 BRON each to Alice's commitment.
 	// This won't trigger Alice's ErrMaxPendingAmount error.
 	const numHTLCs = 2
-	htlcAmt := lnwire.NewMSatFromSatoshis(1.5 * bronutil.SatoshiPerBrocoin)
+	htlcAmt := lnwire.NewMSatFromBroneess(1.5 * bronutil.BroneesPerBrocoin)
 	for i := 0; i < numHTLCs; i++ {
 		htlc, _ := createHTLC(i, htlcAmt)
 		if _, err := aliceChannel.AddHTLC(htlc, nil); err != nil {
@@ -6536,9 +6536,9 @@ func TestMaxPendingAmount(t *testing.T) {
 		}
 	}
 
-	// We finally add one more HTLC of 0.1 BTC to Alice's commitment. This
+	// We finally add one more HTLC of 0.1 BRON to Alice's commitment. This
 	// SHOULD trigger Alice's ErrMaxPendingAmount error.
-	htlcAmt = lnwire.NewMSatFromSatoshis(0.1 * bronutil.SatoshiPerBrocoin)
+	htlcAmt = lnwire.NewMSatFromBroneess(0.1 * bronutil.BroneesPerBrocoin)
 	htlc, _ := createHTLC(numHTLCs, htlcAmt)
 	_, err = aliceChannel.AddHTLC(htlc, nil)
 	if err != ErrMaxPendingAmount {
@@ -6556,8 +6556,8 @@ func assertChannelBalances(t *testing.T, alice, bob *LightningChannel,
 
 	_, _, line, _ := runtime.Caller(1)
 
-	aliceSelfBalance := alice.channelState.LocalCommitment.LocalBalance.ToSatoshis()
-	aliceBobBalance := alice.channelState.LocalCommitment.RemoteBalance.ToSatoshis()
+	aliceSelfBalance := alice.channelState.LocalCommitment.LocalBalance.ToBroneess()
+	aliceBobBalance := alice.channelState.LocalCommitment.RemoteBalance.ToBroneess()
 	if aliceSelfBalance != aliceBalance {
 		t.Fatalf("line #%v: wrong alice self balance: expected %v, got %v",
 			line, aliceBalance, aliceSelfBalance)
@@ -6567,8 +6567,8 @@ func assertChannelBalances(t *testing.T, alice, bob *LightningChannel,
 			line, bobBalance, aliceBobBalance)
 	}
 
-	bobSelfBalance := bob.channelState.LocalCommitment.LocalBalance.ToSatoshis()
-	bobAliceBalance := bob.channelState.LocalCommitment.RemoteBalance.ToSatoshis()
+	bobSelfBalance := bob.channelState.LocalCommitment.LocalBalance.ToBroneess()
+	bobAliceBalance := bob.channelState.LocalCommitment.RemoteBalance.ToBroneess()
 	if bobSelfBalance != bobBalance {
 		t.Fatalf("line #%v: wrong bob self balance: expected %v, got %v",
 			line, bobBalance, bobSelfBalance)
@@ -6587,7 +6587,7 @@ func TestChanReserve(t *testing.T) {
 
 	setupChannels := func() (*LightningChannel, *LightningChannel, func()) {
 		// We'll kick off the test by creating our channels which both
-		// are loaded with 5 BTC each.
+		// are loaded with 5 BRON each.
 		aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 			channeldb.SingleFunderTweaklessBit,
 		)
@@ -6595,11 +6595,11 @@ func TestChanReserve(t *testing.T) {
 			t.Fatalf("unable to create test channels: %v", err)
 		}
 
-		// We set the remote required ChanReserve to 0.5 BTC. We will
+		// We set the remote required ChanReserve to 0.5 BRON. We will
 		// attempt to cause Alice's balance to dip below this amount
 		// and test whether it triggers the ErrBelowChanReserve error.
 		aliceMinReserve := bronutil.Amount(0.5 *
-			bronutil.SatoshiPerBrocoin)
+			bronutil.BroneesPerBrocoin)
 
 		// Alice will need to keep her reserve above aliceMinReserve,
 		// so set this limit to here local config.
@@ -6614,7 +6614,7 @@ func TestChanReserve(t *testing.T) {
 		// his current balance in the channel. This will ensure that
 		// after a channel is first opened, Bob can still receive HTLCs
 		// even though his balance is less than his channel reserve.
-		bobMinReserve := bronutil.Amount(6 * bronutil.SatoshiPerBrocoin)
+		bobMinReserve := bronutil.Amount(6 * bronutil.BroneesPerBrocoin)
 		bobChannel.channelState.LocalChanCfg.ChanReserve = bobMinReserve
 		aliceChannel.channelState.RemoteChanCfg.ChanReserve = bobMinReserve
 
@@ -6633,7 +6633,7 @@ func TestChanReserve(t *testing.T) {
 	// Resulting balances:
 	//	Alice:	4.5
 	//	Bob:	5.0
-	htlcAmt := lnwire.NewMSatFromSatoshis(0.5 * bronutil.SatoshiPerBrocoin)
+	htlcAmt := lnwire.NewMSatFromBroneess(0.5 * bronutil.BroneesPerBrocoin)
 	htlc, _ := createHTLC(aliceIndex, htlcAmt)
 	aliceIndex++
 	if _, err := aliceChannel.AddHTLC(htlc, nil); err != nil {
@@ -6652,7 +6652,7 @@ func TestChanReserve(t *testing.T) {
 	commitFee := aliceChannel.channelState.LocalCommitment.CommitFee
 	assertChannelBalances(
 		t, aliceChannel, bobChannel,
-		bronutil.SatoshiPerBrocoin*4.5-commitFee, bronutil.SatoshiPerBrocoin*5,
+		bronutil.BroneesPerBrocoin*4.5-commitFee, bronutil.BroneesPerBrocoin*5,
 	)
 
 	// Now let Bob try to add an HTLC. This should fail, since it will
@@ -6681,13 +6681,13 @@ func TestChanReserve(t *testing.T) {
 	aliceIndex = 0
 	bobIndex = 0
 
-	// Now we'll add HTLC of 3.5 BTC to Alice's commitment, this should put
-	// Alice's balance at 1.5 BTC.
+	// Now we'll add HTLC of 3.5 BRON to Alice's commitment, this should put
+	// Alice's balance at 1.5 BRON.
 	//
 	// Resulting balances:
 	//	Alice:	1.5
 	//	Bob:	9.5
-	htlcAmt = lnwire.NewMSatFromSatoshis(3.5 * bronutil.SatoshiPerBrocoin)
+	htlcAmt = lnwire.NewMSatFromBroneess(3.5 * bronutil.BroneesPerBrocoin)
 
 	// The first HTLC should successfully be sent.
 	htlc, _ = createHTLC(aliceIndex, htlcAmt)
@@ -6699,11 +6699,11 @@ func TestChanReserve(t *testing.T) {
 		t.Fatalf("unable to recv htlc: %v", err)
 	}
 
-	// Add a second HTLC of 1 BTC. This should fail because it will take
+	// Add a second HTLC of 1 BRON. This should fail because it will take
 	// Alice's balance all the way down to her channel reserve, but since
 	// she is the initiator the additional transaction fee makes her
 	// balance dip below.
-	htlcAmt = lnwire.NewMSatFromSatoshis(1 * bronutil.SatoshiPerBrocoin)
+	htlcAmt = lnwire.NewMSatFromBroneess(1 * bronutil.BroneesPerBrocoin)
 	htlc, _ = createHTLC(aliceIndex, htlcAmt)
 	aliceIndex++
 	_, err = aliceChannel.AddHTLC(htlc, nil)
@@ -6724,11 +6724,11 @@ func TestChanReserve(t *testing.T) {
 	aliceIndex = 0
 	bobIndex = 0
 
-	// Add a HTLC of 2 BTC to Alice, and the settle it.
+	// Add a HTLC of 2 BRON to Alice, and the settle it.
 	// Resulting balances:
 	//	Alice:	3.0
 	//	Bob:	7.0
-	htlcAmt = lnwire.NewMSatFromSatoshis(2 * bronutil.SatoshiPerBrocoin)
+	htlcAmt = lnwire.NewMSatFromBroneess(2 * bronutil.BroneesPerBrocoin)
 	htlc, preimage := createHTLC(aliceIndex, htlcAmt)
 	aliceIndex++
 	aliceHtlcIndex, err := aliceChannel.AddHTLC(htlc, nil)
@@ -6746,7 +6746,7 @@ func TestChanReserve(t *testing.T) {
 	commitFee = aliceChannel.channelState.LocalCommitment.CommitFee
 	assertChannelBalances(
 		t, aliceChannel, bobChannel,
-		bronutil.SatoshiPerBrocoin*3-commitFee, bronutil.SatoshiPerBrocoin*5,
+		bronutil.BroneesPerBrocoin*3-commitFee, bronutil.BroneesPerBrocoin*5,
 	)
 
 	if err := bobChannel.SettleHTLC(preimage, bobHtlcIndex, nil, nil, nil); err != nil {
@@ -6762,13 +6762,13 @@ func TestChanReserve(t *testing.T) {
 	commitFee = aliceChannel.channelState.LocalCommitment.CommitFee
 	assertChannelBalances(
 		t, aliceChannel, bobChannel,
-		bronutil.SatoshiPerBrocoin*3-commitFee, bronutil.SatoshiPerBrocoin*7,
+		bronutil.BroneesPerBrocoin*3-commitFee, bronutil.BroneesPerBrocoin*7,
 	)
 
-	// And now let Bob add an HTLC of 1 BTC. This will take Bob's balance
+	// And now let Bob add an HTLC of 1 BRON. This will take Bob's balance
 	// all the way down to his channel reserve, but since he is not paying
 	// the fee this is okay.
-	htlcAmt = lnwire.NewMSatFromSatoshis(1 * bronutil.SatoshiPerBrocoin)
+	htlcAmt = lnwire.NewMSatFromBroneess(1 * bronutil.BroneesPerBrocoin)
 	htlc, _ = createHTLC(bobIndex, htlcAmt)
 	bobIndex++
 	if _, err := bobChannel.AddHTLC(htlc, nil); err != nil {
@@ -6786,7 +6786,7 @@ func TestChanReserve(t *testing.T) {
 	commitFee = aliceChannel.channelState.LocalCommitment.CommitFee
 	assertChannelBalances(
 		t, aliceChannel, bobChannel,
-		bronutil.SatoshiPerBrocoin*3-commitFee, bronutil.SatoshiPerBrocoin*6,
+		bronutil.BroneesPerBrocoin*3-commitFee, bronutil.BroneesPerBrocoin*6,
 	)
 }
 
@@ -6796,7 +6796,7 @@ func TestChanReserve(t *testing.T) {
 func TestChanReserveRemoteInitiator(t *testing.T) {
 	t.Parallel()
 
-	// We start out with a channel where both parties have 5 BTC.
+	// We start out with a channel where both parties have 5 BRON.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -6805,22 +6805,22 @@ func TestChanReserveRemoteInitiator(t *testing.T) {
 	}
 	defer cleanUp()
 
-	// Set Alice's channel reserve to be 5 BTC-commitfee. This means she
+	// Set Alice's channel reserve to be 5 BRON-commitfee. This means she
 	// has just enough balance to cover the comitment fee, but not enough
 	// to add any more HTLCs to the commitment. Although a reserve this
 	// high is unrealistic, a channel can easiliy get into a situation
 	// where the initiator cannot pay for the fee of any more HTLCs.
 	commitFee := aliceChannel.channelState.LocalCommitment.CommitFee
-	aliceMinReserve := 5*bronutil.SatoshiPerBrocoin - commitFee
+	aliceMinReserve := 5*bronutil.BroneesPerBrocoin - commitFee
 
 	aliceChannel.channelState.LocalChanCfg.ChanReserve = aliceMinReserve
 	bobChannel.channelState.RemoteChanCfg.ChanReserve = aliceMinReserve
 
-	// Now let Bob attempt to add an HTLC of 0.1 BTC. He has plenty of
+	// Now let Bob attempt to add an HTLC of 0.1 BRON. He has plenty of
 	// money available to spend, but Alice, which is the initiator, cannot
 	// afford any more HTLCs on the commitment transaction because that
 	// would take here below her channel reserve..
-	htlcAmt := lnwire.NewMSatFromSatoshis(0.1 * bronutil.SatoshiPerBrocoin)
+	htlcAmt := lnwire.NewMSatFromBroneess(0.1 * bronutil.BroneesPerBrocoin)
 	htlc, _ := createHTLC(0, htlcAmt)
 
 	// Bob should refuse to add this HTLC, since he realizes it will create
@@ -6874,12 +6874,12 @@ func TestChanReserveLocalInitiatorDustHtlc(t *testing.T) {
 	// the HTLC, but not low enough to allow the extra fee from adding the
 	// HTLC to the commitment.
 	commitFee := aliceChannel.channelState.LocalCommitment.CommitFee
-	aliceMinReserve := 5*bronutil.SatoshiPerBrocoin - commitFee - htlcSat
+	aliceMinReserve := 5*bronutil.BroneesPerBrocoin - commitFee - htlcSat
 
 	aliceChannel.channelState.LocalChanCfg.ChanReserve = aliceMinReserve
 	bobChannel.channelState.RemoteChanCfg.ChanReserve = aliceMinReserve
 
-	htlcDustAmt := lnwire.NewMSatFromSatoshis(htlcSat)
+	htlcDustAmt := lnwire.NewMSatFromBroneess(htlcSat)
 	htlc, _ := createHTLC(0, htlcDustAmt)
 
 	// Alice should realize that the fee she must pay to add this HTLC to
@@ -6896,7 +6896,7 @@ func TestMinHTLC(t *testing.T) {
 	t.Parallel()
 
 	// We'll kick off the test by creating our channels which both are
-	// loaded with 5 BTC each.
+	// loaded with 5 BRON each.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -6905,18 +6905,18 @@ func TestMinHTLC(t *testing.T) {
 	}
 	defer cleanUp()
 
-	// We set Alice's MinHTLC to 0.1 BTC. We will attempt to send an
+	// We set Alice's MinHTLC to 0.1 BRON. We will attempt to send an
 	// HTLC BELOW this value to trigger the ErrBelowMinHTLC error.
-	minValue := lnwire.NewMSatFromSatoshis(0.1 * bronutil.SatoshiPerBrocoin)
+	minValue := lnwire.NewMSatFromBroneess(0.1 * bronutil.BroneesPerBrocoin)
 
 	// Setting the min value in Alice's local config means that the
 	// remote will not accept any HTLCs of value less than specified.
 	aliceChannel.channelState.LocalChanCfg.MinHTLC = minValue
 	bobChannel.channelState.RemoteChanCfg.MinHTLC = minValue
 
-	// First, we will add an HTLC of 0.5 BTC. This will not trigger
+	// First, we will add an HTLC of 0.5 BRON. This will not trigger
 	// ErrBelowMinHTLC.
-	htlcAmt := lnwire.NewMSatFromSatoshis(0.5 * bronutil.SatoshiPerBrocoin)
+	htlcAmt := lnwire.NewMSatFromBroneess(0.5 * bronutil.BroneesPerBrocoin)
 	htlc, _ := createHTLC(0, htlcAmt)
 	if _, err := aliceChannel.AddHTLC(htlc, nil); err != nil {
 		t.Fatalf("unable to add htlc: %v", err)
@@ -6948,7 +6948,7 @@ func TestInvalidHTLCAmt(t *testing.T) {
 	t.Parallel()
 
 	// We'll kick off the test by creating our channels which both are
-	// loaded with 5 BTC each.
+	// loaded with 5 BRON each.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -6963,7 +6963,7 @@ func TestInvalidHTLCAmt(t *testing.T) {
 	bobChannel.channelState.RemoteChanCfg.MinHTLC = 0
 
 	// Create a zero-value HTLC.
-	htlcAmt := lnwire.MilliSatoshi(0)
+	htlcAmt := lnwire.MilliBronees(0)
 	htlc, _ := createHTLC(0, htlcAmt)
 
 	// Sending or receiving the HTLC should fail with ErrInvalidHTLCAmt.
@@ -6986,7 +6986,7 @@ func TestNewBreachRetributionSkipsDustHtlcs(t *testing.T) {
 	t.Parallel()
 
 	// We'll kick off the test by creating our channels which both are
-	// loaded with 5 BTC each.
+	// loaded with 5 BRON each.
 	aliceChannel, bobChannel, cleanUp, err := CreateTestChannels(
 		channeldb.SingleFunderTweaklessBit,
 	)
@@ -7014,7 +7014,7 @@ func TestNewBreachRetributionSkipsDustHtlcs(t *testing.T) {
 		rHash := sha256.Sum256(bobPreimage[:])
 		h := &lnwire.UpdateAddHTLC{
 			PaymentHash: rHash,
-			Amount:      lnwire.NewMSatFromSatoshis(dustValue),
+			Amount:      lnwire.NewMSatFromBroneess(dustValue),
 			Expiry:      uint32(10),
 			OnionBlob:   fakeOnionBlob,
 		}
@@ -7171,7 +7171,7 @@ func TestChannelRestoreUpdateLogs(t *testing.T) {
 
 	// First, we'll add an HTLC from Alice to Bob, which we will lock in on
 	// Bob's commit, but not on Alice's.
-	htlcAmount := lnwire.NewMSatFromSatoshis(20000)
+	htlcAmount := lnwire.NewMSatFromBroneess(20000)
 	htlcAlice, _ := createHTLC(0, htlcAmount)
 	if _, err := aliceChannel.AddHTLC(htlcAlice, nil); err != nil {
 		t.Fatalf("alice unable to add htlc: %v", err)
@@ -7341,7 +7341,7 @@ func TestChannelRestoreUpdateLogsFailedHTLC(t *testing.T) {
 	defer cleanUp()
 
 	// First, we'll add an HTLC from Alice to Bob, and lock it in for both.
-	htlcAmount := lnwire.NewMSatFromSatoshis(20000)
+	htlcAmount := lnwire.NewMSatFromBroneess(20000)
 	htlcAlice, _ := createHTLC(0, htlcAmount)
 	if _, err := aliceChannel.AddHTLC(htlcAlice, nil); err != nil {
 		t.Fatalf("alice unable to add htlc: %v", err)
@@ -7467,7 +7467,7 @@ func TestDuplicateFailRejection(t *testing.T) {
 
 	// First, we'll add an HTLC from Alice to Bob, and lock it in for both
 	// parties.
-	htlcAmount := lnwire.NewMSatFromSatoshis(20000)
+	htlcAmount := lnwire.NewMSatFromBroneess(20000)
 	htlcAlice, _ := createHTLC(0, htlcAmount)
 	if _, err := aliceChannel.AddHTLC(htlcAlice, nil); err != nil {
 		t.Fatalf("alice unable to add htlc: %v", err)
@@ -7547,7 +7547,7 @@ func TestDuplicateSettleRejection(t *testing.T) {
 
 	// First, we'll add an HTLC from Alice to Bob, and lock it in for both
 	// parties.
-	htlcAmount := lnwire.NewMSatFromSatoshis(20000)
+	htlcAmount := lnwire.NewMSatFromBroneess(20000)
 	htlcAlice, alicePreimage := createHTLC(0, htlcAmount)
 	if _, err := aliceChannel.AddHTLC(htlcAlice, nil); err != nil {
 		t.Fatalf("alice unable to add htlc: %v", err)
@@ -7670,7 +7670,7 @@ func TestChannelRestoreCommitHeight(t *testing.T) {
 	}
 
 	// We'll send an HtLC from Alice to Bob.
-	htlcAmount := lnwire.NewMSatFromSatoshis(100000000)
+	htlcAmount := lnwire.NewMSatFromBroneess(100000000)
 	htlcAlice, _ := createHTLC(0, htlcAmount)
 	if _, err := aliceChannel.AddHTLC(htlcAlice, nil); err != nil {
 		t.Fatalf("alice unable to add htlc: %v", err)
@@ -8532,7 +8532,7 @@ func TestEvaluateView(t *testing.T) {
 		// expressed in msat.
 		ourFeeUpdateAmt = 20000
 
-		// ourFeeUpdatePerSat is the fee rate *in satoshis* that we
+		// ourFeeUpdatePerSat is the fee rate *in broneess* that we
 		// expect if we update to ourFeeUpdateAmt.
 		ourFeeUpdatePerSat = chainfee.SatPerKWeight(20)
 
@@ -8540,7 +8540,7 @@ func TestEvaluateView(t *testing.T) {
 		// expressed in msat.
 		theirFeeUpdateAmt = 10000
 
-		// theirFeeUpdatePerSat is the fee rate *in satoshis* that we
+		// theirFeeUpdatePerSat is the fee rate *in broneess* that we
 		// expect if we update to ourFeeUpdateAmt.
 		theirFeeUpdatePerSat = chainfee.SatPerKWeight(10)
 	)
@@ -8570,11 +8570,11 @@ func TestEvaluateView(t *testing.T) {
 
 		// expectReceived is the amount we expect the channel to have
 		// tracked as our receive total.
-		expectReceived lnwire.MilliSatoshi
+		expectReceived lnwire.MilliBronees
 
 		// expectSent is the amount we expect the channel to have
 		// tracked as our send total.
-		expectSent lnwire.MilliSatoshi
+		expectSent lnwire.MilliBronees
 	}{
 		{
 			name:        "our fee update is applied",
@@ -8837,8 +8837,8 @@ func TestEvaluateView(t *testing.T) {
 				// not check these values in this test because
 				// balance modification happens on the htlc
 				// processing level.
-				ourBalance   lnwire.MilliSatoshi
-				theirBalance lnwire.MilliSatoshi
+				ourBalance   lnwire.MilliBronees
+				theirBalance lnwire.MilliBronees
 			)
 
 			// Evaluate the htlc view, mutate as test expects.
@@ -8926,7 +8926,7 @@ func TestProcessFeeUpdate(t *testing.T) {
 		// in msat.
 		ourFeeUpdateAmt = 20000
 
-		// ourFeeUpdatePerSat is the fee rate *in satoshis* that we
+		// ourFeeUpdatePerSat is the fee rate *in broneess* that we
 		// expect if we update to ourFeeUpdateAmt.
 		ourFeeUpdatePerSat = chainfee.SatPerKWeight(20)
 	)
@@ -9132,11 +9132,11 @@ func TestProcessAddRemoveEntry(t *testing.T) {
 		nextHeight = 400
 
 		// updateAmount is the amount that the update is set to.
-		updateAmount = lnwire.MilliSatoshi(10)
+		updateAmount = lnwire.MilliBronees(10)
 
 		// startBalance is a balance we start both sides out with
 		// so that balances can be incremented.
-		startBalance = lnwire.MilliSatoshi(100)
+		startBalance = lnwire.MilliBronees(100)
 	)
 
 	tests := []struct {
@@ -9145,8 +9145,8 @@ func TestProcessAddRemoveEntry(t *testing.T) {
 		remoteChain          bool
 		isIncoming           bool
 		mutateState          bool
-		ourExpectedBalance   lnwire.MilliSatoshi
-		theirExpectedBalance lnwire.MilliSatoshi
+		ourExpectedBalance   lnwire.MilliBronees
+		theirExpectedBalance lnwire.MilliBronees
 		expectedHeights      heights
 		updateType           updateType
 	}{
@@ -9554,7 +9554,7 @@ func TestChannelUnsignedAckedFailure(t *testing.T) {
 	defer cleanUp()
 
 	// First we create an HTLC that Alice sends to Bob.
-	htlc, _ := createHTLC(0, lnwire.MilliSatoshi(500000))
+	htlc, _ := createHTLC(0, lnwire.MilliBronees(500000))
 
 	// -----add----->
 	_, err = aliceChannel.AddHTLC(htlc, nil)
@@ -9617,7 +9617,7 @@ func TestChannelUnsignedAckedFailure(t *testing.T) {
 	require.NoError(t, err)
 
 	// Now Bob sends an HTLC to Alice.
-	htlc2, _ := createHTLC(0, lnwire.MilliSatoshi(500000))
+	htlc2, _ := createHTLC(0, lnwire.MilliBronees(500000))
 
 	// <----add------
 	_, err = bobChannel.AddHTLC(htlc2, nil)
@@ -9664,7 +9664,7 @@ func TestChannelLocalUnsignedUpdatesFailure(t *testing.T) {
 	defer cleanUp()
 
 	// First we create an htlc that Bob sends to Alice.
-	htlc, _ := createHTLC(0, lnwire.MilliSatoshi(500000))
+	htlc, _ := createHTLC(0, lnwire.MilliBronees(500000))
 
 	// <----add-----
 	_, err = bobChannel.AddHTLC(htlc, nil)
@@ -9752,7 +9752,7 @@ func TestChannelSignedAckRegression(t *testing.T) {
 	defer cleanUp()
 
 	// Create an HTLC that Bob will send to Alice.
-	htlc, preimage := createHTLC(0, lnwire.MilliSatoshi(5000000))
+	htlc, preimage := createHTLC(0, lnwire.MilliBronees(5000000))
 
 	// <----add------
 	_, err = bobChannel.AddHTLC(htlc, nil)
@@ -9794,7 +9794,7 @@ func TestChannelSignedAckRegression(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create an HTLC that Alice will send to Bob.
-	htlc2, _ := createHTLC(0, lnwire.MilliSatoshi(5000000))
+	htlc2, _ := createHTLC(0, lnwire.MilliBronees(5000000))
 
 	// -----add---->
 	_, err = aliceChannel.AddHTLC(htlc2, nil)
@@ -9865,13 +9865,13 @@ func TestMayAddOutgoingHtlc(t *testing.T) {
 
 	// Each side should be able to add 1/4 of total channel balance since
 	// we're 50/50 split.
-	mayAdd := lnwire.MilliSatoshi(chanBal / 4 * 1000)
+	mayAdd := lnwire.MilliBronees(chanBal / 4 * 1000)
 	require.NoError(t, aliceChannel.MayAddOutgoingHtlc(mayAdd))
 	require.NoError(t, bobChannel.MayAddOutgoingHtlc(mayAdd))
 
 	// Both channels should fail if we try to add an amount more than
 	// their current balance.
-	mayNotAdd := lnwire.MilliSatoshi(chanBal * 1000)
+	mayNotAdd := lnwire.MilliBronees(chanBal * 1000)
 	require.Error(t, aliceChannel.MayAddOutgoingHtlc(mayNotAdd))
 	require.Error(t, bobChannel.MayAddOutgoingHtlc(mayNotAdd))
 
@@ -9898,7 +9898,7 @@ func TestIsChannelClean(t *testing.T) {
 	// Assert that neither side considers the channel clean when alice
 	// sends an htlc.
 	// ---add--->
-	htlc, preimage := createHTLC(0, lnwire.MilliSatoshi(5000000))
+	htlc, preimage := createHTLC(0, lnwire.MilliBronees(5000000))
 	_, err = aliceChannel.AddHTLC(htlc, nil)
 	require.NoError(t, err)
 	_, err = bobChannel.ReceiveHTLC(htlc)
@@ -10054,7 +10054,7 @@ func testGetDustSum(t *testing.T, chantype channeldb.ChannelType) {
 	// Use a function closure to assert the dust sum for a passed channel's
 	// local and remote commitments match the expected values.
 	checkDust := func(c *LightningChannel, expLocal,
-		expRemote lnwire.MilliSatoshi) {
+		expRemote lnwire.MilliBronees) {
 
 		localDustSum := c.GetDustSum(false)
 		require.Equal(t, expLocal, localDustSum)
@@ -10074,7 +10074,7 @@ func testGetDustSum(t *testing.T, chantype channeldb.ChannelType) {
 	// Create an HTLC that Bob will send to Alice which is above Alice's
 	// dust limit and below Bob's dust limit. This takes into account dust
 	// trimming for non-zero-fee channels.
-	htlc1Amt := lnwire.MilliSatoshi(700_000)
+	htlc1Amt := lnwire.MilliBronees(700_000)
 	htlc1, preimage1 := createHTLC(0, htlc1Amt)
 
 	_, err = bobChannel.AddHTLC(htlc1, nil)
@@ -10084,17 +10084,17 @@ func testGetDustSum(t *testing.T, chantype channeldb.ChannelType) {
 
 	// Assert that GetDustSum from Alice's perspective does not consider
 	// the HTLC dust on her commitment, but does on Bob's commitment.
-	checkDust(aliceChannel, lnwire.MilliSatoshi(0), htlc1Amt)
+	checkDust(aliceChannel, lnwire.MilliBronees(0), htlc1Amt)
 
 	// Assert that GetDustSum from Bob's perspective results in the same
 	// conditions above holding.
-	checkDust(bobChannel, htlc1Amt, lnwire.MilliSatoshi(0))
+	checkDust(bobChannel, htlc1Amt, lnwire.MilliBronees(0))
 
 	// Forcing a state transition to occur should not change the dust sum.
 	err = ForceStateTransition(bobChannel, aliceChannel)
 	require.NoError(t, err)
-	checkDust(aliceChannel, lnwire.MilliSatoshi(0), htlc1Amt)
-	checkDust(bobChannel, htlc1Amt, lnwire.MilliSatoshi(0))
+	checkDust(aliceChannel, lnwire.MilliBronees(0), htlc1Amt)
+	checkDust(bobChannel, htlc1Amt, lnwire.MilliBronees(0))
 
 	// Settling the HTLC back from Alice to Bob should not change the dust
 	// sum because the HTLC is counted until it's removed from the update
@@ -10103,8 +10103,8 @@ func testGetDustSum(t *testing.T, chantype channeldb.ChannelType) {
 	require.NoError(t, err)
 	err = bobChannel.ReceiveHTLCSettle(preimage1, uint64(0))
 	require.NoError(t, err)
-	checkDust(aliceChannel, lnwire.MilliSatoshi(0), htlc1Amt)
-	checkDust(bobChannel, htlc1Amt, lnwire.MilliSatoshi(0))
+	checkDust(aliceChannel, lnwire.MilliBronees(0), htlc1Amt)
+	checkDust(bobChannel, htlc1Amt, lnwire.MilliBronees(0))
 
 	// Forcing a state transition will remove the HTLC in-memory for Bob
 	// since ReceiveRevocation is called which calls compactLogs. Bob
@@ -10112,12 +10112,12 @@ func testGetDustSum(t *testing.T, chantype channeldb.ChannelType) {
 	// having the original dust sum since compactLogs hasn't been called.
 	err = ForceStateTransition(aliceChannel, bobChannel)
 	require.NoError(t, err)
-	checkDust(aliceChannel, lnwire.MilliSatoshi(0), htlc1Amt)
-	checkDust(bobChannel, lnwire.MilliSatoshi(0), lnwire.MilliSatoshi(0))
+	checkDust(aliceChannel, lnwire.MilliBronees(0), htlc1Amt)
+	checkDust(bobChannel, lnwire.MilliBronees(0), lnwire.MilliBronees(0))
 
 	// Alice now sends an HTLC of 100sats, which is below both sides' dust
 	// limits.
-	htlc2Amt := lnwire.MilliSatoshi(100_000)
+	htlc2Amt := lnwire.MilliBronees(100_000)
 	htlc2, _ := createHTLC(0, htlc2Amt)
 
 	_, err = aliceChannel.AddHTLC(htlc2, nil)
@@ -10168,7 +10168,7 @@ func testGetDustSum(t *testing.T, chantype channeldb.ChannelType) {
 	// and then updates the fee of the channel to trigger the trimmed to
 	// dust mechanism, Alice will count this HTLC in the dust sum for her
 	// commitment in the non-zero-fee case.
-	htlc3Amt := lnwire.MilliSatoshi(400_000)
+	htlc3Amt := lnwire.MilliBronees(400_000)
 	htlc3, _ := createHTLC(1, htlc3Amt)
 
 	_, err = aliceChannel.AddHTLC(htlc3, nil)

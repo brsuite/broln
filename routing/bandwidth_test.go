@@ -3,10 +3,10 @@ package routing
 import (
 	"testing"
 
-	"github.com/brsuite/bronutil"
-	"github.com/go-errors/errors"
 	"github.com/brsuite/broln/htlcswitch"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/bronutil"
+	"github.com/go-errors/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,8 +14,8 @@ import (
 // manager.
 func TestBandwidthManager(t *testing.T) {
 	var (
-		chan1ID      uint64         = 101
-		chan2ID      uint64         = 102
+		chan1ID      uint64          = 101
+		chan2ID      uint64          = 102
 		chanCapacity bronutil.Amount = 100000
 	)
 
@@ -23,7 +23,7 @@ func TestBandwidthManager(t *testing.T) {
 		name              string
 		channelID         uint64
 		linkQuery         getLinkQuery
-		expectedBandwidth lnwire.MilliSatoshi
+		expectedBandwidth lnwire.MilliBronees
 		expectFound       bool
 	}{
 		{

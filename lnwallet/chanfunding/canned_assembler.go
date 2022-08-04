@@ -3,11 +3,11 @@ package chanfunding
 import (
 	"fmt"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 // ShimIntent is an intent created by the CannedAssembler which represents a
@@ -26,7 +26,7 @@ type ShimIntent struct {
 	localKey *keychain.KeyDescriptor
 
 	// remoteKey is the remote party's multi-sig key.
-	remoteKey *btcec.PublicKey
+	remoteKey *bronec.PublicKey
 
 	// chanPoint is the final channel point for the to be created channel.
 	chanPoint *wire.OutPoint
@@ -128,7 +128,7 @@ type FundingKeys struct {
 	LocalKey *keychain.KeyDescriptor
 
 	// RemoteKey is the multi-sig key of the remote party.
-	RemoteKey *btcec.PublicKey
+	RemoteKey *bronec.PublicKey
 }
 
 // MultiSigKeys returns the committed multi-sig keys, but only if they've been
@@ -159,7 +159,7 @@ type CannedAssembler struct {
 	localKey *keychain.KeyDescriptor
 
 	// remoteKey is the remote party's multi-sig key.
-	remoteKey *btcec.PublicKey
+	remoteKey *bronec.PublicKey
 
 	// chanPoint is the final channel point for the to be created channel.
 	chanPoint wire.OutPoint
@@ -177,7 +177,7 @@ type CannedAssembler struct {
 // to construct a funding output and channel point.
 func NewCannedAssembler(thawHeight uint32, chanPoint wire.OutPoint,
 	fundingAmt bronutil.Amount, localKey *keychain.KeyDescriptor,
-	remoteKey *btcec.PublicKey, initiator bool) *CannedAssembler {
+	remoteKey *bronec.PublicKey, initiator bool) *CannedAssembler {
 
 	return &CannedAssembler{
 		initiator:  initiator,

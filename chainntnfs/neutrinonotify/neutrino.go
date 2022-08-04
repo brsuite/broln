@@ -8,7 +8,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/brsuite/brond/btcjson"
+	"github.com/brsuite/broln/blockcache"
+	"github.com/brsuite/broln/chainntnfs"
+	"github.com/brsuite/broln/lntypes"
+	"github.com/brsuite/broln/queue"
+	"github.com/brsuite/brond/bronjson"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/rpcclient"
 	"github.com/brsuite/brond/txscript"
@@ -17,10 +21,6 @@ import (
 	"github.com/brsuite/bronutil/gcs/builder"
 	"github.com/brsuite/neutrino"
 	"github.com/brsuite/neutrino/headerfs"
-	"github.com/brsuite/broln/blockcache"
-	"github.com/brsuite/broln/chainntnfs"
-	"github.com/brsuite/broln/lntypes"
-	"github.com/brsuite/broln/queue"
 )
 
 const (
@@ -294,12 +294,12 @@ func (n *NeutrinoNotifier) onFilteredBlockDisconnected(height int32,
 // any outstanding spend requests.
 type relevantTx struct {
 	tx      *bronutil.Tx
-	details *btcjson.BlockDetails
+	details *bronjson.BlockDetails
 }
 
 // onRelevantTx is a callback that proxies relevant transaction notifications
 // from the backend to the notifier's main event handler.
-func (n *NeutrinoNotifier) onRelevantTx(tx *bronutil.Tx, details *btcjson.BlockDetails) {
+func (n *NeutrinoNotifier) onRelevantTx(tx *bronutil.Tx, details *bronjson.BlockDetails) {
 	select {
 	case n.txUpdates.ChanIn() <- &relevantTx{tx, details}:
 	case <-n.quit:
@@ -1118,14 +1118,14 @@ func (n *NeutrinoChainConn) GetBlockHeader(blockHash *chainhash.Hash) (*wire.Blo
 // GetBlockHeaderVerbose returns a verbose block header result for a hash. This
 // result only contains the height with a nil hash.
 func (n *NeutrinoChainConn) GetBlockHeaderVerbose(blockHash *chainhash.Hash) (
-	*btcjson.GetBlockHeaderVerboseResult, error) {
+	*bronjson.GetBlockHeaderVerboseResult, error) {
 
 	height, err := n.p2pNode.GetBlockHeight(blockHash)
 	if err != nil {
 		return nil, err
 	}
 	// Since only the height is used from the result, leave the hash nil.
-	return &btcjson.GetBlockHeaderVerboseResult{Height: int32(height)}, nil
+	return &bronjson.GetBlockHeaderVerboseResult{Height: int32(height)}, nil
 }
 
 // GetBlockHash returns the hash from a block height.

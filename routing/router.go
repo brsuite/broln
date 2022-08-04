@@ -10,13 +10,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-errors/errors"
 
-	sphinx "github.com/brsuite/lightning-onion"
 	"github.com/brsuite/broln/amp"
 	"github.com/brsuite/broln/batch"
 	"github.com/brsuite/broln/chainntnfs"
@@ -37,6 +36,7 @@ import (
 	"github.com/brsuite/broln/routing/shards"
 	"github.com/brsuite/broln/ticker"
 	"github.com/brsuite/broln/zpay32"
+	sphinx "github.com/brsuite/lightning-onion"
 )
 
 const (
@@ -228,16 +228,16 @@ type MissionController interface {
 	// GetProbability is expected to return the success probability of a
 	// payment from fromNode along edge.
 	GetProbability(fromNode, toNode route.Vertex,
-		amt lnwire.MilliSatoshi) float64
+		amt lnwire.MilliBronees) float64
 }
 
 // FeeSchema is the set fee configuration for a Lightning Node on the network.
 // Using the coefficients described within the schema, the required fee to
 // forward outgoing payments can be derived.
 type FeeSchema struct {
-	// BaseFee is the base amount of milli-satoshis that will be chained
+	// BaseFee is the base amount of milli-broneess that will be chained
 	// for ANY payment forwarded.
-	BaseFee lnwire.MilliSatoshi
+	BaseFee lnwire.MilliBronees
 
 	// FeeRate is the rate that will be charged for forwarding payments.
 	// This value should be interpreted as the numerator for a fraction
@@ -260,11 +260,11 @@ type ChannelPolicy struct {
 
 	// MaxHTLC is the maximum HTLC size including fees we are allowed to
 	// forward over this channel.
-	MaxHTLC lnwire.MilliSatoshi
+	MaxHTLC lnwire.MilliBronees
 
 	// MinHTLC is the minimum HTLC size including fees we are allowed to
 	// forward over this channel.
-	MinHTLC *lnwire.MilliSatoshi
+	MinHTLC *lnwire.MilliBronees
 }
 
 // Config defines the configuration for the ChannelRouter. ALL elements within
@@ -1733,7 +1733,7 @@ type routingMsg struct {
 // particular target destination to which it is able to send `amt` after
 // factoring in channel capacities and cumulative fees along the route.
 func (r *ChannelRouter) FindRoute(source, target route.Vertex,
-	amt lnwire.MilliSatoshi, restrictions *RestrictParams,
+	amt lnwire.MilliBronees, restrictions *RestrictParams,
 	destCustomRecords record.CustomSet,
 	routeHints map[route.Vertex][]*channeldb.CachedEdgePolicy,
 	finalExpiry uint16) (*route.Route, error) {
@@ -1799,12 +1799,12 @@ func (r *ChannelRouter) FindRoute(source, target route.Vertex,
 
 // generateNewSessionKey generates a new ephemeral private key to be used for a
 // payment attempt.
-func generateNewSessionKey() (*btcec.PrivateKey, error) {
+func generateNewSessionKey() (*bronec.PrivateKey, error) {
 	// Generate a new random session key to ensure that we don't trigger
 	// any replay.
 	//
 	// TODO(roasbeef): add more sources of randomness?
-	return btcec.NewPrivateKey(btcec.S256())
+	return bronec.NewPrivateKey(bronec.S256())
 }
 
 // generateSphinxPacket generates then encodes a sphinx packet which encodes
@@ -1812,7 +1812,7 @@ func generateNewSessionKey() (*btcec.PrivateKey, error) {
 // from this function can immediately be included within an HTLC add packet to
 // be sent to the first hop within the route.
 func generateSphinxPacket(rt *route.Route, paymentHash []byte,
-	sessionKey *btcec.PrivateKey) ([]byte, *sphinx.Circuit, error) {
+	sessionKey *bronec.PrivateKey) ([]byte, *sphinx.Circuit, error) {
 
 	// Now that we know we have an actual route, we'll map the route into a
 	// sphinx payument path which includes per-hop paylods for each hop
@@ -1878,13 +1878,13 @@ type LightningPayment struct {
 	Target route.Vertex
 
 	// Amount is the value of the payment to send through the network in
-	// milli-satoshis.
-	Amount lnwire.MilliSatoshi
+	// milli-broneess.
+	Amount lnwire.MilliBronees
 
-	// FeeLimit is the maximum fee in millisatoshis that the payment should
+	// FeeLimit is the maximum fee in millibroneess that the payment should
 	// accept when sending it through the network. The payment will fail
 	// if there isn't a route with lower fees than this limit.
-	FeeLimit lnwire.MilliSatoshi
+	FeeLimit lnwire.MilliBronees
 
 	// CltvLimit is the maximum time lock that is allowed for attempts to
 	// complete this payment.
@@ -1962,7 +1962,7 @@ type LightningPayment struct {
 	// the payment amount is greater than it.
 	//
 	// NOTE: This field is _optional_.
-	MaxShardAmt *lnwire.MilliSatoshi
+	MaxShardAmt *lnwire.MilliBronees
 }
 
 // AMPOptions houses information that must be known in order to send an AMP
@@ -2298,7 +2298,7 @@ func (r *ChannelRouter) SendToRoute(htlcHash lntypes.Hash, rt *route.Route) (
 // router will call this method for every payment still in-flight according to
 // the ControlTower.
 func (r *ChannelRouter) sendPayment(
-	totalAmt, feeLimit lnwire.MilliSatoshi, identifier lntypes.Hash,
+	totalAmt, feeLimit lnwire.MilliBronees, identifier lntypes.Hash,
 	timeout time.Duration, paySession PaymentSession,
 	shardTracker shards.ShardTracker) ([32]byte, *route.Route, error) {
 
@@ -2358,7 +2358,7 @@ func (r *ChannelRouter) extractChannelUpdate(
 // applyChannelUpdate validates a channel update and if valid, applies it to the
 // database. It returns a bool indicating whether the updates was successful.
 func (r *ChannelRouter) applyChannelUpdate(msg *lnwire.ChannelUpdate,
-	pubKey *btcec.PublicKey) bool {
+	pubKey *bronec.PublicKey) bool {
 
 	ch, _, _, err := r.GetChannelByID(msg.ShortChannelID)
 	if err != nil {
@@ -2380,8 +2380,8 @@ func (r *ChannelRouter) applyChannelUpdate(msg *lnwire.ChannelUpdate,
 		TimeLockDelta:             msg.TimeLockDelta,
 		MinHTLC:                   msg.HtlcMinimumMsat,
 		MaxHTLC:                   msg.HtlcMaximumMsat,
-		FeeBaseMSat:               lnwire.MilliSatoshi(msg.BaseFee),
-		FeeProportionalMillionths: lnwire.MilliSatoshi(msg.FeeRate),
+		FeeBaseMSat:               lnwire.MilliBronees(msg.BaseFee),
+		FeeProportionalMillionths: lnwire.MilliBronees(msg.FeeRate),
 	})
 	if err != nil && !IsError(err, ErrIgnored, ErrOutdated) {
 		log.Errorf("Unable to apply channel update: %v", err)
@@ -2659,7 +2659,7 @@ func (e ErrNoChannel) Error() string {
 // BuildRoute returns a fully specified route based on a list of pubkeys. If
 // amount is nil, the minimum routable amount is used. To force a specific
 // outgoing channel, use the outgoingChan parameter.
-func (r *ChannelRouter) BuildRoute(amt *lnwire.MilliSatoshi,
+func (r *ChannelRouter) BuildRoute(amt *lnwire.MilliBronees,
 	hops []route.Vertex, outgoingChan *uint64,
 	finalCltvDelta int32, payAddr *[32]byte) (*route.Route, error) {
 
@@ -2697,7 +2697,7 @@ func (r *ChannelRouter) BuildRoute(amt *lnwire.MilliSatoshi,
 	// route.
 	edges := make([]*unifiedPolicy, len(hops))
 
-	var runningAmt lnwire.MilliSatoshi
+	var runningAmt lnwire.MilliBronees
 	if useMinAmt {
 		// For minimum amount routes, aim to deliver at least 1 msat to
 		// the destination. There are nodes in the wild that have a

@@ -179,12 +179,12 @@ type AddHoldInvoiceRequest struct {
 	// The hash of the preimage
 	Hash []byte `protobuf:"bytes,2,opt,name=hash,proto3" json:"hash,omitempty"`
 	//
-	//The value of this invoice in satoshis
+	//The value of this invoice in broneess
 	//
 	//The fields value and value_msat are mutually exclusive.
 	Value int64 `protobuf:"varint,3,opt,name=value,proto3" json:"value,omitempty"`
 	//
-	//The value of this invoice in millisatoshis
+	//The value of this invoice in millibroneess
 	//
 	//The fields value and value_msat are mutually exclusive.
 	ValueMsat int64 `protobuf:"varint,10,opt,name=value_msat,json=valueMsat,proto3" json:"value_msat,omitempty"`

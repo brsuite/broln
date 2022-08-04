@@ -9,10 +9,6 @@ import (
 	math "math"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/feature"
 	"github.com/brsuite/broln/htlcswitch"
@@ -24,6 +20,10 @@ import (
 	"github.com/brsuite/broln/routing/route"
 	"github.com/brsuite/broln/subscribe"
 	"github.com/brsuite/broln/zpay32"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 const (
@@ -53,7 +53,7 @@ type RouterBackend struct {
 	// FindRoutes is a closure that abstracts away how we locate/query for
 	// routes.
 	FindRoute func(source, target route.Vertex,
-		amt lnwire.MilliSatoshi, restrictions *routing.RestrictParams,
+		amt lnwire.MilliBronees, restrictions *routing.RestrictParams,
 		destCustomRecords record.CustomSet,
 		routeHints map[route.Vertex][]*channeldb.CachedEdgePolicy,
 		finalExpiry uint16) (*route.Route, error)
@@ -102,7 +102,7 @@ type MissionControl interface {
 	// GetProbability is expected to return the success probability of a
 	// payment from fromNode to toNode.
 	GetProbability(fromNode, toNode route.Vertex,
-		amt lnwire.MilliSatoshi) float64
+		amt lnwire.MilliBronees) float64
 
 	// ResetHistory resets the history of MissionControl returning it to a
 	// state as if no payment attempts have been made.
@@ -132,7 +132,7 @@ type MissionControl interface {
 
 // QueryRoutes attempts to query the daemons' Channel Router for a possible
 // route to a target destination capable of carrying a specific amount of
-// satoshis within the route's flow. The retuned route contains the full
+// broneess within the route's flow. The retuned route contains the full
 // details required to craft and send an HTLC, also including the necessary
 // information that should be present within the Sphinx packet encapsulated
 // within the HTLC.
@@ -172,7 +172,7 @@ func (r *RouterBackend) QueryRoutes(ctx context.Context,
 
 	// Currently, within the bootstrap phase of the network, we limit the
 	// largest payment size allotted to (2^32) - 1 mSAT or 4.29 million
-	// satoshis.
+	// broneess.
 	amt, err := lnrpc.UnmarshallAmt(in.Amt, in.AmtMsat)
 	if err != nil {
 		return nil, err
@@ -257,7 +257,7 @@ func (r *RouterBackend) QueryRoutes(ctx context.Context,
 	restrictions := &routing.RestrictParams{
 		FeeLimit: feeLimit,
 		ProbabilitySource: func(fromNode, toNode route.Vertex,
-			amt lnwire.MilliSatoshi) float64 {
+			amt lnwire.MilliBronees) float64 {
 
 			if _, ok := ignoredNodes[fromNode]; ok {
 				return 0
@@ -321,7 +321,7 @@ func (r *RouterBackend) QueryRoutes(ctx context.Context,
 	}
 
 	// Query the channel router for a possible path to the destination that
-	// can carry `in.Amt` satoshis _including_ the total fee required on
+	// can carry `in.Amt` broneess _including_ the total fee required on
 	// the route.
 	route, err := r.FindRoute(
 		sourcePubKey, targetPubKey, amt, restrictions,
@@ -397,9 +397,9 @@ func (r *RouterBackend) rpcEdgeToPair(e *lnrpc.EdgeLocator) (
 func (r *RouterBackend) MarshallRoute(route *route.Route) (*lnrpc.Route, error) {
 	resp := &lnrpc.Route{
 		TotalTimeLock: route.TotalTimeLock,
-		TotalFees:     int64(route.TotalFees().ToSatoshis()),
+		TotalFees:     int64(route.TotalFees().ToBroneess()),
 		TotalFeesMsat: int64(route.TotalFees()),
-		TotalAmt:      int64(route.TotalAmount.ToSatoshis()),
+		TotalAmt:      int64(route.TotalAmount.ToBroneess()),
 		TotalAmtMsat:  int64(route.TotalAmount),
 		Hops:          make([]*lnrpc.Hop, len(route.Hops)),
 	}
@@ -415,7 +415,7 @@ func (r *RouterBackend) MarshallRoute(route *route.Route) (*lnrpc.Route, error) 
 			// If capacity cannot be retrieved, this may be a
 			// not-yet-received or private channel. Then report
 			// amount that is sent through the channel as capacity.
-			chanCapacity = incomingAmt.ToSatoshis()
+			chanCapacity = incomingAmt.ToBroneess()
 		}
 
 		// Extract the MPP fields if present on this hop.
@@ -432,9 +432,9 @@ func (r *RouterBackend) MarshallRoute(route *route.Route) (*lnrpc.Route, error) 
 		resp.Hops[i] = &lnrpc.Hop{
 			ChanId:           hop.ChannelID,
 			ChanCapacity:     int64(chanCapacity),
-			AmtToForward:     int64(hop.AmtToForward.ToSatoshis()),
+			AmtToForward:     int64(hop.AmtToForward.ToBroneess()),
 			AmtToForwardMsat: int64(hop.AmtToForward),
-			Fee:              int64(fee.ToSatoshis()),
+			Fee:              int64(fee.ToBroneess()),
 			FeeMsat:          int64(fee),
 			Expiry:           uint32(hop.OutgoingTimeLock),
 			PubKey: hex.EncodeToString(
@@ -472,7 +472,7 @@ func UnmarshallHopWithPubkey(rpcHop *lnrpc.Hop, pubkey route.Vertex) (*route.Hop
 
 	return &route.Hop{
 		OutgoingTimeLock: rpcHop.Expiry,
-		AmtToForward:     lnwire.MilliSatoshi(rpcHop.AmtToForwardMsat),
+		AmtToForward:     lnwire.MilliBronees(rpcHop.AmtToForwardMsat),
 		PubKeyBytes:      pubkey,
 		ChannelID:        rpcHop.ChanId,
 		CustomRecords:    customRecords,
@@ -539,7 +539,7 @@ func (r *RouterBackend) UnmarshallRoute(rpcroute *lnrpc.Route) (
 	}
 
 	route, err := route.NewRouteFromHops(
-		lnwire.MilliSatoshi(rpcroute.TotalAmtMsat),
+		lnwire.MilliBronees(rpcroute.TotalAmtMsat),
 		rpcroute.TotalTimeLock,
 		r.SelfNode,
 		hops,
@@ -607,7 +607,7 @@ func (r *RouterBackend) extractIntentFromSendRequest(
 	// that now, which'll force us to always make payment splits smaller
 	// than this.
 	if rpcPayReq.MaxShardSizeMsat > 0 {
-		shardAmtMsat := lnwire.MilliSatoshi(rpcPayReq.MaxShardSizeMsat)
+		shardAmtMsat := lnwire.MilliBronees(rpcPayReq.MaxShardSizeMsat)
 		payIntent.MaxShardAmt = &shardAmtMsat
 	}
 
@@ -683,7 +683,7 @@ func (r *RouterBackend) extractIntentFromSendRequest(
 		}
 
 		// If the amount was not included in the invoice, then we let
-		// the payee specify the amount of satoshis they wish to send.
+		// the payee specify the amount of broneess they wish to send.
 		// We override the amount to pay with the amount provided from
 		// the payment request.
 		if payReq.MilliSat == nil {
@@ -927,7 +927,7 @@ func unmarshallHopHint(rpcHint *lnrpc.HopHint) (zpay32.HopHint, error) {
 		return zpay32.HopHint{}, err
 	}
 
-	pubkey, err := btcec.ParsePubKey(pubBytes, btcec.S256())
+	pubkey, err := bronec.ParsePubKey(pubBytes, bronec.S256())
 	if err != nil {
 		return zpay32.HopHint{}, err
 	}
@@ -1028,7 +1028,7 @@ func UnmarshalMPP(reqMPP *lnrpc.MPPRecord) (*record.MPP, error) {
 			"payment_addr: %v", err)
 	}
 
-	total := lnwire.MilliSatoshi(reqTotal)
+	total := lnwire.MilliBronees(reqTotal)
 
 	return record.NewMPP(total, addr), nil
 }
@@ -1319,7 +1319,7 @@ func (r *RouterBackend) MarshallPayment(payment *channeldb.MPPayment) (
 
 	// Fetch the payment's preimage and the total paid in fees.
 	var (
-		fee      lnwire.MilliSatoshi
+		fee      lnwire.MilliBronees
 		preimage lntypes.Preimage
 	)
 	for _, htlc := range payment.HTLCs {
@@ -1332,7 +1332,7 @@ func (r *RouterBackend) MarshallPayment(payment *channeldb.MPPayment) (
 	}
 
 	msatValue := int64(payment.Info.Value)
-	satValue := int64(payment.Info.Value.ToSatoshis())
+	satValue := int64(payment.Info.Value.ToBroneess())
 
 	status, err := convertPaymentStatus(payment.Status)
 	if err != nil {
@@ -1367,8 +1367,8 @@ func (r *RouterBackend) MarshallPayment(payment *channeldb.MPPayment) (
 		ValueSat:        satValue,
 		CreationDate:    payment.Info.CreationTime.Unix(),
 		CreationTimeNs:  creationTimeNS,
-		Fee:             int64(fee.ToSatoshis()),
-		FeeSat:          int64(fee.ToSatoshis()),
+		Fee:             int64(fee.ToBroneess()),
+		FeeSat:          int64(fee.ToBroneess()),
 		FeeMsat:         int64(fee),
 		PaymentPreimage: hex.EncodeToString(preimage[:]),
 		PaymentRequest:  string(payment.Info.PaymentRequest),

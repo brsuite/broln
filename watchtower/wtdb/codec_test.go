@@ -10,13 +10,13 @@ import (
 	"testing"
 	"testing/quick"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/tor"
 	"github.com/brsuite/broln/watchtower/wtdb"
+	"github.com/brsuite/brond/bronec"
 )
 
-func randPubKey() (*btcec.PublicKey, error) {
-	priv, err := btcec.NewPrivateKey(btcec.S256())
+func randPubKey() (*bronec.PublicKey, error) {
+	priv, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		return nil, err
 	}

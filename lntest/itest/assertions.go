@@ -9,17 +9,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/rpcclient"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/go-errors/errors"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/routerrpc"
 	"github.com/brsuite/broln/lnrpc/walletrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lntest/wait"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/rpcclient"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/go-errors/errors"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
 )
@@ -906,8 +906,8 @@ func findSweepInDetails(t *testing.T, sweepTxid string,
 }
 
 // assertAmountSent generates a closure which queries listchannels for sndr and
-// rcvr, and asserts that sndr sent amt satoshis, and that rcvr received amt
-// satoshis.
+// rcvr, and asserts that sndr sent amt broneess, and that rcvr received amt
+// broneess.
 //
 // NOTE: This method assumes that each node only has one channel, and it is the
 // channel used to send the payment.
@@ -923,11 +923,11 @@ func assertAmountSent(amt bronutil.Amount, sndr, rcvr *lntest.HarnessNode) func(
 			return fmt.Errorf("unable to query for %s's channel "+
 				"list: %v", sndr.Name(), err)
 		}
-		sndrSatoshisSent := sndrListChannels.Channels[0].TotalSatoshisSent
-		if sndrSatoshisSent != int64(amt) {
-			return fmt.Errorf("%s's satoshis sent is incorrect "+
+		sndrBroneessSent := sndrListChannels.Channels[0].TotalBroneessSent
+		if sndrBroneessSent != int64(amt) {
+			return fmt.Errorf("%s's broneess sent is incorrect "+
 				"got %v, expected %v", sndr.Name(),
-				sndrSatoshisSent, amt)
+				sndrBroneessSent, amt)
 		}
 
 		ctxt, _ = context.WithTimeout(ctxb, defaultTimeout)
@@ -936,11 +936,11 @@ func assertAmountSent(amt bronutil.Amount, sndr, rcvr *lntest.HarnessNode) func(
 			return fmt.Errorf("unable to query for %s's channel "+
 				"list: %v", rcvr.Name(), err)
 		}
-		rcvrSatoshisReceived := rcvrListChannels.Channels[0].TotalSatoshisReceived
-		if rcvrSatoshisReceived != int64(amt) {
-			return fmt.Errorf("%s's satoshis received is "+
+		rcvrBroneessReceived := rcvrListChannels.Channels[0].TotalBroneessReceived
+		if rcvrBroneessReceived != int64(amt) {
+			return fmt.Errorf("%s's broneess received is "+
 				"incorrect got %v, expected %v", rcvr.Name(),
-				rcvrSatoshisReceived, amt)
+				rcvrBroneessReceived, amt)
 		}
 
 		return nil
@@ -1021,18 +1021,18 @@ func assertAmountPaid(t *harnessTest, channelName string,
 				continue
 			}
 
-			if channel.TotalSatoshisSent != amountSent {
+			if channel.TotalBroneessSent != amountSent {
 				return fmt.Errorf("%v: incorrect amount"+
 					" sent: %v != %v", channelName,
-					channel.TotalSatoshisSent,
+					channel.TotalBroneessSent,
 					amountSent)
 			}
-			if channel.TotalSatoshisReceived !=
+			if channel.TotalBroneessReceived !=
 				amountReceived {
 				return fmt.Errorf("%v: incorrect amount"+
 					" received: %v != %v",
 					channelName,
-					channel.TotalSatoshisReceived,
+					channel.TotalBroneessReceived,
 					amountReceived)
 			}
 

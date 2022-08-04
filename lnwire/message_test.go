@@ -13,10 +13,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/tor"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -25,7 +25,7 @@ const deliveryAddressMaxSize = 34
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 var (
-	testSig = &btcec.Signature{
+	testSig = &bronec.Signature{
 		R: new(big.Int),
 		S: new(big.Int),
 	}
@@ -313,11 +313,11 @@ func newMsgOpenChannel(t testing.TB, r *rand.Rand) *lnwire.OpenChannel {
 
 	msg := &lnwire.OpenChannel{
 		FundingAmount:        bronutil.Amount(r.Int63()),
-		PushAmount:           lnwire.MilliSatoshi(r.Int63()),
+		PushAmount:           lnwire.MilliBronees(r.Int63()),
 		DustLimit:            bronutil.Amount(r.Int63()),
-		MaxValueInFlight:     lnwire.MilliSatoshi(r.Int63()),
+		MaxValueInFlight:     lnwire.MilliBronees(r.Int63()),
 		ChannelReserve:       bronutil.Amount(r.Int63()),
-		HtlcMinimum:          lnwire.MilliSatoshi(r.Int63()),
+		HtlcMinimum:          lnwire.MilliBronees(r.Int63()),
 		FeePerKiloWeight:     uint32(r.Int31()),
 		CsvDelay:             uint16(r.Intn(1 << 16)),
 		MaxAcceptedHTLCs:     uint16(r.Intn(1 << 16)),
@@ -345,10 +345,10 @@ func newMsgAcceptChannel(t testing.TB, r *rand.Rand) *lnwire.AcceptChannel {
 
 	msg := &lnwire.AcceptChannel{
 		DustLimit:             bronutil.Amount(r.Int63()),
-		MaxValueInFlight:      lnwire.MilliSatoshi(r.Int63()),
+		MaxValueInFlight:      lnwire.MilliBronees(r.Int63()),
 		ChannelReserve:        bronutil.Amount(r.Int63()),
 		MinAcceptDepth:        uint32(r.Int31()),
-		HtlcMinimum:           lnwire.MilliSatoshi(r.Int63()),
+		HtlcMinimum:           lnwire.MilliBronees(r.Int63()),
 		CsvDelay:              uint16(r.Intn(1 << 16)),
 		MaxAcceptedHTLCs:      uint16(r.Intn(1 << 16)),
 		FundingKey:            randPubKey(t),
@@ -466,7 +466,7 @@ func newMsgClosingSigned(t testing.TB, r *rand.Rand) *lnwire.ClosingSigned {
 	t.Helper()
 
 	msg := &lnwire.ClosingSigned{
-		FeeSatoshis: bronutil.Amount(r.Int63()),
+		FeeBroneess: bronutil.Amount(r.Int63()),
 		Signature:   testNodeSig,
 		ExtraData:   createExtraData(t, r),
 	}
@@ -482,7 +482,7 @@ func newMsgUpdateAddHTLC(t testing.TB, r *rand.Rand) *lnwire.UpdateAddHTLC {
 
 	msg := &lnwire.UpdateAddHTLC{
 		ID:        r.Uint64(),
-		Amount:    lnwire.MilliSatoshi(r.Int63()),
+		Amount:    lnwire.MilliBronees(r.Int63()),
 		Expiry:    r.Uint32(),
 		ExtraData: createExtraData(t, r),
 	}
@@ -674,7 +674,7 @@ func newMsgChannelUpdate(t testing.TB, r *rand.Rand) *lnwire.ChannelUpdate {
 	t.Helper()
 
 	msgFlags := lnwire.ChanUpdateMsgFlags(r.Int31())
-	maxHtlc := lnwire.MilliSatoshi(r.Int63())
+	maxHtlc := lnwire.MilliBronees(r.Int63())
 
 	// We make the max_htlc field zero if it is not flagged
 	// as being part of the ChannelUpdate, to pass
@@ -690,7 +690,7 @@ func newMsgChannelUpdate(t testing.TB, r *rand.Rand) *lnwire.ChannelUpdate {
 		MessageFlags:    msgFlags,
 		ChannelFlags:    lnwire.ChanUpdateChanFlags(r.Int31()),
 		TimeLockDelta:   uint16(r.Int31()),
-		HtlcMinimumMsat: lnwire.MilliSatoshi(r.Int63()),
+		HtlcMinimumMsat: lnwire.MilliBronees(r.Int63()),
 		HtlcMaximumMsat: maxHtlc,
 		BaseFee:         uint32(r.Int31()),
 		FeeRate:         uint32(r.Int31()),
@@ -866,7 +866,7 @@ func randRawKey(t testing.TB) [33]byte {
 
 	var n [33]byte
 
-	priv, err := btcec.NewPrivateKey(btcec.S256())
+	priv, err := bronec.NewPrivateKey(bronec.S256())
 	require.NoError(t, err, "failed to create privKey")
 
 	copy(n[:], priv.PubKey().SerializeCompressed())
@@ -874,10 +874,10 @@ func randRawKey(t testing.TB) [33]byte {
 	return n
 }
 
-func randPubKey(t testing.TB) *btcec.PublicKey {
+func randPubKey(t testing.TB) *bronec.PublicKey {
 	t.Helper()
 
-	priv, err := btcec.NewPrivateKey(btcec.S256())
+	priv, err := bronec.NewPrivateKey(bronec.S256())
 	require.NoError(t, err, "failed to create pubkey")
 
 	return priv.PubKey()

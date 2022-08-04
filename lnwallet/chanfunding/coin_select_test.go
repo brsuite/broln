@@ -5,10 +5,10 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lnwallet/chainfee"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -157,29 +157,29 @@ func TestCoinSelect(t *testing.T) {
 
 	testCases := []testCase{
 		{
-			// We have 1.0 BTC available, and wants to send 0.5.
+			// We have 1.0 BRON available, and wants to send 0.5.
 			// This will obviously lead to a change output of
-			// almost 0.5 BTC.
+			// almost 0.5 BRON.
 			name: "big change",
 			coins: []Coin{
 				{
 					TxOut: wire.TxOut{
 						PkScript: p2wkhScript,
-						Value:    1 * bronutil.SatoshiPerBrocoin,
+						Value:    1 * bronutil.BroneesPerBrocoin,
 					},
 				},
 			},
-			outputValue: 0.5 * bronutil.SatoshiPerBrocoin,
+			outputValue: 0.5 * bronutil.BroneesPerBrocoin,
 
 			// The one and only input will be selected.
 			expectedInput: []bronutil.Amount{
-				1 * bronutil.SatoshiPerBrocoin,
+				1 * bronutil.BroneesPerBrocoin,
 			},
 			// Change will be what's left minus the fee.
-			expectedChange: 0.5*bronutil.SatoshiPerBrocoin - fundingFee(feeRate, 1, true),
+			expectedChange: 0.5*bronutil.BroneesPerBrocoin - fundingFee(feeRate, 1, true),
 		},
 		{
-			// We have 1 BTC available, and we want to send 1 BTC.
+			// We have 1 BRON available, and we want to send 1 BRON.
 			// This should lead to an error, as we don't have
 			// enough funds to pay the fee.
 			name: "nothing left for fees",
@@ -187,15 +187,15 @@ func TestCoinSelect(t *testing.T) {
 				{
 					TxOut: wire.TxOut{
 						PkScript: p2wkhScript,
-						Value:    1 * bronutil.SatoshiPerBrocoin,
+						Value:    1 * bronutil.BroneesPerBrocoin,
 					},
 				},
 			},
-			outputValue: 1 * bronutil.SatoshiPerBrocoin,
+			outputValue: 1 * bronutil.BroneesPerBrocoin,
 			expectErr:   true,
 		},
 		{
-			// We have a 1 BTC input, and want to create an output
+			// We have a 1 BRON input, and want to create an output
 			// as big as possible, such that the remaining change
 			// would be dust but instead goes to fees.
 			name: "dust change",
@@ -203,16 +203,16 @@ func TestCoinSelect(t *testing.T) {
 				{
 					TxOut: wire.TxOut{
 						PkScript: p2wkhScript,
-						Value:    1 * bronutil.SatoshiPerBrocoin,
+						Value:    1 * bronutil.BroneesPerBrocoin,
 					},
 				},
 			},
 			// We tune the output value by subtracting the expected
 			// fee and the dustlimit.
-			outputValue: 1*bronutil.SatoshiPerBrocoin - fundingFee(feeRate, 1, false) - dustLimit,
+			outputValue: 1*bronutil.BroneesPerBrocoin - fundingFee(feeRate, 1, false) - dustLimit,
 
 			expectedInput: []bronutil.Amount{
-				1 * bronutil.SatoshiPerBrocoin,
+				1 * bronutil.BroneesPerBrocoin,
 			},
 
 			// Change must be zero.
@@ -333,7 +333,7 @@ func TestCoinSelectSubtractFees(t *testing.T) {
 
 	testCases := []testCase{
 		{
-			// We have 1.0 BTC available, spend them all. This
+			// We have 1.0 BRON available, spend them all. This
 			// should lead to a funding TX with one output, the
 			// rest goes to fees.
 			name: "spend all",
@@ -341,39 +341,39 @@ func TestCoinSelectSubtractFees(t *testing.T) {
 				{
 					TxOut: wire.TxOut{
 						PkScript: p2wkhScript,
-						Value:    1 * bronutil.SatoshiPerBrocoin,
+						Value:    1 * bronutil.BroneesPerBrocoin,
 					},
 				},
 			},
-			spendValue: 1 * bronutil.SatoshiPerBrocoin,
+			spendValue: 1 * bronutil.BroneesPerBrocoin,
 
 			// The one and only input will be selected.
 			expectedInput: []bronutil.Amount{
-				1 * bronutil.SatoshiPerBrocoin,
+				1 * bronutil.BroneesPerBrocoin,
 			},
-			expectedFundingAmt: 1*bronutil.SatoshiPerBrocoin - fundingFee(feeRate, 1, false),
+			expectedFundingAmt: 1*bronutil.BroneesPerBrocoin - fundingFee(feeRate, 1, false),
 			expectedChange:     0,
 		},
 		{
-			// We have 1.0 BTC available and spend half of it. This
+			// We have 1.0 BRON available and spend half of it. This
 			// should lead to a funding TX with a change output.
 			name: "spend with change",
 			coins: []Coin{
 				{
 					TxOut: wire.TxOut{
 						PkScript: p2wkhScript,
-						Value:    1 * bronutil.SatoshiPerBrocoin,
+						Value:    1 * bronutil.BroneesPerBrocoin,
 					},
 				},
 			},
-			spendValue: 0.5 * bronutil.SatoshiPerBrocoin,
+			spendValue: 0.5 * bronutil.BroneesPerBrocoin,
 
 			// The one and only input will be selected.
 			expectedInput: []bronutil.Amount{
-				1 * bronutil.SatoshiPerBrocoin,
+				1 * bronutil.BroneesPerBrocoin,
 			},
-			expectedFundingAmt: 0.5*bronutil.SatoshiPerBrocoin - fundingFee(feeRate, 1, true),
-			expectedChange:     0.5 * bronutil.SatoshiPerBrocoin,
+			expectedFundingAmt: 0.5*bronutil.BroneesPerBrocoin - fundingFee(feeRate, 1, true),
+			expectedChange:     0.5 * bronutil.BroneesPerBrocoin,
 		},
 		{
 			// The total funds available is below the dust limit
@@ -389,8 +389,8 @@ func TestCoinSelectSubtractFees(t *testing.T) {
 			},
 			spendValue: fundingFee(feeRate, 1, false) + dust,
 
-			expectErr: "output amount(<amt> BTC) after subtracting " +
-				"fees(<amt> BTC) below dust limit(<amt> BTC)",
+			expectErr: "output amount(<amt> BRON) after subtracting " +
+				"fees(<amt> BRON) below dust limit(<amt> BRON)",
 		},
 		{
 			// After subtracting fees, the resulting change output
@@ -401,16 +401,16 @@ func TestCoinSelectSubtractFees(t *testing.T) {
 				{
 					TxOut: wire.TxOut{
 						PkScript: p2wkhScript,
-						Value:    1 * bronutil.SatoshiPerBrocoin,
+						Value:    1 * bronutil.BroneesPerBrocoin,
 					},
 				},
 			},
-			spendValue: 1*bronutil.SatoshiPerBrocoin - dust,
+			spendValue: 1*bronutil.BroneesPerBrocoin - dust,
 
 			expectedInput: []bronutil.Amount{
-				1 * bronutil.SatoshiPerBrocoin,
+				1 * bronutil.BroneesPerBrocoin,
 			},
-			expectedFundingAmt: 1*bronutil.SatoshiPerBrocoin - fundingFee(feeRate, 1, false),
+			expectedFundingAmt: 1*bronutil.BroneesPerBrocoin - fundingFee(feeRate, 1, false),
 			expectedChange:     0,
 		},
 		{
@@ -466,7 +466,7 @@ func TestCoinSelectSubtractFees(t *testing.T) {
 			},
 			spendValue: 5 * fundingFee(highFeeRate, 1, false),
 
-			expectErr: "fee <amt> BTC on total output value <amt> BTC",
+			expectErr: "fee <amt> BRON on total output value <amt> BRON",
 		},
 	}
 

@@ -18,14 +18,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/kvdb"
+	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/brsuite/broln/kvdb"
-	"github.com/brsuite/broln/lnwire"
-	"github.com/brsuite/broln/routing/route"
 	"github.com/stretchr/testify/require"
 )
 
@@ -36,7 +36,7 @@ var (
 		"[2001:db8:85a3:0:0:8a2e:370:7334]:80")
 	testAddrs = []net.Addr{testAddr, anotherAddr}
 
-	testSig = &btcec.Signature{
+	testSig = &bronec.Signature{
 		R: new(big.Int),
 		S: new(big.Int),
 	}
@@ -94,7 +94,7 @@ func MakeTestGraph(modifiers ...OptionModifier) (*ChannelGraph, func(), error) {
 	return graph, cleanUp, nil
 }
 
-func createLightningNode(db kvdb.Backend, priv *btcec.PrivateKey) (*LightningNode, error) {
+func createLightningNode(db kvdb.Backend, priv *bronec.PrivateKey) (*LightningNode, error) {
 	updateTime := prand.Int63()
 
 	pub := priv.PubKey().SerializeCompressed()
@@ -114,7 +114,7 @@ func createLightningNode(db kvdb.Backend, priv *btcec.PrivateKey) (*LightningNod
 }
 
 func createTestVertex(db kvdb.Backend) (*LightningNode, error) {
-	priv, err := btcec.NewPrivateKey(btcec.S256())
+	priv, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -1079,10 +1079,10 @@ func newEdgePolicy(chanID uint64, db kvdb.Backend,
 		MessageFlags:              1,
 		ChannelFlags:              0,
 		TimeLockDelta:             uint16(prand.Int63()),
-		MinHTLC:                   lnwire.MilliSatoshi(prand.Int63()),
-		MaxHTLC:                   lnwire.MilliSatoshi(prand.Int63()),
-		FeeBaseMSat:               lnwire.MilliSatoshi(prand.Int63()),
-		FeeProportionalMillionths: lnwire.MilliSatoshi(prand.Int63()),
+		MinHTLC:                   lnwire.MilliBronees(prand.Int63()),
+		MaxHTLC:                   lnwire.MilliBronees(prand.Int63()),
+		FeeBaseMSat:               lnwire.MilliBronees(prand.Int63()),
+		FeeProportionalMillionths: lnwire.MilliBronees(prand.Int63()),
 		db:                        db,
 	}
 }
@@ -3490,7 +3490,7 @@ func TestLightningNodeSigVerification(t *testing.T) {
 	}
 
 	// Create private key and sign the data with it.
-	priv, err := btcec.NewPrivateKey(btcec.S256())
+	priv, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to crete priv key: %v", err)
 	}
@@ -3536,8 +3536,8 @@ func TestComputeFee(t *testing.T) {
 			FeeBaseMSat:               10000,
 			FeeProportionalMillionths: 30000,
 		}
-		outgoingAmt = lnwire.MilliSatoshi(1000000)
-		expectedFee = lnwire.MilliSatoshi(40000)
+		outgoingAmt = lnwire.MilliBronees(1000000)
+		expectedFee = lnwire.MilliBronees(40000)
 	)
 
 	fee := policy.ComputeFee(outgoingAmt)
@@ -3709,7 +3709,7 @@ func BenchmarkForEachChannel(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var (
 			totalCapacity bronutil.Amount
-			maxHTLCs      lnwire.MilliSatoshi
+			maxHTLCs      lnwire.MilliBronees
 		)
 
 		var nodes []GraphCacheNode

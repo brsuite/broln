@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/brsuite/brond/btcjson"
+	"github.com/brsuite/brond/bronjson"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/integration/rpctest"
 	"github.com/brsuite/brond/rpcclient"
@@ -59,12 +59,12 @@ func (b BrondBackendConfig) GenArgs() []string {
 
 // ConnectMiner is called to establish a connection to the test miner.
 func (b BrondBackendConfig) ConnectMiner() error {
-	return b.harness.Client.Node(btcjson.NConnect, b.minerAddr, &temp)
+	return b.harness.Client.Node(bronjson.NConnect, b.minerAddr, &temp)
 }
 
 // DisconnectMiner is called to disconnect the miner.
 func (b BrondBackendConfig) DisconnectMiner() error {
-	return b.harness.Client.Node(btcjson.NDisconnect, b.minerAddr, &temp)
+	return b.harness.Client.Node(bronjson.NDisconnect, b.minerAddr, &temp)
 }
 
 // Name returns the name of the backend type.

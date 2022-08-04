@@ -144,7 +144,7 @@ func TestUpdateAdditionalEdge(t *testing.T) {
 		oldExpiryDelta, policy.TimeLockDelta, "timelock delta mismatch",
 	)
 	require.Equal(t,
-		lnwire.MilliSatoshi(oldFeeBaseMSat),
+		lnwire.MilliBronees(oldFeeBaseMSat),
 		policy.FeeBaseMSat, "fee base msat mismatch",
 	)
 
@@ -169,7 +169,7 @@ func TestUpdateAdditionalEdge(t *testing.T) {
 		newExpiryDelta, policy.TimeLockDelta, "timelock delta mismatch",
 	)
 	require.Equal(t,
-		lnwire.MilliSatoshi(newFeeBaseMSat),
+		lnwire.MilliBronees(newFeeBaseMSat),
 		policy.FeeBaseMSat, "fee base msat mismatch",
 	)
 }
@@ -212,7 +212,7 @@ func TestRequestRoute(t *testing.T) {
 	// Override pathfinder with a mock.
 	session.pathFinder = func(
 		g *graphParams, r *RestrictParams, cfg *PathFindingConfig,
-		source, target route.Vertex, amt lnwire.MilliSatoshi,
+		source, target route.Vertex, amt lnwire.MilliBronees,
 		finalHtlcExpiry int32) ([]*channeldb.CachedEdgePolicy, error) {
 
 		// We expect find path to receive a cltv limit excluding the

@@ -8,10 +8,10 @@ import (
 	"encoding/hex"
 	"sync/atomic"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/brsuite/broln/autopilot"
 	"github.com/brsuite/broln/lnrpc"
+	"github.com/brsuite/brond/bronec"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"gopkg.in/macaroon-bakery.v2/bakery"
 )
@@ -226,7 +226,7 @@ func (s *Server) QueryScores(ctx context.Context, in *QueryScoresRequest) (
 		if err != nil {
 			return nil, err
 		}
-		pubKey, err := btcec.ParsePubKey(pubHex, btcec.S256())
+		pubKey, err := bronec.ParsePubKey(pubHex, bronec.S256())
 		if err != nil {
 			return nil, err
 		}
@@ -283,7 +283,7 @@ func (s *Server) SetScores(ctx context.Context,
 		if err != nil {
 			return nil, err
 		}
-		pubKey, err := btcec.ParsePubKey(pubHex, btcec.S256())
+		pubKey, err := bronec.ParsePubKey(pubHex, bronec.S256())
 		if err != nil {
 			return nil, err
 		}

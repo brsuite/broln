@@ -3,7 +3,7 @@ package lnwire
 import (
 	"io"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 )
 
 // FundingLocked is the message that both parties to a new channel creation
@@ -18,12 +18,12 @@ type FundingLocked struct {
 
 	// NextPerCommitmentPoint is the secret that can be used to revoke the
 	// next commitment transaction for the channel.
-	NextPerCommitmentPoint *btcec.PublicKey
+	NextPerCommitmentPoint *bronec.PublicKey
 }
 
 // NewFundingLocked creates a new FundingLocked message, populating it with the
 // necessary IDs and revocation secret.
-func NewFundingLocked(cid ChannelID, npcp *btcec.PublicKey) *FundingLocked {
+func NewFundingLocked(cid ChannelID, npcp *bronec.PublicKey) *FundingLocked {
 	return &FundingLocked{
 		ChanID:                 cid,
 		NextPerCommitmentPoint: npcp,

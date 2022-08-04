@@ -19,9 +19,9 @@ func testHtlcErrorPropagation(net *lntest.NetworkHarness, t *harnessTest) {
 	// In this test we wish to exercise the daemon's correct parsing,
 	// handling, and propagation of errors that occur while processing a
 	// multi-hop payment.
-	const chanAmt = funding.MaxBtcFundingAmount
+	const chanAmt = funding.MaxBronFundingAmount
 
-	// First establish a channel with a capacity of 0.5 BTC between Alice
+	// First establish a channel with a capacity of 0.5 BRON between Alice
 	// and Bob.
 	chanPointAlice := openChannelAndAssert(
 		t, net, net.Alice, net.Bob,
@@ -93,7 +93,7 @@ func testHtlcErrorPropagation(net *lntest.NetworkHarness, t *harnessTest) {
 	// The channel created will be of lower capacity that the one created
 	// above.
 	net.ConnectNodes(t.t, net.Bob, carol)
-	const bobChanAmt = funding.MaxBtcFundingAmount
+	const bobChanAmt = funding.MaxBronFundingAmount
 	chanPointBob := openChannelAndAssert(
 		t, net, net.Bob, carol,
 		lntest.OpenChannelParams{

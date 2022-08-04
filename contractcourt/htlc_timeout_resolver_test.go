@@ -8,10 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
@@ -19,6 +15,10 @@ import (
 	"github.com/brsuite/broln/lntest/mock"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwallet"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -337,7 +337,7 @@ func TestHtlcTimeoutResolver(t *testing.T) {
 				timeoutTxID := timeoutTx.TxHash()
 				reports = append(reports, &channeldb.ResolverReport{
 					OutPoint:        timeoutTx.TxIn[0].PreviousOutPoint,
-					Amount:          testHtlcAmt.ToSatoshis(),
+					Amount:          testHtlcAmt.ToBroneess(),
 					ResolverType:    channeldb.ResolverTypeOutgoingHtlc,
 					ResolverOutcome: channeldb.ResolverOutcomeFirstStage,
 					SpendTxID:       &timeoutTxID,
@@ -607,7 +607,7 @@ func TestHtlcTimeoutSecondStage(t *testing.T) {
 
 	firstStage := &channeldb.ResolverReport{
 		OutPoint:        commitOutpoint,
-		Amount:          testHtlcAmt.ToSatoshis(),
+		Amount:          testHtlcAmt.ToBroneess(),
 		ResolverType:    channeldb.ResolverTypeOutgoingHtlc,
 		ResolverOutcome: channeldb.ResolverOutcomeFirstStage,
 		SpendTxID:       &timeoutTxid,
@@ -991,7 +991,7 @@ func TestHtlcTimeoutSecondStageSweeper(t *testing.T) {
 
 	firstStage := &channeldb.ResolverReport{
 		OutPoint:        commitOutpoint,
-		Amount:          testHtlcAmt.ToSatoshis(),
+		Amount:          testHtlcAmt.ToBroneess(),
 		ResolverType:    channeldb.ResolverTypeOutgoingHtlc,
 		ResolverOutcome: channeldb.ResolverOutcomeFirstStage,
 		SpendTxID:       &reSignedHash,

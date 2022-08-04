@@ -36,7 +36,7 @@ connection from the watch-only node.
   [introducing a more sane default
   value](https://github.com/brsuite/broln/pull/6226) of 5% routing fees
   (except for small amounts <= [1k
-  satoshis](https://github.com/brsuite/broln/pull/6234) where the 100%
+  broneess](https://github.com/brsuite/broln/pull/6234) where the 100%
   routing fees are kept to accommodate for the base fee in channels). To avoid
   falling back to a default value, users should always set their own fee limits
   by using the `--fee_limit` or `--fee_limit_percent` flags on the `brolncli

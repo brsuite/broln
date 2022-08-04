@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/htlcswitch/hop"
 	"github.com/brsuite/broln/invoices"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwallet"
+	"github.com/brsuite/bronutil"
 )
 
 // htlcIncomingContestResolver is a ContractResolver that's able to resolve an
@@ -355,7 +355,7 @@ func (h *htlcIncomingContestResolver) Resolve() (ContractResolver, error) {
 func (h *htlcIncomingContestResolver) report() *ContractReport {
 	// No locking needed as these values are read-only.
 
-	finalAmt := h.htlc.Amt.ToSatoshis()
+	finalAmt := h.htlc.Amt.ToBroneess()
 	if h.htlcResolution.SignedSuccessTx != nil {
 		finalAmt = bronutil.Amount(
 			h.htlcResolution.SignedSuccessTx.TxOut[0].Value,

@@ -7,9 +7,6 @@ import (
 	"math"
 	"sync"
 
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
@@ -17,6 +14,9 @@ import (
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/sweep"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/davecgh/go-spew/spew"
 )
 
 // htlcTimeoutResolver is a ContractResolver that's capable of resolving an
@@ -549,7 +549,7 @@ func (h *htlcTimeoutResolver) handleCommitSpend(
 
 		reports = append(reports, &channeldb.ResolverReport{
 			OutPoint:        timeoutTx.TxIn[index].PreviousOutPoint,
-			Amount:          h.htlc.Amt.ToSatoshis(),
+			Amount:          h.htlc.Amt.ToBroneess(),
 			ResolverType:    channeldb.ResolverTypeOutgoingHtlc,
 			ResolverOutcome: channeldb.ResolverOutcomeFirstStage,
 			SpendTxID:       spendHash,
@@ -610,7 +610,7 @@ func (h *htlcTimeoutResolver) report() *ContractReport {
 func (h *htlcTimeoutResolver) initReport() {
 	// We create the initial report. This will only be reported for
 	// resolvers not handled by the nursery.
-	finalAmt := h.htlc.Amt.ToSatoshis()
+	finalAmt := h.htlc.Amt.ToBroneess()
 	if h.htlcResolution.SignedTimeoutTx != nil {
 		finalAmt = bronutil.Amount(
 			h.htlcResolution.SignedTimeoutTx.TxOut[0].Value,

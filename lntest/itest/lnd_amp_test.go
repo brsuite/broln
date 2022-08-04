@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/amp"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/lnrpc"
@@ -16,6 +15,7 @@ import (
 	"github.com/brsuite/broln/lnrpc/routerrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lntypes"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -219,7 +219,7 @@ func testSendPaymentAMPInvoiceRepeat(net *lntest.NetworkHarness,
 	defer shutdownAndAssert(net, t, carol)
 
 	// Send Carol enough coins to be able to open a channel to Dave.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	dave := net.NewNode(t.t, "Dave", nil)
 	defer shutdownAndAssert(net, t, dave)

@@ -4,12 +4,12 @@ import (
 	"context"
 	"math"
 
-	"github.com/brsuite/bronutil"
-	"github.com/brsuite/bronutil/hdkeychain"
 	"github.com/brsuite/broln/aezeed"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lntest/wait"
+	"github.com/brsuite/bronutil"
+	"github.com/brsuite/bronutil/hdkeychain"
 	"github.com/stretchr/testify/require"
 )
 
@@ -186,8 +186,8 @@ func testOnchainFundRecovery(net *lntest.NetworkHarness, t *harnessTest) {
 			return true
 		}, defaultTimeout)
 		if err != nil {
-			t.Fatalf("expected restored node to have %d satoshis, "+
-				"instead has %d satoshis, expected %d utxos "+
+			t.Fatalf("expected restored node to have %d broneess, "+
+				"instead has %d broneess, expected %d utxos "+
 				"instead has %d", expAmount, currBalance,
 				expectedNumUTXOs, currNumUTXOs)
 		}
@@ -230,12 +230,12 @@ func testOnchainFundRecovery(net *lntest.NetworkHarness, t *harnessTest) {
 				require.NoError(t.t, err)
 			}
 
-			// Send one BTC to the next P2WKH address.
-			net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, node)
+			// Send one BRON to the next P2WKH address.
+			net.SendCoins(t.t, bronutil.BroneesPerBrocoin, node)
 
 			// And another to the next NP2WKH address.
 			net.SendCoinsNP2WKH(
-				t.t, bronutil.SatoshiPerBrocoin, node,
+				t.t, bronutil.BroneesPerBrocoin, node,
 			)
 		}
 	}
@@ -243,7 +243,7 @@ func testOnchainFundRecovery(net *lntest.NetworkHarness, t *harnessTest) {
 	// Restore Carol with a recovery window of 0. Since no coins have been
 	// sent, her balance should be zero.
 	//
-	// After, one BTC is sent to both her first external P2WKH and NP2WKH
+	// After, one BRON is sent to both her first external P2WKH and NP2WKH
 	// addresses.
 	restoreCheckBalance(0, 0, 0, skipAndSend(0))
 
@@ -256,25 +256,25 @@ func testOnchainFundRecovery(net *lntest.NetworkHarness, t *harnessTest) {
 	// wallet at the end of the recovery attempt.
 	//
 	// After, we will generate and skip 9 P2WKH and NP2WKH addresses, and
-	// send another BTC to the subsequent 10th address in each derivation
+	// send another BRON to the subsequent 10th address in each derivation
 	// path.
-	restoreCheckBalance(2*bronutil.SatoshiPerBrocoin, 2, 1, skipAndSend(9))
+	restoreCheckBalance(2*bronutil.BroneesPerBrocoin, 2, 1, skipAndSend(9))
 
 	// Check that using a recovery window of 9 does not find the two most
 	// recent txns.
-	restoreCheckBalance(2*bronutil.SatoshiPerBrocoin, 2, 9, nil)
+	restoreCheckBalance(2*bronutil.BroneesPerBrocoin, 2, 9, nil)
 
 	// Extending our recovery window to 10 should find the most recent
-	// transactions, leaving the wallet with 4 BTC total. We should also
+	// transactions, leaving the wallet with 4 BRON total. We should also
 	// learn of the two additional UTXOs created above.
 	//
 	// After, we will skip 19 more addrs, sending to the 20th address past
 	// our last found address, and repeat the same checks.
-	restoreCheckBalance(4*bronutil.SatoshiPerBrocoin, 4, 10, skipAndSend(19))
+	restoreCheckBalance(4*bronutil.BroneesPerBrocoin, 4, 10, skipAndSend(19))
 
 	// Check that recovering with a recovery window of 19 fails to find the
 	// most recent transactions.
-	restoreCheckBalance(4*bronutil.SatoshiPerBrocoin, 4, 19, nil)
+	restoreCheckBalance(4*bronutil.BroneesPerBrocoin, 4, 19, nil)
 
 	// Ensure that using a recovery window of 20 succeeds with all UTXOs
 	// found and the final balance reflected.
@@ -284,11 +284,11 @@ func testOnchainFundRecovery(net *lntest.NetworkHarness, t *harnessTest) {
 	// fixed bug in the wallet in which change addresses could at times be
 	// created outside of the default key scopes. Recovery only used to be
 	// performed on the default key scopes, so ideally this test case
-	// would've caught the bug earlier. Carol has received 6 BTC so far from
+	// would've caught the bug earlier. Carol has received 6 BRON so far from
 	// the miner, we'll send 5 back to ensure all of her UTXOs get spent to
 	// avoid fee discrepancies and a change output is formed.
-	const minerAmt = 5 * bronutil.SatoshiPerBrocoin
-	const finalBalance = 6 * bronutil.SatoshiPerBrocoin
+	const minerAmt = 5 * bronutil.BroneesPerBrocoin
+	const finalBalance = 6 * bronutil.BroneesPerBrocoin
 	promptChangeAddr := func(node *lntest.HarnessNode) {
 		t.t.Helper()
 
@@ -311,9 +311,9 @@ func testOnchainFundRecovery(net *lntest.NetworkHarness, t *harnessTest) {
 	}
 	restoreCheckBalance(finalBalance, 6, 20, promptChangeAddr)
 
-	// We should expect a static fee of 27750 satoshis for spending 6 inputs
+	// We should expect a static fee of 27750 broneess for spending 6 inputs
 	// (3 P2WPKH, 3 NP2WPKH) to two P2WPKH outputs. Carol should therefore
-	// only have one UTXO present (the change output) of 6 - 5 - fee BTC.
+	// only have one UTXO present (the change output) of 6 - 5 - fee BRON.
 	const fee = 27750
 	restoreCheckBalance(finalBalance-minerAmt-fee, 1, 21, nil)
 

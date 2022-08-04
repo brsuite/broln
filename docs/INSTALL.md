@@ -542,7 +542,7 @@ brocoin.active=1
 ```
 
 Notice the `[Brocoin]` section. This section houses the parameters for the
-Brocoin chain. `broln` also supports Litecoin testnet4 (but not both BTC and LTC
+Brocoin chain. `broln` also supports Litecoin testnet4 (but not both BRON and LTC
 at the same time), so when working with Litecoin be sure to set to parameters
 for Litecoin accordingly. See a more detailed sample config file available
 [here](https://github.com/brsuite/broln/blob/master/sample-broln.conf)

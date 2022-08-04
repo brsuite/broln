@@ -5,11 +5,11 @@ import (
 	"encoding/binary"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
-	sphinx "github.com/brsuite/lightning-onion"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/record"
 	"github.com/brsuite/broln/tlv"
+	sphinx "github.com/brsuite/lightning-onion"
+	"github.com/davecgh/go-spew/spew"
 )
 
 // TestSphinxHopIteratorForwardingInstructions tests that we're able to
@@ -31,7 +31,7 @@ func TestSphinxHopIteratorForwardingInstructions(t *testing.T) {
 	nextAddrInt := binary.BigEndian.Uint64(hopData.NextAddress[:])
 	expectedFwdInfo := ForwardingInfo{
 		NextHop:         lnwire.NewShortChanIDFromInt(nextAddrInt),
-		AmountToForward: lnwire.MilliSatoshi(hopData.ForwardAmount),
+		AmountToForward: lnwire.MilliBronees(hopData.ForwardAmount),
 		OutgoingCTLV:    hopData.OutgoingCltv,
 	}
 

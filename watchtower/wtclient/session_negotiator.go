@@ -5,8 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/btcsuite/btclog"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/watchtower/blob"
@@ -14,6 +12,8 @@ import (
 	"github.com/brsuite/broln/watchtower/wtpolicy"
 	"github.com/brsuite/broln/watchtower/wtserver"
 	"github.com/brsuite/broln/watchtower/wtwire"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/bronlog"
 )
 
 // SessionNegotiator is an interface for asynchronously requesting new sessions.
@@ -89,7 +89,7 @@ type NegotiatorConfig struct {
 
 	// Log specifies the desired log output, which should be prefixed by the
 	// client type, e.g. anchor or legacy.
-	Log btclog.Logger
+	Log bronlog.Logger
 }
 
 // sessionNegotiator is concrete SessionNegotiator that is able to request new
@@ -102,7 +102,7 @@ type sessionNegotiator struct {
 	localInit *wtwire.Init
 
 	cfg *NegotiatorConfig
-	log btclog.Logger
+	log bronlog.Logger
 
 	dispatcher             chan struct{}
 	newSessions            chan *wtdb.ClientSession

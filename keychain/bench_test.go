@@ -3,7 +3,7 @@ package keychain
 import (
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,7 +20,7 @@ func BenchmarkDerivePrivKey(t *testing.B) {
 	defer cleanUp()
 
 	var (
-		privKey *btcec.PrivateKey
+		privKey *bronec.PrivateKey
 	)
 
 	keyDesc := KeyDescriptor{

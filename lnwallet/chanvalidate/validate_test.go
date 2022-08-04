@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/input"
+	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	"github.com/brsuite/broln/input"
-	"github.com/brsuite/broln/lnwire"
 )
 
 var (
@@ -27,8 +27,8 @@ var (
 		0x69, 0x49, 0x18, 0x83, 0x31, 0x98, 0x47, 0x53,
 	}
 
-	alicePriv, alicePub = btcec.PrivKeyFromBytes(btcec.S256(), aliceKey[:])
-	bobPriv, bobPub     = btcec.PrivKeyFromBytes(btcec.S256(), bobKey[:])
+	alicePriv, alicePub = bronec.PrivKeyFromBytes(bronec.S256(), aliceKey[:])
+	bobPriv, bobPub     = bronec.PrivKeyFromBytes(bronec.S256(), bobKey[:])
 )
 
 // channelTestCtx holds shared context that will be used in all tests cases
@@ -106,8 +106,8 @@ func newChannelTestCtx(chanSize int64) (*channelTestCtx, error) {
 		return nil, err
 	}
 
-	aliceSig, err := btcec.ParseDERSignature(
-		aliceSigRaw, btcec.S256(),
+	aliceSig, err := bronec.ParseDERSignature(
+		aliceSigRaw, bronec.S256(),
 	)
 	if err != nil {
 		return nil, err
@@ -121,8 +121,8 @@ func newChannelTestCtx(chanSize int64) (*channelTestCtx, error) {
 		return nil, err
 	}
 
-	bobSig, err := btcec.ParseDERSignature(
-		bobSigRaw, btcec.S256(),
+	bobSig, err := bronec.ParseDERSignature(
+		bobSigRaw, bronec.S256(),
 	)
 	if err != nil {
 		return nil, err

@@ -14,16 +14,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/brsuite/bronutil/hdkeychain"
-	"github.com/brsuite/bronutil/psbt"
-	"github.com/brsuite/bronwallet/waddrmgr"
-	"github.com/brsuite/bronwallet/wtxmgr"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/labels"
@@ -34,6 +24,16 @@ import (
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/macaroons"
 	"github.com/brsuite/broln/sweep"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/brsuite/bronutil/hdkeychain"
+	"github.com/brsuite/bronutil/psbt"
+	"github.com/brsuite/bronwallet/waddrmgr"
+	"github.com/brsuite/bronwallet/wtxmgr"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"gopkg.in/macaroon-bakery.v2/bakery"
 )
@@ -324,7 +324,7 @@ func (w *WalletKit) internalScope() waddrmgr.KeyScope {
 
 // ListUnspent returns useful information about each unspent output owned by the
 // wallet, as reported by the underlying `ListUnspentWitness`; the information
-// returned is: outpoint, amount in satoshis, address, address type,
+// returned is: outpoint, amount in broneess, address, address type,
 // scriptPubKey in hex and number of confirmations.  The result is filtered to
 // contain outputs whose number of confirmations is between a
 // minimum and maximum number of confirmations specified by the user, with 0
@@ -1525,7 +1525,7 @@ func (w *WalletKit) ImportAccount(ctx context.Context,
 func (w *WalletKit) ImportPublicKey(ctx context.Context,
 	req *ImportPublicKeyRequest) (*ImportPublicKeyResponse, error) {
 
-	pubKey, err := btcec.ParsePubKey(req.PublicKey, btcec.S256())
+	pubKey, err := bronec.ParsePubKey(req.PublicKey, bronec.S256())
 	if err != nil {
 		return nil, err
 	}

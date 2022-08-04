@@ -9,14 +9,14 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
 	mig "github.com/brsuite/broln/channeldb/migration_01_to_11"
 	"github.com/brsuite/broln/channeldb/migtest"
 	"github.com/brsuite/broln/kvdb"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 var (
@@ -62,7 +62,7 @@ var (
 		},
 		LockTime: 5,
 	}
-	_, pubKey = btcec.PrivKeyFromBytes(btcec.S256(), key[:])
+	_, pubKey = bronec.PrivKeyFromBytes(bronec.S256(), key[:])
 )
 
 // TestMigrateFwdPkgCleanup asserts that the migration will delete all the

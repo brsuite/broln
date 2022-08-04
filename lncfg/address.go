@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/tor"
+	"github.com/brsuite/brond/bronec"
 )
 
 var (
@@ -294,7 +294,7 @@ func ParseLNAddressString(strAddress string, defaultPort string,
 
 	// Parse the pubkey bytes to verify that it corresponds to valid public
 	// key on the secp256k1 curve.
-	pubKey, err := btcec.ParsePubKey(pubKeyBytes, btcec.S256())
+	pubKey, err := bronec.ParsePubKey(pubKeyBytes, bronec.S256())
 	if err != nil {
 		return nil, fmt.Errorf("invalid lightning address pubkey: %v", err)
 	}

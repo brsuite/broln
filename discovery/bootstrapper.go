@@ -12,12 +12,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/bronutil/bech32"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/autopilot"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/tor"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/bronutil/bech32"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/miekg/dns"
 )
 
@@ -206,8 +206,8 @@ func (c *ChannelGraphBootstrapper) SampleNodeAddrs(numAddrs uint32,
 					return nil
 				}
 
-				nodePub, err := btcec.ParsePubKey(
-					nodePubKeyBytes[:], btcec.S256(),
+				nodePub, err := bronec.ParsePubKey(
+					nodePubKeyBytes[:], bronec.S256(),
 				)
 				if err != nil {
 					return err
@@ -487,8 +487,8 @@ search:
 			if err != nil {
 				return nil, err
 			}
-			nodeKey, err := btcec.ParsePubKey(
-				nodeBytes, btcec.S256(),
+			nodeKey, err := bronec.ParsePubKey(
+				nodeBytes, bronec.S256(),
 			)
 			if err != nil {
 				return nil, err

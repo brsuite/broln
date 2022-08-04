@@ -10,16 +10,16 @@ import (
 	"net"
 	"os"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/shachain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 var (
@@ -81,7 +81,7 @@ var (
 		LockTime: 5,
 	}
 
-	// A valid, DER-encoded signature (taken from btcec unit tests).
+	// A valid, DER-encoded signature (taken from bronec unit tests).
 	testSigBytes = []byte{
 		0x30, 0x44, 0x02, 0x20, 0x4e, 0x45, 0xe1, 0x69,
 		0x32, 0xb8, 0xaf, 0x51, 0x49, 0x61, 0xa1, 0xd3,
@@ -102,7 +102,7 @@ var (
 
 // CreateTestChannels creates to fully populated channels to be used within
 // testing fixtures. The channels will be returned as if the funding process
-// has just completed.  The channel itself is funded with 10 BTC, with 5 BTC
+// has just completed.  The channel itself is funded with 10 BRON, with 5 BRON
 // allocated to each side. Within the channel, Alice is the initiator. The
 // function also returns a "cleanup" function that is meant to be called once
 // the test has been finalized. The clean up function will remote all temporary
@@ -130,29 +130,29 @@ func CreateTestChannels(chanType channeldb.ChannelType) (
 	// For each party, we'll create a distinct set of keys in order to
 	// emulate the typical set up with live channels.
 	var (
-		aliceKeys []*btcec.PrivateKey
-		bobKeys   []*btcec.PrivateKey
+		aliceKeys []*bronec.PrivateKey
+		bobKeys   []*bronec.PrivateKey
 	)
 	for i := 0; i < 5; i++ {
 		key := make([]byte, len(testWalletPrivKey))
 		copy(key[:], testWalletPrivKey[:])
 		key[0] ^= byte(i + 1)
 
-		aliceKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), key)
+		aliceKey, _ := bronec.PrivKeyFromBytes(bronec.S256(), key)
 		aliceKeys = append(aliceKeys, aliceKey)
 
 		key = make([]byte, len(bobsPrivKey))
 		copy(key[:], bobsPrivKey)
 		key[0] ^= byte(i + 1)
 
-		bobKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), key)
+		bobKey, _ := bronec.PrivKeyFromBytes(bronec.S256(), key)
 		bobKeys = append(bobKeys, bobKey)
 	}
 
 	aliceCfg := channeldb.ChannelConfig{
 		ChannelConstraints: channeldb.ChannelConstraints{
 			DustLimit:        aliceDustLimit,
-			MaxPendingAmount: lnwire.NewMSatFromSatoshis(channelCapacity),
+			MaxPendingAmount: lnwire.NewMSatFromBroneess(channelCapacity),
 			ChanReserve:      channelCapacity / 100,
 			MinHTLC:          0,
 			MaxAcceptedHtlcs: input.MaxHTLCNumber / 2,
@@ -177,7 +177,7 @@ func CreateTestChannels(chanType channeldb.ChannelType) (
 	bobCfg := channeldb.ChannelConfig{
 		ChannelConstraints: channeldb.ChannelConstraints{
 			DustLimit:        bobDustLimit,
-			MaxPendingAmount: lnwire.NewMSatFromSatoshis(channelCapacity),
+			MaxPendingAmount: lnwire.NewMSatFromBroneess(channelCapacity),
 			ChanReserve:      channelCapacity / 100,
 			MinHTLC:          0,
 			MaxAcceptedHtlcs: input.MaxHTLCNumber / 2,
@@ -261,10 +261,10 @@ func CreateTestChannels(chanType channeldb.ChannelType) (
 		anchorAmt += 2 * anchorSize
 	}
 
-	aliceBalance := lnwire.NewMSatFromSatoshis(
+	aliceBalance := lnwire.NewMSatFromBroneess(
 		channelBal - commitFee - anchorAmt,
 	)
-	bobBalance := lnwire.NewMSatFromSatoshis(channelBal)
+	bobBalance := lnwire.NewMSatFromBroneess(channelBal)
 
 	aliceLocalCommit := channeldb.ChannelCommitment{
 		CommitHeight:  0,
@@ -445,21 +445,21 @@ func initRevocationWindows(chanA, chanB *LightningChannel) error {
 }
 
 // pubkeyFromHex parses a Brocoin public key from a hex encoded string.
-func pubkeyFromHex(keyHex string) (*btcec.PublicKey, error) {
+func pubkeyFromHex(keyHex string) (*bronec.PublicKey, error) {
 	bytes, err := hex.DecodeString(keyHex)
 	if err != nil {
 		return nil, err
 	}
-	return btcec.ParsePubKey(bytes, btcec.S256())
+	return bronec.ParsePubKey(bytes, bronec.S256())
 }
 
 // privkeyFromHex parses a Brocoin private key from a hex encoded string.
-func privkeyFromHex(keyHex string) (*btcec.PrivateKey, error) {
+func privkeyFromHex(keyHex string) (*bronec.PrivateKey, error) {
 	bytes, err := hex.DecodeString(keyHex)
 	if err != nil {
 		return nil, err
 	}
-	key, _ := btcec.PrivKeyFromBytes(btcec.S256(), bytes)
+	key, _ := bronec.PrivKeyFromBytes(bronec.S256(), bytes)
 	return key, nil
 
 }

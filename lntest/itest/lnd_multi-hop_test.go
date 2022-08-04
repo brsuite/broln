@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/invoicesrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lntypes"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -214,8 +214,8 @@ func createThreeHopNetwork(t *harnessTest, net *lntest.NetworkHarness,
 
 	// Make sure there are enough utxos for anchoring.
 	for i := 0; i < 2; i++ {
-		net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, alice)
-		net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, bob)
+		net.SendCoins(t.t, bronutil.BroneesPerBrocoin, alice)
+		net.SendCoins(t.t, bronutil.BroneesPerBrocoin, bob)
 	}
 
 	// We'll start the test by creating a channel between Alice and Bob,
@@ -266,7 +266,7 @@ func createThreeHopNetwork(t *harnessTest, net *lntest.NetworkHarness,
 	// needs to be attached as an additional input. This can still lead to a
 	// positively-yielding transaction.
 	for i := 0; i < 2; i++ {
-		net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+		net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 	}
 
 	// We'll then create a channel from Bob to Carol. After this channel is

@@ -3,14 +3,14 @@ package autopilot_test
 import (
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/autopilot"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/bronutil"
 )
 
 // randKey returns a random public key.
-func randKey() (*btcec.PublicKey, error) {
-	priv, err := btcec.NewPrivateKey(btcec.S256())
+func randKey() (*bronec.PublicKey, error) {
+	priv, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func TestSetNodeScores(t *testing.T) {
 		q[nID] = struct{}{}
 	}
 	resp, err := h.NodeScores(
-		nil, nil, bronutil.Amount(bronutil.SatoshiPerBrocoin), q,
+		nil, nil, bronutil.Amount(bronutil.BroneesPerBrocoin), q,
 	)
 	if err != nil {
 		t.Fatal(err)

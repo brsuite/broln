@@ -7,17 +7,17 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/funding"
 	"github.com/brsuite/broln/lntest"
+	"github.com/brsuite/bronutil"
 )
 
 // testMaxChannelSize tests that broln handles --maxchansize parameter
-// correctly. Wumbo nodes should enforce a default soft limit of 10 BTC by
+// correctly. Wumbo nodes should enforce a default soft limit of 10 BRON by
 // default. This limit can be adjusted with --maxchansize config option
 func testMaxChannelSize(net *lntest.NetworkHarness, t *harnessTest) {
 	// We'll make two new nodes, both wumbo but with the default
-	// limit on maximum channel size (10 BTC)
+	// limit on maximum channel size (10 BRON)
 	wumboNode := net.NewNode(
 		t.t, "wumbo", []string{"--protocol.wumbo-channels"},
 	)
@@ -28,22 +28,22 @@ func testMaxChannelSize(net *lntest.NetworkHarness, t *harnessTest) {
 	)
 	defer shutdownAndAssert(net, t, wumboNode2)
 
-	// We'll send 11 BTC to the wumbo node so it can test the wumbo soft limit.
-	net.SendCoins(t.t, 11*bronutil.SatoshiPerBrocoin, wumboNode)
+	// We'll send 11 BRON to the wumbo node so it can test the wumbo soft limit.
+	net.SendCoins(t.t, 11*bronutil.BroneesPerBrocoin, wumboNode)
 
 	// Next we'll connect both nodes, then attempt to make a wumbo channel
 	// funding request, which should fail as it exceeds the default wumbo
-	// soft limit of 10 BTC.
+	// soft limit of 10 BRON.
 	net.EnsureConnected(t.t, wumboNode, wumboNode2)
 
-	chanAmt := funding.MaxBtcFundingAmountWumbo + 1
+	chanAmt := funding.MaxBronFundingAmountWumbo + 1
 	_, err := net.OpenChannel(
 		wumboNode, wumboNode2, lntest.OpenChannelParams{
 			Amt: chanAmt,
 		},
 	)
 	if err == nil {
-		t.Fatalf("expected channel funding to fail as it exceeds 10 BTC limit")
+		t.Fatalf("expected channel funding to fail as it exceeds 10 BRON limit")
 	}
 
 	// The test should show failure due to the channel exceeding our max size.
@@ -65,7 +65,7 @@ func testMaxChannelSize(net *lntest.NetworkHarness, t *harnessTest) {
 		},
 	)
 	if err == nil {
-		t.Fatalf("expected channel funding to fail as it exceeds 0.16 BTC limit")
+		t.Fatalf("expected channel funding to fail as it exceeds 0.16 BRON limit")
 	}
 
 	// The test should show failure due to the channel exceeding our max size.
@@ -81,7 +81,7 @@ func testMaxChannelSize(net *lntest.NetworkHarness, t *harnessTest) {
 			"--protocol.wumbo-channels",
 			fmt.Sprintf(
 				"--maxchansize=%v",
-				int64(funding.MaxBtcFundingAmountWumbo+1),
+				int64(funding.MaxBronFundingAmountWumbo+1),
 			),
 		},
 	)

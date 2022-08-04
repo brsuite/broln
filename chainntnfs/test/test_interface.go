@@ -12,6 +12,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/brsuite/broln/blockcache"
+	"github.com/brsuite/broln/chainntnfs"
+	"github.com/brsuite/broln/chainntnfs/brocoindnotify"
+	"github.com/brsuite/broln/chainntnfs/brondnotify"
+	"github.com/brsuite/broln/chainntnfs/neutrinonotify"
+	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/integration/rpctest"
 	"github.com/brsuite/brond/rpcclient"
@@ -20,12 +26,6 @@ import (
 	"github.com/brsuite/bronwallet/chain"
 	_ "github.com/brsuite/bronwallet/walletdb/bdb" // Required to auto-register the boltdb walletdb implementation.
 	"github.com/brsuite/neutrino"
-	"github.com/brsuite/broln/blockcache"
-	"github.com/brsuite/broln/chainntnfs"
-	"github.com/brsuite/broln/chainntnfs/brocoindnotify"
-	"github.com/brsuite/broln/chainntnfs/brondnotify"
-	"github.com/brsuite/broln/chainntnfs/neutrinonotify"
-	"github.com/brsuite/broln/channeldb"
 )
 
 func testSingleConfirmationNotification(miner *rpctest.Harness,
@@ -1917,7 +1917,7 @@ var blockCatchupTests = []blockCatchupTestCase{
 func TestInterfaces(t *testing.T, targetBackEnd string) {
 	// Initialize the harness around a brond node which will serve as our
 	// dedicated miner to generate blocks, cause re-orgs, etc. We'll set up
-	// this node with a chain length of 125, so we have plenty of BTC to
+	// this node with a chain length of 125, so we have plenty of BRON to
 	// play around with.
 	miner, tearDown := chainntnfs.NewMiner(t, nil, true, 25)
 	defer tearDown()

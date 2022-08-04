@@ -7,8 +7,6 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/brsuite/broln/lncfg"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnwire"
@@ -16,6 +14,8 @@ import (
 	"github.com/brsuite/broln/watchtower/wtclient"
 	"github.com/brsuite/broln/watchtower/wtdb"
 	"github.com/brsuite/broln/watchtower/wtpolicy"
+	"github.com/brsuite/brond/bronec"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"gopkg.in/macaroon-bakery.v2/bakery"
 )
@@ -188,7 +188,7 @@ func (c *WatchtowerClient) AddTower(ctx context.Context,
 		return nil, err
 	}
 
-	pubKey, err := btcec.ParsePubKey(req.Pubkey, btcec.S256())
+	pubKey, err := bronec.ParsePubKey(req.Pubkey, bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +227,7 @@ func (c *WatchtowerClient) RemoveTower(ctx context.Context,
 		return nil, err
 	}
 
-	pubKey, err := btcec.ParsePubKey(req.Pubkey, btcec.S256())
+	pubKey, err := bronec.ParsePubKey(req.Pubkey, bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -301,7 +301,7 @@ func (c *WatchtowerClient) GetTowerInfo(ctx context.Context,
 		return nil, err
 	}
 
-	pubKey, err := btcec.ParsePubKey(req.Pubkey, btcec.S256())
+	pubKey, err := bronec.ParsePubKey(req.Pubkey, bronec.S256())
 	if err != nil {
 		return nil, err
 	}

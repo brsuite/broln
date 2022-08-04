@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/lntest/wait"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/route"
 	"github.com/brsuite/broln/ticker"
+	"github.com/brsuite/brond/bronec"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,7 +25,7 @@ func randPeer(t *testing.T, quit chan struct{}) *mockPeer {
 	return peerWithPubkey(pk, quit)
 }
 
-func peerWithPubkey(pk *btcec.PublicKey, quit chan struct{}) *mockPeer {
+func peerWithPubkey(pk *bronec.PublicKey, quit chan struct{}) *mockPeer {
 	return &mockPeer{
 		pk:       pk,
 		sentMsgs: make(chan lnwire.Message),
@@ -69,7 +69,7 @@ func TestSyncManagerNumActiveSyncers(t *testing.T) {
 	const numInactiveSyncers = 1
 
 	pinnedSyncers := make(PinnedSyncers)
-	pinnedPubkeys := make(map[route.Vertex]*btcec.PublicKey)
+	pinnedPubkeys := make(map[route.Vertex]*bronec.PublicKey)
 	for i := 0; i < numPinnedSyncers; i++ {
 		pubkey := randPubKey(t)
 		vertex := route.NewVertex(pubkey)

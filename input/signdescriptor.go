@@ -5,10 +5,10 @@ import (
 	"errors"
 	"io"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/broln/keychain"
 )
 
 var (
@@ -53,7 +53,7 @@ type SignDescriptor struct {
 	// NOTE: If this value is nil, then the input can be signed using only
 	// the above public key. Either a SingleTweak should be set or a
 	// DoubleTweak, not both.
-	DoubleTweak *btcec.PrivateKey
+	DoubleTweak *bronec.PrivateKey
 
 	// WitnessScript is the full script required to properly redeem the
 	// output. This field should be set to the full script if a p2wsh
@@ -159,8 +159,8 @@ func ReadSignDescriptor(r io.Reader, sd *SignDescriptor) error {
 		if err != nil {
 			return err
 		}
-		sd.KeyDesc.PubKey, err = btcec.ParsePubKey(
-			pubKeyBytes, btcec.S256(),
+		sd.KeyDesc.PubKey, err = bronec.ParsePubKey(
+			pubKeyBytes, bronec.S256(),
 		)
 		if err != nil {
 			return err
@@ -196,7 +196,7 @@ func ReadSignDescriptor(r io.Reader, sd *SignDescriptor) error {
 	if len(doubleTweakBytes) == 0 {
 		sd.DoubleTweak = nil
 	} else {
-		sd.DoubleTweak, _ = btcec.PrivKeyFromBytes(btcec.S256(), doubleTweakBytes)
+		sd.DoubleTweak, _ = bronec.PrivKeyFromBytes(bronec.S256(), doubleTweakBytes)
 	}
 
 	// Only one tweak should ever be set, fail if both are present.

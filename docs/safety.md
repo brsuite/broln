@@ -30,7 +30,7 @@ This chapter describes the security/safety mechanisms that are implemented in
 `broln`. We encourage every person that is planning on putting mainnet funds into
 a Lightning Network channel using `broln` to read this guide carefully.   
 As of this writing, `broln` is still in beta and it is considered `#reckless` to
-put any life altering amounts of BTC into the network.   
+put any life altering amounts of BRON into the network.   
 That said, we constantly put in a lot of effort to make `broln` safer to use and
 more secure. We will update this documentation with each safety mechanism that
 we implement.
@@ -47,7 +47,7 @@ This is what all the on-chain private keys are derived from. `aezeed` is similar
 to BIP39 as it uses the same word list to encode the seed as a mnemonic phrase.
 But this is where the similarities end, because `aezeed` is _not_ compatible
 with BIP39. The 24 words of `aezeed` encode a 128 bit entropy (the seed itself),
-a wallet birthday (days since BTC genesis block) and a version.   
+a wallet birthday (days since BRON genesis block) and a version.   
 This data is _encrypted_ with a password using the AEZ cipher suite (hence the
 name). Encrypting the content instead of using the password to derive the HD
 extended root key has the advantage that the password can actually be checked

@@ -14,15 +14,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/batch"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 var (
@@ -860,7 +860,7 @@ func addLightningNode(tx kvdb.RwTx, node *LightningNode) error {
 
 // LookupAlias attempts to return the alias as advertised by the target node.
 // TODO(roasbeef): currently assumes that aliases are unique...
-func (c *ChannelGraph) LookupAlias(pub *btcec.PublicKey) (string, error) {
+func (c *ChannelGraph) LookupAlias(pub *bronec.PublicKey) (string, error) {
 	var alias string
 
 	err := kvdb.View(c.db, func(tx kvdb.RTx) error {
@@ -2608,7 +2608,7 @@ func updateEdgePolicy(tx kvdb.RwTx, edge *ChannelEdgePolicy,
 type LightningNode struct {
 	// PubKeyBytes is the raw bytes of the public key of the target node.
 	PubKeyBytes [33]byte
-	pubKey      *btcec.PublicKey
+	pubKey      *bronec.PublicKey
 
 	// HaveNodeAnnouncement indicates whether we received a node
 	// announcement for this particular node. If true, the remaining fields
@@ -2657,12 +2657,12 @@ type LightningNode struct {
 //
 // NOTE: By having this method to access an attribute, we ensure we only need
 // to fully deserialize the pubkey if absolutely necessary.
-func (l *LightningNode) PubKey() (*btcec.PublicKey, error) {
+func (l *LightningNode) PubKey() (*bronec.PublicKey, error) {
 	if l.pubKey != nil {
 		return l.pubKey, nil
 	}
 
-	key, err := btcec.ParsePubKey(l.PubKeyBytes[:], btcec.S256())
+	key, err := bronec.ParsePubKey(l.PubKeyBytes[:], bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -2676,13 +2676,13 @@ func (l *LightningNode) PubKey() (*btcec.PublicKey, error) {
 //
 // NOTE: By having this method to access an attribute, we ensure we only need
 // to fully deserialize the signature if absolutely necessary.
-func (l *LightningNode) AuthSig() (*btcec.Signature, error) {
-	return btcec.ParseSignature(l.AuthSigBytes, btcec.S256())
+func (l *LightningNode) AuthSig() (*bronec.Signature, error) {
+	return bronec.ParseSignature(l.AuthSigBytes, bronec.S256())
 }
 
 // AddPubKey is a setter-link method that can be used to swap out the public
 // key for a node.
-func (l *LightningNode) AddPubKey(key *btcec.PublicKey) {
+func (l *LightningNode) AddPubKey(key *bronec.PublicKey) {
 	l.pubKey = key
 	copy(l.PubKeyBytes[:], key.SerializeCompressed())
 }
@@ -3034,19 +3034,19 @@ type ChannelEdgeInfo struct {
 
 	// NodeKey1Bytes is the raw public key of the first node.
 	NodeKey1Bytes [33]byte
-	nodeKey1      *btcec.PublicKey
+	nodeKey1      *bronec.PublicKey
 
 	// NodeKey2Bytes is the raw public key of the first node.
 	NodeKey2Bytes [33]byte
-	nodeKey2      *btcec.PublicKey
+	nodeKey2      *bronec.PublicKey
 
 	// BrocoinKey1Bytes is the raw public key of the first node.
 	BrocoinKey1Bytes [33]byte
-	brocoinKey1      *btcec.PublicKey
+	brocoinKey1      *bronec.PublicKey
 
 	// BrocoinKey2Bytes is the raw public key of the first node.
 	BrocoinKey2Bytes [33]byte
-	brocoinKey2      *btcec.PublicKey
+	brocoinKey2      *bronec.PublicKey
 
 	// Features is an opaque byte slice that encodes the set of channel
 	// specific features that this channel edge supports.
@@ -3079,7 +3079,7 @@ type ChannelEdgeInfo struct {
 // AddNodeKeys is a setter-like method that can be used to replace the set of
 // keys for the target ChannelEdgeInfo.
 func (c *ChannelEdgeInfo) AddNodeKeys(nodeKey1, nodeKey2, brocoinKey1,
-	brocoinKey2 *btcec.PublicKey) {
+	brocoinKey2 *bronec.PublicKey) {
 
 	c.nodeKey1 = nodeKey1
 	copy(c.NodeKey1Bytes[:], c.nodeKey1.SerializeCompressed())
@@ -3101,12 +3101,12 @@ func (c *ChannelEdgeInfo) AddNodeKeys(nodeKey1, nodeKey2, brocoinKey1,
 //
 // NOTE: By having this method to access an attribute, we ensure we only need
 // to fully deserialize the pubkey if absolutely necessary.
-func (c *ChannelEdgeInfo) NodeKey1() (*btcec.PublicKey, error) {
+func (c *ChannelEdgeInfo) NodeKey1() (*bronec.PublicKey, error) {
 	if c.nodeKey1 != nil {
 		return c.nodeKey1, nil
 	}
 
-	key, err := btcec.ParsePubKey(c.NodeKey1Bytes[:], btcec.S256())
+	key, err := bronec.ParsePubKey(c.NodeKey1Bytes[:], bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -3123,12 +3123,12 @@ func (c *ChannelEdgeInfo) NodeKey1() (*btcec.PublicKey, error) {
 //
 // NOTE: By having this method to access an attribute, we ensure we only need
 // to fully deserialize the pubkey if absolutely necessary.
-func (c *ChannelEdgeInfo) NodeKey2() (*btcec.PublicKey, error) {
+func (c *ChannelEdgeInfo) NodeKey2() (*bronec.PublicKey, error) {
 	if c.nodeKey2 != nil {
 		return c.nodeKey2, nil
 	}
 
-	key, err := btcec.ParsePubKey(c.NodeKey2Bytes[:], btcec.S256())
+	key, err := bronec.ParsePubKey(c.NodeKey2Bytes[:], bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -3143,12 +3143,12 @@ func (c *ChannelEdgeInfo) NodeKey2() (*btcec.PublicKey, error) {
 //
 // NOTE: By having this method to access an attribute, we ensure we only need
 // to fully deserialize the pubkey if absolutely necessary.
-func (c *ChannelEdgeInfo) BrocoinKey1() (*btcec.PublicKey, error) {
+func (c *ChannelEdgeInfo) BrocoinKey1() (*bronec.PublicKey, error) {
 	if c.brocoinKey1 != nil {
 		return c.brocoinKey1, nil
 	}
 
-	key, err := btcec.ParsePubKey(c.BrocoinKey1Bytes[:], btcec.S256())
+	key, err := bronec.ParsePubKey(c.BrocoinKey1Bytes[:], bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -3163,12 +3163,12 @@ func (c *ChannelEdgeInfo) BrocoinKey1() (*btcec.PublicKey, error) {
 //
 // NOTE: By having this method to access an attribute, we ensure we only need
 // to fully deserialize the pubkey if absolutely necessary.
-func (c *ChannelEdgeInfo) BrocoinKey2() (*btcec.PublicKey, error) {
+func (c *ChannelEdgeInfo) BrocoinKey2() (*bronec.PublicKey, error) {
 	if c.brocoinKey2 != nil {
 		return c.brocoinKey2, nil
 	}
 
-	key, err := btcec.ParsePubKey(c.BrocoinKey2Bytes[:], btcec.S256())
+	key, err := bronec.ParsePubKey(c.BrocoinKey2Bytes[:], bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -3250,28 +3250,28 @@ func (c *ChannelEdgeInfo) FetchOtherNode(tx kvdb.RTx, thisNodeKey []byte) (*Ligh
 // features.
 type ChannelAuthProof struct {
 	// nodeSig1 is a cached instance of the first node signature.
-	nodeSig1 *btcec.Signature
+	nodeSig1 *bronec.Signature
 
 	// NodeSig1Bytes are the raw bytes of the first node signature encoded
 	// in DER format.
 	NodeSig1Bytes []byte
 
 	// nodeSig2 is a cached instance of the second node signature.
-	nodeSig2 *btcec.Signature
+	nodeSig2 *bronec.Signature
 
 	// NodeSig2Bytes are the raw bytes of the second node signature
 	// encoded in DER format.
 	NodeSig2Bytes []byte
 
 	// brocoinSig1 is a cached instance of the first brocoin signature.
-	brocoinSig1 *btcec.Signature
+	brocoinSig1 *bronec.Signature
 
 	// BrocoinSig1Bytes are the raw bytes of the first brocoin signature
 	// encoded in DER format.
 	BrocoinSig1Bytes []byte
 
 	// brocoinSig2 is a cached instance of the second brocoin signature.
-	brocoinSig2 *btcec.Signature
+	brocoinSig2 *bronec.Signature
 
 	// BrocoinSig2Bytes are the raw bytes of the second brocoin signature
 	// encoded in DER format.
@@ -3284,12 +3284,12 @@ type ChannelAuthProof struct {
 //
 // NOTE: By having this method to access an attribute, we ensure we only need
 // to fully deserialize the signature if absolutely necessary.
-func (c *ChannelAuthProof) Node1Sig() (*btcec.Signature, error) {
+func (c *ChannelAuthProof) Node1Sig() (*bronec.Signature, error) {
 	if c.nodeSig1 != nil {
 		return c.nodeSig1, nil
 	}
 
-	sig, err := btcec.ParseSignature(c.NodeSig1Bytes, btcec.S256())
+	sig, err := bronec.ParseSignature(c.NodeSig1Bytes, bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -3305,12 +3305,12 @@ func (c *ChannelAuthProof) Node1Sig() (*btcec.Signature, error) {
 //
 // NOTE: By having this method to access an attribute, we ensure we only need
 // to fully deserialize the signature if absolutely necessary.
-func (c *ChannelAuthProof) Node2Sig() (*btcec.Signature, error) {
+func (c *ChannelAuthProof) Node2Sig() (*bronec.Signature, error) {
 	if c.nodeSig2 != nil {
 		return c.nodeSig2, nil
 	}
 
-	sig, err := btcec.ParseSignature(c.NodeSig2Bytes, btcec.S256())
+	sig, err := bronec.ParseSignature(c.NodeSig2Bytes, bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -3325,12 +3325,12 @@ func (c *ChannelAuthProof) Node2Sig() (*btcec.Signature, error) {
 //
 // NOTE: By having this method to access an attribute, we ensure we only need
 // to fully deserialize the signature if absolutely necessary.
-func (c *ChannelAuthProof) BrocoinSig1() (*btcec.Signature, error) {
+func (c *ChannelAuthProof) BrocoinSig1() (*bronec.Signature, error) {
 	if c.brocoinSig1 != nil {
 		return c.brocoinSig1, nil
 	}
 
-	sig, err := btcec.ParseSignature(c.BrocoinSig1Bytes, btcec.S256())
+	sig, err := bronec.ParseSignature(c.BrocoinSig1Bytes, bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -3345,12 +3345,12 @@ func (c *ChannelAuthProof) BrocoinSig1() (*btcec.Signature, error) {
 //
 // NOTE: By having this method to access an attribute, we ensure we only need
 // to fully deserialize the signature if absolutely necessary.
-func (c *ChannelAuthProof) BrocoinSig2() (*btcec.Signature, error) {
+func (c *ChannelAuthProof) BrocoinSig2() (*bronec.Signature, error) {
 	if c.brocoinSig2 != nil {
 		return c.brocoinSig2, nil
 	}
 
-	sig, err := btcec.ParseSignature(c.BrocoinSig2Bytes, btcec.S256())
+	sig, err := bronec.ParseSignature(c.BrocoinSig2Bytes, bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -3382,7 +3382,7 @@ type ChannelEdgePolicy struct {
 	SigBytes []byte
 
 	// sig is a cached fully parsed signature.
-	sig *btcec.Signature
+	sig *bronec.Signature
 
 	// ChannelID is the unique channel ID for the channel. The first 3
 	// bytes are the block height, the next 3 the index within the block,
@@ -3407,20 +3407,20 @@ type ChannelEdgePolicy struct {
 	TimeLockDelta uint16
 
 	// MinHTLC is the smallest value HTLC this node will forward, expressed
-	// in millisatoshi.
-	MinHTLC lnwire.MilliSatoshi
+	// in millibronees.
+	MinHTLC lnwire.MilliBronees
 
 	// MaxHTLC is the largest value HTLC this node will forward, expressed
-	// in millisatoshi.
-	MaxHTLC lnwire.MilliSatoshi
+	// in millibronees.
+	MaxHTLC lnwire.MilliBronees
 
 	// FeeBaseMSat is the base HTLC fee that will be charged for forwarding
 	// ANY HTLC, expressed in mSAT's.
-	FeeBaseMSat lnwire.MilliSatoshi
+	FeeBaseMSat lnwire.MilliBronees
 
 	// FeeProportionalMillionths is the rate that the node will charge for
-	// HTLCs for each millionth of a satoshi forwarded.
-	FeeProportionalMillionths lnwire.MilliSatoshi
+	// HTLCs for each millionth of a bronees forwarded.
+	FeeProportionalMillionths lnwire.MilliBronees
 
 	// Node is the LightningNode that this directed edge leads to. Using
 	// this pointer the channel graph can further be traversed.
@@ -3442,12 +3442,12 @@ type ChannelEdgePolicy struct {
 //
 // NOTE: By having this method to access an attribute, we ensure we only need
 // to fully deserialize the signature if absolutely necessary.
-func (c *ChannelEdgePolicy) Signature() (*btcec.Signature, error) {
+func (c *ChannelEdgePolicy) Signature() (*bronec.Signature, error) {
 	if c.sig != nil {
 		return c.sig, nil
 	}
 
-	sig, err := btcec.ParseSignature(c.SigBytes, btcec.S256())
+	sig, err := bronec.ParseSignature(c.SigBytes, bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -3469,24 +3469,24 @@ func (c *ChannelEdgePolicy) IsDisabled() bool {
 	return c.ChannelFlags.IsDisabled()
 }
 
-// ComputeFee computes the fee to forward an HTLC of `amt` milli-satoshis over
+// ComputeFee computes the fee to forward an HTLC of `amt` milli-broneess over
 // the passed active payment channel. This value is currently computed as
 // specified in BOLT07, but will likely change in the near future.
 func (c *ChannelEdgePolicy) ComputeFee(
-	amt lnwire.MilliSatoshi) lnwire.MilliSatoshi {
+	amt lnwire.MilliBronees) lnwire.MilliBronees {
 
 	return c.FeeBaseMSat + (amt*c.FeeProportionalMillionths)/feeRateParts
 }
 
 // divideCeil divides dividend by factor and rounds the result up.
-func divideCeil(dividend, factor lnwire.MilliSatoshi) lnwire.MilliSatoshi {
+func divideCeil(dividend, factor lnwire.MilliBronees) lnwire.MilliBronees {
 	return (dividend + factor - 1) / factor
 }
 
 // ComputeFeeFromIncoming computes the fee to forward an HTLC given the incoming
 // amount.
 func (c *ChannelEdgePolicy) ComputeFeeFromIncoming(
-	incomingAmt lnwire.MilliSatoshi) lnwire.MilliSatoshi {
+	incomingAmt lnwire.MilliBronees) lnwire.MilliBronees {
 
 	return incomingAmt - divideCeil(
 		feeRateParts*(incomingAmt-c.FeeBaseMSat),
@@ -4786,17 +4786,17 @@ func deserializeChanEdgePolicyRaw(r io.Reader) (*ChannelEdgePolicy, error) {
 	if err := binary.Read(r, byteOrder, &n); err != nil {
 		return nil, err
 	}
-	edge.MinHTLC = lnwire.MilliSatoshi(n)
+	edge.MinHTLC = lnwire.MilliBronees(n)
 
 	if err := binary.Read(r, byteOrder, &n); err != nil {
 		return nil, err
 	}
-	edge.FeeBaseMSat = lnwire.MilliSatoshi(n)
+	edge.FeeBaseMSat = lnwire.MilliBronees(n)
 
 	if err := binary.Read(r, byteOrder, &n); err != nil {
 		return nil, err
 	}
-	edge.FeeProportionalMillionths = lnwire.MilliSatoshi(n)
+	edge.FeeProportionalMillionths = lnwire.MilliBronees(n)
 
 	var pub [33]byte
 	if _, err := r.Read(pub[:]); err != nil {
@@ -4832,7 +4832,7 @@ func deserializeChanEdgePolicyRaw(r io.Reader) (*ChannelEdgePolicy, error) {
 		}
 
 		maxHtlc := byteOrder.Uint64(opq[:8])
-		edge.MaxHTLC = lnwire.MilliSatoshi(maxHtlc)
+		edge.MaxHTLC = lnwire.MilliBronees(maxHtlc)
 
 		// Exclude the parsed field from the rest of the opaque data.
 		edge.ExtraOpaqueData = opq[8:]

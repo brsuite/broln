@@ -10,9 +10,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lntypes"
@@ -20,6 +17,9 @@ import (
 	"github.com/brsuite/broln/macaroons"
 	"github.com/brsuite/broln/routing"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -349,14 +349,14 @@ func (s *Server) EstimateRouteFee(ctx context.Context,
 	var destNode route.Vertex
 	copy(destNode[:], req.Dest)
 
-	// Next, we'll convert the amount in satoshis to mSAT, which are the
+	// Next, we'll convert the amount in broneess to mSAT, which are the
 	// native unit of LN.
-	amtMsat := lnwire.NewMSatFromSatoshis(bronutil.Amount(req.AmtSat))
+	amtMsat := lnwire.NewMSatFromBroneess(bronutil.Amount(req.AmtSat))
 
 	// Pick a fee limit
 	//
 	// TODO: Change this into behaviour that makes more sense.
-	feeLimit := lnwire.NewMSatFromSatoshis(bronutil.SatoshiPerBrocoin)
+	feeLimit := lnwire.NewMSatFromBroneess(bronutil.BroneesPerBrocoin)
 
 	// Finally, we'll query for a route to the destination that can carry
 	// that target amount, we'll only request a single route. Set a
@@ -511,9 +511,9 @@ func (s *Server) QueryMissionControl(ctx context.Context,
 // toRPCPairData marshalls mission control pair data to the rpc struct.
 func toRPCPairData(data *routing.TimedPairResult) *PairData {
 	rpcData := PairData{
-		FailAmtSat:     int64(data.FailAmt.ToSatoshis()),
+		FailAmtSat:     int64(data.FailAmt.ToBroneess()),
 		FailAmtMsat:    int64(data.FailAmt),
-		SuccessAmtSat:  int64(data.SuccessAmt.ToSatoshis()),
+		SuccessAmtSat:  int64(data.SuccessAmt.ToBroneess()),
 		SuccessAmtMsat: int64(data.SuccessAmt),
 	}
 
@@ -584,7 +584,7 @@ func toPairSnapshot(pairResult *PairHistory) (*routing.MissionControlPairSnapsho
 	}
 
 	failAmt, failTime, err := getPair(
-		lnwire.MilliSatoshi(pairResult.History.FailAmtMsat),
+		lnwire.MilliBronees(pairResult.History.FailAmtMsat),
 		bronutil.Amount(pairResult.History.FailAmtSat),
 		pairResult.History.FailTime,
 	)
@@ -594,7 +594,7 @@ func toPairSnapshot(pairResult *PairHistory) (*routing.MissionControlPairSnapsho
 	}
 
 	successAmt, successTime, err := getPair(
-		lnwire.MilliSatoshi(pairResult.History.SuccessAmtMsat),
+		lnwire.MilliBronees(pairResult.History.SuccessAmtMsat),
 		bronutil.Amount(pairResult.History.SuccessAmtSat),
 		pairResult.History.SuccessTime,
 	)
@@ -625,8 +625,8 @@ func toPairSnapshot(pairResult *PairHistory) (*routing.MissionControlPairSnapsho
 
 // getPair validates the values provided for a mission control result and
 // returns the msat amount and timestamp for it.
-func getPair(amtMsat lnwire.MilliSatoshi, amtSat bronutil.Amount,
-	timestamp int64) (lnwire.MilliSatoshi, time.Time, error) {
+func getPair(amtMsat lnwire.MilliBronees, amtSat bronutil.Amount,
+	timestamp int64) (lnwire.MilliBronees, time.Time, error) {
 
 	amt, err := getMsatPairValue(amtMsat, amtSat)
 	if err != nil {
@@ -657,19 +657,19 @@ func getPair(amtMsat lnwire.MilliSatoshi, amtSat bronutil.Amount,
 
 // getMsatPairValue checks the msat and sat values set for a pair and ensures
 // that the values provided are either the same, or only a single value is set.
-func getMsatPairValue(msatValue lnwire.MilliSatoshi,
-	satValue bronutil.Amount) (lnwire.MilliSatoshi, error) {
+func getMsatPairValue(msatValue lnwire.MilliBronees,
+	satValue bronutil.Amount) (lnwire.MilliBronees, error) {
 
 	// If our msat value converted to sats equals our sat value, we just
 	// return the msat value, since the values are the same.
-	if msatValue.ToSatoshis() == satValue {
+	if msatValue.ToBroneess() == satValue {
 		return msatValue, nil
 	}
 
 	// If we have no msatValue, we can just return our sate value even if
 	// it is zero, because it's impossible that we have mismatched values.
 	if msatValue == 0 {
-		return lnwire.MilliSatoshi(satValue * 1000), nil
+		return lnwire.MilliBronees(satValue * 1000), nil
 	}
 
 	// Likewise, we can just use msat value if we have no sat value set.
@@ -698,7 +698,7 @@ func (s *Server) QueryProbability(ctx context.Context,
 		return nil, err
 	}
 
-	amt := lnwire.MilliSatoshi(req.AmtMsat)
+	amt := lnwire.MilliBronees(req.AmtMsat)
 
 	mc := s.cfg.RouterBackend.MissionControl
 	prob := mc.GetProbability(fromNode, toNode, amt)
@@ -797,9 +797,9 @@ func (s *Server) BuildRoute(ctx context.Context,
 	}
 
 	// Prepare BuildRoute call parameters from rpc request.
-	var amt *lnwire.MilliSatoshi
+	var amt *lnwire.MilliBronees
 	if req.AmtMsat != 0 {
-		rpcAmt := lnwire.MilliSatoshi(req.AmtMsat)
+		rpcAmt := lnwire.MilliBronees(req.AmtMsat)
 		amt = &rpcAmt
 	}
 

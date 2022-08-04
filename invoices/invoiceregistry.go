@@ -922,7 +922,7 @@ func (i *InvoiceRegistry) processAMP(ctx invoiceUpdateCtx) error {
 // complete. If the set doesn't fully arrive in time, a timer will cancel the
 // held htlc.
 func (i *InvoiceRegistry) NotifyExitHopHtlc(rHash lntypes.Hash,
-	amtPaid lnwire.MilliSatoshi, expiry uint32, currentHeight int32,
+	amtPaid lnwire.MilliBronees, expiry uint32, currentHeight int32,
 	circuitKey channeldb.CircuitKey, hodlChan chan<- interface{},
 	payload Payload) (HtlcResolution, error) {
 

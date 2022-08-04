@@ -6,10 +6,10 @@ import (
 	"io"
 	"time"
 
-	"github.com/brsuite/brond/wire"
 	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/tlv"
+	"github.com/brsuite/brond/wire"
 )
 
 const (
@@ -67,9 +67,9 @@ type ContractTerm struct {
 	// extended.
 	PaymentPreimage lntypes.Preimage
 
-	// Value is the expected amount of milli-satoshis to be paid to an HTLC
+	// Value is the expected amount of milli-broneess to be paid to an HTLC
 	// which can be satisfied by the above preimage.
-	Value lnwire.MilliSatoshi
+	Value lnwire.MilliBronees
 
 	// State describes the state the invoice is in.
 	State ContractState
@@ -145,7 +145,7 @@ type Invoice struct {
 	// this invoice. We specify this value independently as it's possible
 	// that the invoice originally didn't specify an amount, or the sender
 	// overpaid.
-	AmtPaid lnwire.MilliSatoshi
+	AmtPaid lnwire.MilliBronees
 
 	// Htlcs records all htlcs that paid to this invoice. Some of these
 	// htlcs may have been marked as canceled.
@@ -206,7 +206,7 @@ func LegacyDeserializeInvoice(r io.Reader) (Invoice, error) {
 	if _, err := io.ReadFull(r, scratch[:]); err != nil {
 		return invoice, err
 	}
-	invoice.Terms.Value = lnwire.MilliSatoshi(byteOrder.Uint64(scratch[:]))
+	invoice.Terms.Value = lnwire.MilliBronees(byteOrder.Uint64(scratch[:]))
 
 	if err := binary.Read(r, byteOrder, &invoice.Terms.State); err != nil {
 		return invoice, err

@@ -8,15 +8,15 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/brsuite/bronutil/psbt"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/walletrpc"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/brsuite/bronutil/psbt"
 	"github.com/stretchr/testify/require"
 )
 
@@ -101,7 +101,7 @@ func newTestHarness(t *testing.T, failUpdate1, failUpdate2,
 func (h *testHarness) parseRequest(
 	in *lnrpc.OpenChannelRequest) (*InitFundingMsg, error) {
 
-	pubKey, err := btcec.ParsePubKey(in.NodePubkey, btcec.S256())
+	pubKey, err := bronec.ParsePubKey(in.NodePubkey, bronec.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (h *testHarness) parseRequest(
 	return &InitFundingMsg{
 		TargetPubkey:    pubKey,
 		LocalFundingAmt: bronutil.Amount(in.LocalFundingAmount),
-		PushAmt: lnwire.NewMSatFromSatoshis(
+		PushAmt: lnwire.NewMSatFromBroneess(
 			bronutil.Amount(in.PushSat),
 		),
 		FundingFeePerKw: chainfee.SatPerKVByte(

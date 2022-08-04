@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -41,8 +41,8 @@ func TestForwardingLogBasicStorageAndQuery(t *testing.T) {
 			Timestamp:      timestamp,
 			IncomingChanID: lnwire.NewShortChanIDFromInt(uint64(rand.Int63())),
 			OutgoingChanID: lnwire.NewShortChanIDFromInt(uint64(rand.Int63())),
-			AmtIn:          lnwire.MilliSatoshi(rand.Int63()),
-			AmtOut:         lnwire.MilliSatoshi(rand.Int63()),
+			AmtIn:          lnwire.MilliBronees(rand.Int63()),
+			AmtOut:         lnwire.MilliBronees(rand.Int63()),
 		}
 
 		timestamp = timestamp.Add(time.Minute * 10)
@@ -114,8 +114,8 @@ func TestForwardingLogQueryOptions(t *testing.T) {
 			Timestamp:      endTime,
 			IncomingChanID: lnwire.NewShortChanIDFromInt(uint64(rand.Int63())),
 			OutgoingChanID: lnwire.NewShortChanIDFromInt(uint64(rand.Int63())),
-			AmtIn:          lnwire.MilliSatoshi(rand.Int63()),
-			AmtOut:         lnwire.MilliSatoshi(rand.Int63()),
+			AmtIn:          lnwire.MilliBronees(rand.Int63()),
+			AmtOut:         lnwire.MilliBronees(rand.Int63()),
 		}
 
 		endTime = endTime.Add(time.Minute * 10)
@@ -220,8 +220,8 @@ func TestForwardingLogQueryLimit(t *testing.T) {
 			Timestamp:      endTime,
 			IncomingChanID: lnwire.NewShortChanIDFromInt(uint64(rand.Int63())),
 			OutgoingChanID: lnwire.NewShortChanIDFromInt(uint64(rand.Int63())),
-			AmtIn:          lnwire.MilliSatoshi(rand.Int63()),
-			AmtOut:         lnwire.MilliSatoshi(rand.Int63()),
+			AmtIn:          lnwire.MilliBronees(rand.Int63()),
+			AmtOut:         lnwire.MilliBronees(rand.Int63()),
 		}
 
 		endTime = endTime.Add(time.Minute * 10)
@@ -334,8 +334,8 @@ func TestForwardingLogStoreEvent(t *testing.T) {
 			Timestamp:      time.Unix(0, ts+int64(i)),
 			IncomingChanID: lnwire.NewShortChanIDFromInt(uint64(rand.Int63())),
 			OutgoingChanID: lnwire.NewShortChanIDFromInt(uint64(rand.Int63())),
-			AmtIn:          lnwire.MilliSatoshi(rand.Int63()),
-			AmtOut:         lnwire.MilliSatoshi(rand.Int63()),
+			AmtIn:          lnwire.MilliBronees(rand.Int63()),
+			AmtOut:         lnwire.MilliBronees(rand.Int63()),
 		}
 	}
 

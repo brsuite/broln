@@ -5,12 +5,12 @@ import (
 	"encoding/binary"
 	"io"
 
-	"github.com/brsuite/brond/btcec"
+	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
+	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
-	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
-	"github.com/brsuite/broln/keychain"
 )
 
 // CircuitKey is used by a channel to uniquely identify the HTLCs it receives
@@ -48,8 +48,8 @@ type HTLC struct {
 	// RHash is the payment hash of the HTLC.
 	RHash [32]byte
 
-	// Amt is the amount of milli-satoshis this HTLC escrows.
-	Amt lnwire.MilliSatoshi
+	// Amt is the amount of milli-broneess this HTLC escrows.
+	Amt lnwire.MilliBronees
 
 	// RefundTimeout is the absolute timeout on the HTLC that the sender
 	// must wait before reclaiming the funds in limbo.
@@ -115,14 +115,14 @@ type ChannelCommitment struct {
 	//
 	// NOTE: This is the balance *after* subtracting any commitment fee,
 	// AND anchor output values.
-	LocalBalance lnwire.MilliSatoshi
+	LocalBalance lnwire.MilliBronees
 
 	// RemoteBalance is the current available settled balance within the
 	// channel directly spendable by the remote node.
 	//
 	// NOTE: This is the balance *after* subtracting any commitment fee,
 	// AND anchor output values.
-	RemoteBalance lnwire.MilliSatoshi
+	RemoteBalance lnwire.MilliBronees
 
 	// CommitFee is the amount calculated to be paid in fees for the
 	// current set of commitment transactions. The fee amount is persisted
@@ -131,7 +131,7 @@ type ChannelCommitment struct {
 	// happen after a system restart.
 	CommitFee bronutil.Amount
 
-	// FeePerKw is the min satoshis/kilo-weight that should be paid within
+	// FeePerKw is the min broneess/kilo-weight that should be paid within
 	// the commitment transaction for the entire duration of the channel's
 	// lifetime. This field may be updated during normal operation of the
 	// channel as on-chain conditions change.
@@ -291,7 +291,7 @@ type ClosureType uint8
 // constraints are static for the duration of the channel, meaning the channel
 // must be torn down for them to change.
 type ChannelConstraints struct {
-	// DustLimit is the threshold (in satoshis) below which any outputs
+	// DustLimit is the threshold (in broneess) below which any outputs
 	// should be trimmed. When an output is trimmed, it isn't materialized
 	// as an actual output, but is instead burned to miner's fees.
 	DustLimit bronutil.Amount
@@ -306,14 +306,14 @@ type ChannelConstraints struct {
 	// MaxPendingAmount is the maximum pending HTLC value that the
 	// owner of these constraints can offer the remote node at a
 	// particular time.
-	MaxPendingAmount lnwire.MilliSatoshi
+	MaxPendingAmount lnwire.MilliBronees
 
 	// MinHTLC is the minimum HTLC value that the owner of these
 	// constraints can offer the remote node. If any HTLCs below this
 	// amount are offered, then the HTLC will be rejected. This, in
 	// tandem with the dust limit allows a node to regulate the
 	// smallest HTLC that it deems economically relevant.
-	MinHTLC lnwire.MilliSatoshi
+	MinHTLC lnwire.MilliBronees
 
 	// MaxAcceptedHtlcs is the maximum number of HTLCs that the owner of
 	// this set of constraints can offer the remote node. This allows each
@@ -398,7 +398,7 @@ type ChannelCloseSummary struct {
 
 	// RemotePub is the public key of the remote peer that we formerly had
 	// a channel with.
-	RemotePub *btcec.PublicKey
+	RemotePub *bronec.PublicKey
 
 	// Capacity was the total capacity of the channel.
 	Capacity bronutil.Amount
@@ -439,13 +439,13 @@ type ChannelCloseSummary struct {
 	// commitment transaction. However, since this is the derived public key,
 	// we don't yet have the private key so we aren't yet able to verify
 	// that it's actually in the hash chain.
-	RemoteCurrentRevocation *btcec.PublicKey
+	RemoteCurrentRevocation *bronec.PublicKey
 
 	// RemoteNextRevocation is the revocation key to be used for the *next*
 	// commitment transaction we create for the local node. Within the
 	// specification, this value is referred to as the
 	// per-commitment-point.
-	RemoteNextRevocation *btcec.PublicKey
+	RemoteNextRevocation *bronec.PublicKey
 
 	// LocalChanCfg is the channel configuration for the local node.
 	LocalChanConfig ChannelConfig

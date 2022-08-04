@@ -14,8 +14,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/btcjson"
+	"github.com/brsuite/broln/kvdb"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/bronjson"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/integration/rpctest"
@@ -25,7 +26,6 @@ import (
 	"github.com/brsuite/bronwallet/chain"
 	"github.com/brsuite/bronwallet/walletdb"
 	"github.com/brsuite/neutrino"
-	"github.com/brsuite/broln/kvdb"
 )
 
 var (
@@ -41,8 +41,8 @@ var (
 
 // randPubKeyHashScript generates a P2PKH script that pays to the public key of
 // a randomly-generated private key.
-func randPubKeyHashScript() ([]byte, *btcec.PrivateKey, error) {
-	privKey, err := btcec.NewPrivateKey(btcec.S256())
+func randPubKeyHashScript() ([]byte, *bronec.PrivateKey, error) {
+	privKey, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -85,8 +85,8 @@ func WaitForMempoolTx(miner *rpctest.Harness, txid *chainhash.Hash) error {
 		// Check for the harness' knowledge of the txid.
 		tx, err := miner.Client.GetRawTransaction(txid)
 		if err != nil {
-			jsonErr, ok := err.(*btcjson.RPCError)
-			if ok && jsonErr.Code == btcjson.ErrRPCNoTxInfo {
+			jsonErr, ok := err.(*bronjson.RPCError)
+			if ok && jsonErr.Code == bronjson.ErrRPCNoTxInfo {
 				continue
 			}
 			return err
@@ -119,7 +119,7 @@ func WaitForMempoolTx(miner *rpctest.Harness, txid *chainhash.Hash) error {
 // CreateSpendableOutput creates and returns an output that can be spent later
 // on.
 func CreateSpendableOutput(t *testing.T,
-	miner *rpctest.Harness) (*wire.OutPoint, *wire.TxOut, *btcec.PrivateKey) {
+	miner *rpctest.Harness) (*wire.OutPoint, *wire.TxOut, *bronec.PrivateKey) {
 
 	t.Helper()
 
@@ -148,7 +148,7 @@ func CreateSpendableOutput(t *testing.T,
 
 // CreateSpendTx creates a transaction spending the specified output.
 func CreateSpendTx(t *testing.T, prevOutPoint *wire.OutPoint,
-	prevOutput *wire.TxOut, privKey *btcec.PrivateKey) *wire.MsgTx {
+	prevOutput *wire.TxOut, privKey *bronec.PrivateKey) *wire.MsgTx {
 
 	t.Helper()
 

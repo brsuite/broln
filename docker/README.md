@@ -180,8 +180,8 @@ alice ⛰  brolncli --network=simnet listchannels
             "commit_weight": "600",
             "fee_per_kw": "12000",
             "unsettled_balance": "0",
-            "total_satoshis_sent": "0",
-            "total_satoshis_received": "0",
+            "total_broneess_sent": "0",
+            "total_broneess_received": "0",
             "num_updates": "0",
              "pending_htlcs": [
             ],
@@ -231,8 +231,8 @@ alice ⛰  brolncli --network=simnet listchannels
             "commit_weight": "724",
             "fee_per_kw": "12000",
             "unsettled_balance": "0",
-            "total_satoshis_sent": "10000",
-            "total_satoshis_received": "0",
+            "total_broneess_sent": "10000",
+            "total_broneess_received": "0",
             "num_updates": "2",
             "pending_htlcs": [
             ],
@@ -307,7 +307,7 @@ The `Faucet` node address can be found at the [Faucet Lightning Community webpag
 
 ```shell
 # Run "Alice" container and log into it:
-⛰  docker-compose run -d --name alice broln_btc; docker exec -i -t "alice" bash
+⛰  docker-compose run -d --name alice broln_bron; docker exec -i -t "alice" bash
 
 # Connect "Alice" to the "Faucet" node:
 alice ⛰  brolncli --network=testnet connect <faucet_identity_address>@<faucet_host>

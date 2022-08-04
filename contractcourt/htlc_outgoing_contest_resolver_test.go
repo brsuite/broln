@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
@@ -13,6 +12,7 @@ import (
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/wire"
 )
 
 const (
@@ -181,7 +181,7 @@ func newOutgoingResolverTestContext(t *testing.T) *outgoingResolverTestContext {
 			contractResolverKit: *newContractResolverKit(cfg),
 			htlcResolution:      outgoingRes,
 			htlc: channeldb.HTLC{
-				Amt:       lnwire.MilliSatoshi(testHtlcAmount),
+				Amt:       lnwire.MilliBronees(testHtlcAmount),
 				RHash:     testResHash,
 				OnionBlob: testOnionBlob,
 			},

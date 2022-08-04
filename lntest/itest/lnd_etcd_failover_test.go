@@ -9,13 +9,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/cluster"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lncfg"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/routerrpc"
 	"github.com/brsuite/broln/lntest"
+	"github.com/brsuite/bronutil"
 )
 
 func assertLeader(ht *harnessTest, observer cluster.LeaderElector,
@@ -103,7 +103,7 @@ func testEtcdFailoverCase(net *lntest.NetworkHarness, ht *harnessTest,
 
 	net.ConnectNodes(ht.t, carol1, net.Alice)
 
-	// Open a channel with 100k satoshis between Carol and Alice with Alice
+	// Open a channel with 100k broneess between Carol and Alice with Alice
 	// being the sole funder of the channel.
 	chanAmt := bronutil.Amount(100000)
 	_ = openChannelAndAssert(

@@ -11,12 +11,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/netann"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/wire"
 )
 
 var (
@@ -61,7 +61,7 @@ func createChannel(t *testing.T) *channeldb.OpenChannel {
 // our `pubkey` with the direction bit set appropriately in the policies. Our
 // update will be created with the disabled bit set if startEnabled is false.
 func createEdgePolicies(t *testing.T, channel *channeldb.OpenChannel,
-	pubkey *btcec.PublicKey, startEnabled bool) (*channeldb.ChannelEdgeInfo,
+	pubkey *bronec.PublicKey, startEnabled bool) (*channeldb.ChannelEdgeInfo,
 	*channeldb.ChannelEdgePolicy, *channeldb.ChannelEdgePolicy) {
 
 	var (
@@ -80,7 +80,7 @@ func createEdgePolicies(t *testing.T, channel *channeldb.OpenChannel,
 	}
 
 	// Generate and set pubkey2 for THEIR pubkey.
-	privKey2, err := btcec.NewPrivateKey(btcec.S256())
+	privKey2, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to generate key pair: %v", err)
 	}
@@ -127,7 +127,7 @@ type mockGraph struct {
 }
 
 func newMockGraph(t *testing.T, numChannels int,
-	startActive, startEnabled bool, pubKey *btcec.PublicKey) *mockGraph {
+	startActive, startEnabled bool, pubKey *bronec.PublicKey) *mockGraph {
 
 	g := &mockGraph{
 		channels:  make([]*channeldb.OpenChannel, 0, numChannels),
@@ -310,7 +310,7 @@ func newManagerCfg(t *testing.T, numChannels int,
 
 	t.Helper()
 
-	privKey, err := btcec.NewPrivateKey(btcec.S256())
+	privKey, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to generate key pair: %v", err)
 	}
@@ -343,7 +343,7 @@ type testHarness struct {
 	graph              *mockGraph
 	htlcSwitch         *mockSwitch
 	mgr                *netann.ChanStatusManager
-	ourPubKey          *btcec.PublicKey
+	ourPubKey          *bronec.PublicKey
 	safeDisableTimeout time.Duration
 }
 

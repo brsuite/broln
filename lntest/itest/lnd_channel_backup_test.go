@@ -12,13 +12,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/chanbackup"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lnrpc/walletrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lntest/wait"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -905,15 +905,15 @@ func testChanRestoreScenario(t *harnessTest, net *lntest.NetworkHarness,
 
 	// Now that our new nodes are created, we'll give them some coins for
 	// channel opening and anchor sweeping.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	// For the anchor output case we need two UTXOs for Carol so she can
 	// sweep both the local and remote anchor.
 	if commitTypeHasAnchors(testCase.commitmentType) {
-		net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+		net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 	}
 
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, dave)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, dave)
 
 	var from, to *lntest.HarnessNode
 	if testCase.initiator {

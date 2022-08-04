@@ -6,15 +6,15 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
-	brocoinCfg "github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/bronutil"
-	sphinx "github.com/brsuite/lightning-onion"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/htlcswitch"
 	"github.com/brsuite/broln/htlcswitch/hop"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	brocoinCfg "github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/bronutil"
+	sphinx "github.com/brsuite/lightning-onion"
 )
 
 var (
@@ -24,11 +24,11 @@ var (
 
 	// sphinxPrivKey is the private key given to freshly created sphinx
 	// routers.
-	sphinxPrivKey *btcec.PrivateKey
+	sphinxPrivKey *bronec.PrivateKey
 
 	// testEphemeralKey is the ephemeral key that will be extracted to
 	// create onion obfuscators.
-	testEphemeralKey *btcec.PublicKey
+	testEphemeralKey *bronec.PublicKey
 
 	// testExtracter is a precomputed extraction of testEphemeralKey, using
 	// the sphinxPrivKey.
@@ -38,13 +38,13 @@ var (
 func init() {
 	// Generate a fresh key for our sphinx router.
 	var err error
-	sphinxPrivKey, err = btcec.NewPrivateKey(btcec.S256())
+	sphinxPrivKey, err = bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		panic(err)
 	}
 
 	// And another, whose public key will serve as the test ephemeral key.
-	testEphemeralPriv, err := btcec.NewPrivateKey(btcec.S256())
+	testEphemeralPriv, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		panic(err)
 	}
@@ -177,8 +177,8 @@ func TestHalfCircuitSerialization(t *testing.T) {
 	for i, test := range halfCircuitTests {
 		circuit := &htlcswitch.PaymentCircuit{
 			PaymentHash:    test.hash,
-			IncomingAmount: lnwire.NewMSatFromSatoshis(test.inValue),
-			OutgoingAmount: lnwire.NewMSatFromSatoshis(test.outValue),
+			IncomingAmount: lnwire.NewMSatFromBroneess(test.inValue),
+			OutgoingAmount: lnwire.NewMSatFromBroneess(test.outValue),
 			Incoming: htlcswitch.CircuitKey{
 				ChanID: test.chanID,
 				HtlcID: test.htlcID,

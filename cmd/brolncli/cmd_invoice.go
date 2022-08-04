@@ -18,7 +18,7 @@ var addInvoiceCommand = cli.Command{
 
 	Invoices without an amount can be created by not supplying any
 	parameters or providing an amount of 0. These invoices allow the payee
-	to specify the amount of satoshis they wish to send.`,
+	to specify the amount of broneess they wish to send.`,
 	ArgsUsage: "value preimage",
 	Flags: []cli.Flag{
 		cli.StringFlag{
@@ -35,11 +35,11 @@ var addInvoiceCommand = cli.Command{
 		},
 		cli.Int64Flag{
 			Name:  "amt",
-			Usage: "the amt of satoshis in this invoice",
+			Usage: "the amt of broneess in this invoice",
 		},
 		cli.Int64Flag{
 			Name:  "amt_msat",
-			Usage: "the amt of millisatoshis in this invoice",
+			Usage: "the amt of millibroneess in this invoice",
 		},
 		cli.StringFlag{
 			Name: "description_hash",

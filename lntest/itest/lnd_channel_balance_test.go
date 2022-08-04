@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/funding"
 	"github.com/brsuite/broln/lnrpc"
@@ -12,15 +11,16 @@ import (
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/lntest/wait"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
 // testChannelBalance creates a new channel between Alice and Bob, then checks
 // channel balance to be equal amount specified while creation of channel.
 func testChannelBalance(net *lntest.NetworkHarness, t *harnessTest) {
-	// Open a channel with 0.16 BTC between Alice and Bob, ensuring the
+	// Open a channel with 0.16 BRON between Alice and Bob, ensuring the
 	// channel has been opened properly.
-	amount := funding.MaxBtcFundingAmount
+	amount := funding.MaxBronFundingAmount
 
 	// Creates a helper closure to be used below which asserts the proper
 	// response to a channel balance RPC.
@@ -30,11 +30,11 @@ func testChannelBalance(net *lntest.NetworkHarness, t *harnessTest) {
 		expectedResponse := &lnrpc.ChannelBalanceResponse{
 			LocalBalance: &lnrpc.Amount{
 				Sat:  uint64(local),
-				Msat: uint64(lnwire.NewMSatFromSatoshis(local)),
+				Msat: uint64(lnwire.NewMSatFromBroneess(local)),
 			},
 			RemoteBalance: &lnrpc.Amount{
 				Sat: uint64(remote),
-				Msat: uint64(lnwire.NewMSatFromSatoshis(
+				Msat: uint64(lnwire.NewMSatFromBroneess(
 					remote,
 				)),
 			},
@@ -76,7 +76,7 @@ func testChannelBalance(net *lntest.NetworkHarness, t *harnessTest) {
 	}
 
 	// As this is a single funder channel, Alice's balance should be
-	// exactly 0.5 BTC since now state transitions have taken place yet.
+	// exactly 0.5 BRON since now state transitions have taken place yet.
 	checkChannelBalance(net.Alice, amount-calcStaticFee(cType, 0), 0)
 
 	// Ensure Bob currently has no available balance within the channel.
@@ -104,25 +104,25 @@ func testChannelUnsettledBalance(net *lntest.NetworkHarness, t *harnessTest) {
 		expectedResponse := &lnrpc.ChannelBalanceResponse{
 			LocalBalance: &lnrpc.Amount{
 				Sat: uint64(local),
-				Msat: uint64(lnwire.NewMSatFromSatoshis(
+				Msat: uint64(lnwire.NewMSatFromBroneess(
 					local,
 				)),
 			},
 			RemoteBalance: &lnrpc.Amount{
 				Sat: uint64(remote),
-				Msat: uint64(lnwire.NewMSatFromSatoshis(
+				Msat: uint64(lnwire.NewMSatFromBroneess(
 					remote,
 				)),
 			},
 			UnsettledLocalBalance: &lnrpc.Amount{
 				Sat: uint64(unsettledLocal),
-				Msat: uint64(lnwire.NewMSatFromSatoshis(
+				Msat: uint64(lnwire.NewMSatFromBroneess(
 					unsettledLocal,
 				)),
 			},
 			UnsettledRemoteBalance: &lnrpc.Amount{
 				Sat: uint64(unsettledRemote),
-				Msat: uint64(lnwire.NewMSatFromSatoshis(
+				Msat: uint64(lnwire.NewMSatFromBroneess(
 					unsettledRemote,
 				)),
 			},

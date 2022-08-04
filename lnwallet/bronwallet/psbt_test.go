@@ -7,15 +7,15 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/input"
+	"github.com/brsuite/broln/keychain"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/txscript"
 	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/psbt"
 	"github.com/brsuite/bronwallet/waddrmgr"
-	"github.com/brsuite/broln/input"
-	"github.com/brsuite/broln/keychain"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,16 +28,16 @@ var (
 		"9f1f0db609718cf70c580aec6a0e570c3f086ec85a2a6119295b1d64240d" +
 			"aca5",
 	)
-	testCommitSecret, testCommitPoint = btcec.PrivKeyFromBytes(
-		btcec.S256(), testCommitSecretBytes,
+	testCommitSecret, testCommitPoint = bronec.PrivKeyFromBytes(
+		bronec.S256(), testCommitSecretBytes,
 	)
 
 	remoteRevocationBasePubKeyBytes, _ = hex.DecodeString(
 		"02baf067bfd1a6cf7229c7c459b106d384ad33e948ea1d561f2034475ff1" +
 			"7359fb",
 	)
-	remoteRevocationBasePubKey, _ = btcec.ParsePubKey(
-		remoteRevocationBasePubKeyBytes, btcec.S256(),
+	remoteRevocationBasePubKey, _ = bronec.ParsePubKey(
+		remoteRevocationBasePubKeyBytes, bronec.S256(),
 	)
 
 	testTweakSingle, _ = hex.DecodeString(
@@ -95,7 +95,7 @@ func (i testInputType) keyPath() []uint32 {
 }
 
 func (i testInputType) output(t *testing.T,
-	privKey *btcec.PrivateKey) (*wire.TxOut, []byte) {
+	privKey *bronec.PrivateKey) (*wire.TxOut, []byte) {
 
 	var (
 		addr          bronutil.Address
@@ -176,7 +176,7 @@ func (i testInputType) output(t *testing.T,
 	}, witnessScript
 }
 
-func (i testInputType) decorateInput(t *testing.T, privKey *btcec.PrivateKey,
+func (i testInputType) decorateInput(t *testing.T, privKey *bronec.PrivateKey,
 	in *psbt.PInput) {
 
 	switch i {

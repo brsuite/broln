@@ -443,9 +443,9 @@ type ContractTerm struct {
 	// extended. Set to nil if the preimage isn't known yet.
 	PaymentPreimage *lntypes.Preimage
 
-	// Value is the expected amount of milli-satoshis to be paid to an HTLC
+	// Value is the expected amount of milli-broneess to be paid to an HTLC
 	// which can be satisfied by the above preimage.
-	Value lnwire.MilliSatoshi
+	Value lnwire.MilliBronees
 
 	// PaymentAddr is a randomly generated value include in the MPP record
 	// by the sender to prevent probing of the receiver.
@@ -491,7 +491,7 @@ type InvoiceStateAMP struct {
 	// Fetching the full HTLC/invoice state allows one to extract the
 	// custom records as well as the break down of the payment splits used
 	// when paying.
-	AmtPaid lnwire.MilliSatoshi
+	AmtPaid lnwire.MilliBronees
 }
 
 // AMPInvoiceState represents a type that stores metadata related to the set of
@@ -579,7 +579,7 @@ type Invoice struct {
 	// this invoice. We specify this value independently as it's possible
 	// that the invoice originally didn't specify an amount, or the sender
 	// overpaid.
-	AmtPaid lnwire.MilliSatoshi
+	AmtPaid lnwire.MilliBronees
 
 	// Htlcs records all htlcs that paid to this invoice. Some of these
 	// htlcs may have been marked as canceled.
@@ -663,11 +663,11 @@ const (
 // InvoiceHTLC contains details about an htlc paying to this invoice.
 type InvoiceHTLC struct {
 	// Amt is the amount that is carried by this htlc.
-	Amt lnwire.MilliSatoshi
+	Amt lnwire.MilliBronees
 
 	// MppTotalAmt is a field for mpp that indicates the expected total
 	// amount.
-	MppTotalAmt lnwire.MilliSatoshi
+	MppTotalAmt lnwire.MilliBronees
 
 	// AcceptHeight is the block height at which the invoice registry
 	// decided to accept this htlc as a payment to the invoice. At this
@@ -790,11 +790,11 @@ type HtlcAcceptDesc struct {
 	AcceptHeight int32
 
 	// Amt is the amount that is carried by this htlc.
-	Amt lnwire.MilliSatoshi
+	Amt lnwire.MilliBronees
 
 	// MppTotalAmt is a field for mpp that indicates the expected total
 	// amount.
-	MppTotalAmt lnwire.MilliSatoshi
+	MppTotalAmt lnwire.MilliBronees
 
 	// Expiry is the expiry height of this htlc.
 	Expiry uint32
@@ -2040,10 +2040,10 @@ func deserializeInvoice(r io.Reader) (Invoice, error) {
 		i.Terms.PaymentPreimage = &preimage
 	}
 
-	i.Terms.Value = lnwire.MilliSatoshi(value)
+	i.Terms.Value = lnwire.MilliBronees(value)
 	i.Terms.FinalCltvDelta = int32(cltvDelta)
 	i.Terms.Expiry = time.Duration(expiry)
-	i.AmtPaid = lnwire.MilliSatoshi(amtPaid)
+	i.AmtPaid = lnwire.MilliBronees(amtPaid)
 	i.State = ContractState(state)
 
 	if hodlInvoice != 0 {
@@ -2300,7 +2300,7 @@ func ampStateDecoder(r io.Reader, val interface{}, buf *[8]byte, l uint64) error
 				SettleIndex: settleIndex,
 				SettleDate:  settleDate,
 				InvoiceKeys: invoiceKeys,
-				AmtPaid:     lnwire.MilliSatoshi(amtPaid),
+				AmtPaid:     lnwire.MilliBronees(amtPaid),
 			}
 		}
 
@@ -2390,8 +2390,8 @@ func deserializeHtlcs(r io.Reader) (map[CircuitKey]*InvoiceHTLC, error) {
 		htlc.AcceptTime = getNanoTime(acceptTime)
 		htlc.ResolveTime = getNanoTime(resolveTime)
 		htlc.State = HtlcState(state)
-		htlc.Amt = lnwire.MilliSatoshi(amt)
-		htlc.MppTotalAmt = lnwire.MilliSatoshi(mppTotalAmt)
+		htlc.Amt = lnwire.MilliBronees(amt)
+		htlc.MppTotalAmt = lnwire.MilliBronees(mppTotalAmt)
 		if amp != nil && hash != nil {
 			htlc.AMP = &InvoiceHtlcAMPData{
 				Record:   *amp,
@@ -2807,7 +2807,7 @@ func (d *DB) updateInvoice(hash *lntypes.Hash, refSetID *SetID, invoices,
 	// individual HTLCs
 	var (
 		settledSetIDs = make(map[SetID]struct{})
-		amtPaid       lnwire.MilliSatoshi
+		amtPaid       lnwire.MilliBronees
 	)
 	for key, htlc := range invoice.Htlcs {
 		// Set the HTLC preimage for any AMP HTLCs.

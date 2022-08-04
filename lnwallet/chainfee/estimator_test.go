@@ -145,7 +145,7 @@ func TestSparseConfFeeSource(t *testing.T) {
 	}
 
 	// Test parsing an improperly formatted JSON API response.
-	badFees := map[string]uint32{"hi": 12345, "hello": 42, "satoshi": 54321}
+	badFees := map[string]uint32{"hi": 12345, "hello": 42, "bronees": 54321}
 	badJSON := map[string]map[string]uint32{"fee_by_block_target": badFees}
 	jsonResp, err = json.Marshal(badJSON)
 	if err != nil {

@@ -10,7 +10,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/watchtower/blob"
@@ -18,6 +17,7 @@ import (
 	"github.com/brsuite/broln/watchtower/wtdb"
 	"github.com/brsuite/broln/watchtower/wtmock"
 	"github.com/brsuite/broln/watchtower/wtpolicy"
+	"github.com/brsuite/brond/bronec"
 )
 
 // clientDBInit is a closure used to initialize a wtclient.DB instance its
@@ -103,7 +103,7 @@ func (h *clientDBHarness) createTower(lnAddr *lnwire.NetAddress,
 	return tower
 }
 
-func (h *clientDBHarness) removeTower(pubKey *btcec.PublicKey, addr net.Addr,
+func (h *clientDBHarness) removeTower(pubKey *bronec.PublicKey, addr net.Addr,
 	hasSessions bool, expErr error) {
 
 	h.t.Helper()
@@ -152,7 +152,7 @@ func (h *clientDBHarness) removeTower(pubKey *btcec.PublicKey, addr net.Addr,
 	}
 }
 
-func (h *clientDBHarness) loadTower(pubKey *btcec.PublicKey, expErr error) *wtdb.Tower {
+func (h *clientDBHarness) loadTower(pubKey *bronec.PublicKey, expErr error) *wtdb.Tower {
 	h.t.Helper()
 
 	tower, err := h.db.LoadTower(pubKey)

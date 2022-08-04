@@ -17,11 +17,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/chainntnfs"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/chanacceptor"
@@ -38,6 +33,11 @@ import (
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -76,7 +76,7 @@ var (
 		0x6a, 0x49, 0x18, 0x83, 0x31, 0x98, 0x47, 0x53,
 	}
 
-	alicePrivKey, alicePubKey = btcec.PrivKeyFromBytes(btcec.S256(),
+	alicePrivKey, alicePubKey = bronec.PrivKeyFromBytes(bronec.S256(),
 		alicePrivKeyBytes[:])
 
 	aliceTCPAddr, _ = net.ResolveTCPAddr("tcp", "10.0.0.2:9001")
@@ -93,7 +93,7 @@ var (
 		0x1e, 0xb, 0x4c, 0xfd, 0x9e, 0xc5, 0x8c, 0xe9,
 	}
 
-	bobPrivKey, bobPubKey = btcec.PrivKeyFromBytes(btcec.S256(),
+	bobPrivKey, bobPubKey = bronec.PrivKeyFromBytes(bronec.S256(),
 		bobPrivKeyBytes[:])
 
 	bobTCPAddr, _ = net.ResolveTCPAddr("tcp", "10.0.0.2:9000")
@@ -103,7 +103,7 @@ var (
 		Address:     bobTCPAddr,
 	}
 
-	testSig = &btcec.Signature{
+	testSig = &bronec.Signature{
 		R: new(big.Int),
 		S: new(big.Int),
 	}
@@ -186,7 +186,7 @@ type newChannelMsg struct {
 }
 
 type testNode struct {
-	privKey         *btcec.PrivateKey
+	privKey         *bronec.PrivateKey
 	addr            *lnwire.NetAddress
 	msgChan         chan lnwire.Message
 	announceChan    chan lnwire.Message
@@ -205,7 +205,7 @@ type testNode struct {
 
 var _ lnpeer.Peer = (*testNode)(nil)
 
-func (n *testNode) IdentityKey() *btcec.PublicKey {
+func (n *testNode) IdentityKey() *bronec.PublicKey {
 	return n.addr.IdentityKey
 }
 
@@ -279,7 +279,7 @@ func createTestWallet(cdb *channeldb.ChannelStateDB, netParams *chaincfg.Params,
 		ChainIO:            bio,
 		FeeEstimator:       estimator,
 		NetParams:          *netParams,
-		DefaultConstraints: chainreg.GenDefaultBtcConstraints(),
+		DefaultConstraints: chainreg.GenDefaultBronConstraints(),
 	})
 	if err != nil {
 		return nil, err
@@ -292,7 +292,7 @@ func createTestWallet(cdb *channeldb.ChannelStateDB, netParams *chaincfg.Params,
 	return wallet, nil
 }
 
-func createTestFundingManager(t *testing.T, privKey *btcec.PrivateKey,
+func createTestFundingManager(t *testing.T, privKey *bronec.PrivateKey,
 	addr *lnwire.NetAddress, tempTestDir string,
 	options ...cfgOption) (*testNode, error) {
 
@@ -362,7 +362,7 @@ func createTestFundingManager(t *testing.T, privKey *btcec.PrivateKey,
 		Notifier:     chainNotifier,
 		FeeEstimator: estimator,
 		SignMessage: func(_ keychain.KeyLocator,
-			_ []byte, _ bool) (*btcec.Signature, error) {
+			_ []byte, _ bool) (*bronec.Signature, error) {
 
 			return testSig, nil
 		},
@@ -405,7 +405,7 @@ func createTestFundingManager(t *testing.T, privKey *btcec.PrivateKey,
 		},
 		DefaultMinHtlcIn: 5,
 		NumRequiredConfs: func(chanAmt bronutil.Amount,
-			pushAmt lnwire.MilliSatoshi) uint16 {
+			pushAmt lnwire.MilliBronees) uint16 {
 			return 3
 		},
 		RequiredRemoteDelay: func(amt bronutil.Amount) uint16 {
@@ -421,14 +421,14 @@ func createTestFundingManager(t *testing.T, privKey *btcec.PrivateKey,
 
 			return reserve
 		},
-		RequiredRemoteMaxValue: func(chanAmt bronutil.Amount) lnwire.MilliSatoshi {
-			reserve := lnwire.NewMSatFromSatoshis(chanAmt / 100)
-			return lnwire.NewMSatFromSatoshis(chanAmt) - reserve
+		RequiredRemoteMaxValue: func(chanAmt bronutil.Amount) lnwire.MilliBronees {
+			reserve := lnwire.NewMSatFromBroneess(chanAmt / 100)
+			return lnwire.NewMSatFromBroneess(chanAmt) - reserve
 		},
 		RequiredRemoteMaxHTLCs: func(chanAmt bronutil.Amount) uint16 {
 			return uint16(input.MaxHTLCNumber / 2)
 		},
-		WatchNewChannel: func(*channeldb.OpenChannel, *btcec.PublicKey) error {
+		WatchNewChannel: func(*channeldb.OpenChannel, *bronec.PublicKey) error {
 			return nil
 		},
 		ReportShortChanID: func(wire.OutPoint) error {
@@ -443,7 +443,7 @@ func createTestFundingManager(t *testing.T, privKey *btcec.PrivateKey,
 		},
 		ZombieSweeperInterval:         1 * time.Hour,
 		ReservationTimeout:            1 * time.Nanosecond,
-		MaxChanSize:                   MaxBtcFundingAmount,
+		MaxChanSize:                   MaxBronFundingAmount,
 		MaxLocalCSVDelay:              defaultMaxLocalCSVDelay,
 		MaxPendingChannels:            lncfg.DefaultMaxPendingChannels,
 		NotifyOpenChannelEvent:        evt.NotifyOpenChannelEvent,
@@ -510,7 +510,7 @@ func recreateAliceFundingManager(t *testing.T, alice *testNode) {
 		Notifier:     oldCfg.Notifier,
 		FeeEstimator: oldCfg.FeeEstimator,
 		SignMessage: func(_ keychain.KeyLocator,
-			_ []byte, _ bool) (*btcec.Signature, error) {
+			_ []byte, _ bool) (*bronec.Signature, error) {
 
 			return testSig, nil
 		},
@@ -674,7 +674,7 @@ func fundChannel(t *testing.T, alice, bob *testNode, localFundingAmt,
 		ChainHash:       *fundingNetParams.GenesisHash,
 		SubtractFees:    subtractFees,
 		LocalFundingAmt: localFundingAmt,
-		PushAmt:         lnwire.NewMSatFromSatoshis(pushAmt),
+		PushAmt:         lnwire.NewMSatFromBroneess(pushAmt),
 		FundingFeePerKw: 1000,
 		Private:         !announceChan,
 		Updates:         updateChan,
@@ -853,7 +853,7 @@ func assertFundingMsgSent(t *testing.T, msgChan chan lnwire.Message,
 }
 
 func assertNumPendingReservations(t *testing.T, node *testNode,
-	peerPubKey *btcec.PublicKey, expectedNum int) {
+	peerPubKey *bronec.PublicKey, expectedNum int) {
 	t.Helper()
 
 	serializedPubKey := newSerializedKey(peerPubKey)
@@ -994,8 +994,8 @@ func assertAddedToRouterGraph(t *testing.T, alice, bob *testNode,
 // advertised value will be checked against the other node's default min_htlc
 // value.
 func assertChannelAnnouncements(t *testing.T, alice, bob *testNode,
-	capacity bronutil.Amount, customMinHtlc []lnwire.MilliSatoshi,
-	customMaxHtlc []lnwire.MilliSatoshi) {
+	capacity bronutil.Amount, customMinHtlc []lnwire.MilliBronees,
+	customMaxHtlc []lnwire.MilliBronees) {
 	t.Helper()
 
 	// After the FundingLocked message is sent, Alice and Bob will each
@@ -1753,7 +1753,7 @@ func TestFundingManagerPeerTimeoutAfterInitFunding(t *testing.T) {
 		TargetPubkey:    bob.privKey.PubKey(),
 		ChainHash:       *fundingNetParams.GenesisHash,
 		LocalFundingAmt: 500000,
-		PushAmt:         lnwire.NewMSatFromSatoshis(0),
+		PushAmt:         lnwire.NewMSatFromBroneess(0),
 		Private:         false,
 		Updates:         updateChan,
 		Err:             errChan,
@@ -1816,7 +1816,7 @@ func TestFundingManagerPeerTimeoutAfterFundingOpen(t *testing.T) {
 		TargetPubkey:    bob.privKey.PubKey(),
 		ChainHash:       *fundingNetParams.GenesisHash,
 		LocalFundingAmt: 500000,
-		PushAmt:         lnwire.NewMSatFromSatoshis(0),
+		PushAmt:         lnwire.NewMSatFromBroneess(0),
 		Private:         false,
 		Updates:         updateChan,
 		Err:             errChan,
@@ -1888,7 +1888,7 @@ func TestFundingManagerPeerTimeoutAfterFundingAccept(t *testing.T) {
 		TargetPubkey:    bob.privKey.PubKey(),
 		ChainHash:       *fundingNetParams.GenesisHash,
 		LocalFundingAmt: 500000,
-		PushAmt:         lnwire.NewMSatFromSatoshis(0),
+		PushAmt:         lnwire.NewMSatFromBroneess(0),
 		Private:         false,
 		Updates:         updateChan,
 		Err:             errChan,
@@ -2613,7 +2613,7 @@ func TestFundingManagerCustomChannelParameters(t *testing.T) {
 		TargetPubkey:     bob.privKey.PubKey(),
 		ChainHash:        *fundingNetParams.GenesisHash,
 		LocalFundingAmt:  localAmt,
-		PushAmt:          lnwire.NewMSatFromSatoshis(pushAmt),
+		PushAmt:          lnwire.NewMSatFromBroneess(pushAmt),
 		Private:          false,
 		MaxValueInFlight: maxValueInFlight,
 		MinHtlcIn:        minHtlcIn,
@@ -2686,8 +2686,8 @@ func TestFundingManagerCustomChannelParameters(t *testing.T) {
 			5, acceptChannelResponse.HtlcMinimum)
 	}
 
-	reserve := lnwire.NewMSatFromSatoshis(fundingAmt / 100)
-	maxValueAcceptChannel := lnwire.NewMSatFromSatoshis(fundingAmt) - reserve
+	reserve := lnwire.NewMSatFromBroneess(fundingAmt / 100)
+	maxValueAcceptChannel := lnwire.NewMSatFromBroneess(fundingAmt) - reserve
 
 	if acceptChannelResponse.MaxValueInFlight != maxValueAcceptChannel {
 		t.Fatalf("expected AcceptChannel to have MaxValueInFlight %v, got %v",
@@ -2723,7 +2723,7 @@ func TestFundingManagerCustomChannelParameters(t *testing.T) {
 	// Helper method for checking the MinHtlc value stored for a
 	// reservation.
 	assertMinHtlc := func(resCtx *reservationWithCtx,
-		expOurMinHtlc, expTheirMinHtlc lnwire.MilliSatoshi) error {
+		expOurMinHtlc, expTheirMinHtlc lnwire.MilliBronees) error {
 
 		ourMinHtlc := resCtx.reservation.OurContribution().MinHTLC
 		if ourMinHtlc != expOurMinHtlc {
@@ -2742,7 +2742,7 @@ func TestFundingManagerCustomChannelParameters(t *testing.T) {
 	// Helper method for checking the MaxValueInFlight stored for a
 	// reservation.
 	assertMaxHtlc := func(resCtx *reservationWithCtx,
-		expOurMaxValue, expTheirMaxValue lnwire.MilliSatoshi) error {
+		expOurMaxValue, expTheirMaxValue lnwire.MilliBronees) error {
 
 		ourMaxValue :=
 			resCtx.reservation.OurContribution().MaxPendingAmount
@@ -2863,12 +2863,12 @@ func TestFundingManagerCustomChannelParameters(t *testing.T) {
 	// Alice should advertise the default MinHTLC value of
 	// 5, while bob should advertise the value minHtlc, since Alice
 	// required him to use it.
-	minHtlcArr := []lnwire.MilliSatoshi{5, minHtlcIn}
+	minHtlcArr := []lnwire.MilliBronees{5, minHtlcIn}
 
 	// For maxHltc Alice should advertise the default MaxHtlc value of
 	// maxValueAcceptChannel, while bob should advertise the value
 	// maxValueInFlight since Alice required him to use it.
-	maxHtlcArr := []lnwire.MilliSatoshi{maxValueAcceptChannel, maxValueInFlight}
+	maxHtlcArr := []lnwire.MilliBronees{maxValueAcceptChannel, maxValueInFlight}
 
 	assertChannelAnnouncements(t, alice, bob, capacity, minHtlcArr, maxHtlcArr)
 
@@ -2899,7 +2899,7 @@ func TestFundingManagerMaxPendingChannels(t *testing.T) {
 			TargetPubkey:    bob.privKey.PubKey(),
 			ChainHash:       *fundingNetParams.GenesisHash,
 			LocalFundingAmt: 5000000,
-			PushAmt:         lnwire.NewMSatFromSatoshis(0),
+			PushAmt:         lnwire.NewMSatFromBroneess(0),
 			Private:         false,
 			Updates:         updateChan,
 			Err:             errChan,
@@ -3070,7 +3070,7 @@ func TestFundingManagerRejectPush(t *testing.T) {
 		TargetPubkey:    bob.privKey.PubKey(),
 		ChainHash:       *fundingNetParams.GenesisHash,
 		LocalFundingAmt: 500000,
-		PushAmt:         lnwire.NewMSatFromSatoshis(10),
+		PushAmt:         lnwire.NewMSatFromBroneess(10),
 		Private:         true,
 		Updates:         updateChan,
 		Err:             errChan,
@@ -3128,7 +3128,7 @@ func TestFundingManagerMaxConfs(t *testing.T) {
 		TargetPubkey:    bob.privKey.PubKey(),
 		ChainHash:       *fundingNetParams.GenesisHash,
 		LocalFundingAmt: 500000,
-		PushAmt:         lnwire.NewMSatFromSatoshis(10),
+		PushAmt:         lnwire.NewMSatFromBroneess(10),
 		Private:         false,
 		Updates:         updateChan,
 		Err:             errChan,
@@ -3193,7 +3193,7 @@ func TestFundingManagerFundAll(t *testing.T) {
 		{
 			AddressType: lnwallet.WitnessPubKey,
 			Value: bronutil.Amount(
-				0.05 * bronutil.SatoshiPerBrocoin,
+				0.05 * bronutil.BroneesPerBrocoin,
 			),
 			PkScript: mock.CoinPkScript,
 			OutPoint: wire.OutPoint{
@@ -3204,7 +3204,7 @@ func TestFundingManagerFundAll(t *testing.T) {
 		{
 			AddressType: lnwallet.WitnessPubKey,
 			Value: bronutil.Amount(
-				0.06 * bronutil.SatoshiPerBrocoin,
+				0.06 * bronutil.BroneesPerBrocoin,
 			),
 			PkScript: mock.CoinPkScript,
 			OutPoint: wire.OutPoint{
@@ -3222,7 +3222,7 @@ func TestFundingManagerFundAll(t *testing.T) {
 			// We will spend all the funds in the wallet, and
 			// expects no change output.
 			spendAmt: bronutil.Amount(
-				0.11 * bronutil.SatoshiPerBrocoin,
+				0.11 * bronutil.BroneesPerBrocoin,
 			),
 			change: false,
 		},
@@ -3230,7 +3230,7 @@ func TestFundingManagerFundAll(t *testing.T) {
 			// We spend a little less than the funds in the wallet,
 			// so a change output should be created.
 			spendAmt: bronutil.Amount(
-				0.10 * bronutil.SatoshiPerBrocoin,
+				0.10 * bronutil.BroneesPerBrocoin,
 			),
 			change: true,
 		},
@@ -3396,10 +3396,10 @@ func TestMaxChannelSizeConfig(t *testing.T) {
 	// Create a set of funding managers that will reject wumbo
 	// channels but set --maxchansize explicitly lower than soft-limit.
 	// Verify that wumbo rejecting funding managers will respect --maxchansize
-	// below 16777215 satoshi (MaxBtcFundingAmount) limit.
+	// below 16777215 bronees (MaxBronFundingAmount) limit.
 	alice, bob := setupFundingManagers(t, func(cfg *Config) {
 		cfg.NoWumboChans = true
-		cfg.MaxChanSize = MaxBtcFundingAmount - 1
+		cfg.MaxChanSize = MaxBronFundingAmount - 1
 	})
 
 	// Attempt to create a channel above the limit
@@ -3410,8 +3410,8 @@ func TestMaxChannelSizeConfig(t *testing.T) {
 		Peer:            bob,
 		TargetPubkey:    bob.privKey.PubKey(),
 		ChainHash:       *fundingNetParams.GenesisHash,
-		LocalFundingAmt: MaxBtcFundingAmount,
-		PushAmt:         lnwire.NewMSatFromSatoshis(0),
+		LocalFundingAmt: MaxBronFundingAmount,
+		PushAmt:         lnwire.NewMSatFromBroneess(0),
 		Private:         false,
 		Updates:         updateChan,
 		Err:             errChan,
@@ -3430,7 +3430,7 @@ func TestMaxChannelSizeConfig(t *testing.T) {
 	tearDownFundingManagers(t, alice, bob)
 	alice, bob = setupFundingManagers(t, func(cfg *Config) {
 		cfg.NoWumboChans = true
-		cfg.MaxChanSize = MaxBtcFundingAmount + 1
+		cfg.MaxChanSize = MaxBronFundingAmount + 1
 	})
 
 	// Reset the Peer to the newly created one.
@@ -3456,7 +3456,7 @@ func TestMaxChannelSizeConfig(t *testing.T) {
 
 	// Attempt to create a channel above the limit
 	// imposed by --maxchansize, which should be rejected.
-	initReq.LocalFundingAmt = bronutil.SatoshiPerBrocoin + 1
+	initReq.LocalFundingAmt = bronutil.BroneesPerBrocoin + 1
 
 	// After processing the funding open message, bob should respond with
 	// an error rejecting the channel that exceeds size limit.
@@ -3486,8 +3486,8 @@ func TestWumboChannelConfig(t *testing.T) {
 		Peer:            bob,
 		TargetPubkey:    bob.privKey.PubKey(),
 		ChainHash:       *fundingNetParams.GenesisHash,
-		LocalFundingAmt: MaxBtcFundingAmount,
-		PushAmt:         lnwire.NewMSatFromSatoshis(0),
+		LocalFundingAmt: MaxBronFundingAmount,
+		PushAmt:         lnwire.NewMSatFromBroneess(0),
 		Private:         false,
 		Updates:         updateChan,
 		Err:             errChan,
@@ -3501,7 +3501,7 @@ func TestWumboChannelConfig(t *testing.T) {
 
 	// We'll now attempt to create a channel above the wumbo mark, which
 	// should be rejected.
-	initReq.LocalFundingAmt = bronutil.SatoshiPerBrocoin
+	initReq.LocalFundingAmt = bronutil.BroneesPerBrocoin
 
 	// After processing the funding open message, bob should respond with
 	// an error rejecting the channel.
@@ -3515,7 +3515,7 @@ func TestWumboChannelConfig(t *testing.T) {
 	tearDownFundingManagers(t, alice, bob)
 	alice, bob = setupFundingManagers(t, func(cfg *Config) {
 		cfg.NoWumboChans = false
-		cfg.MaxChanSize = MaxBtcFundingAmountWumbo
+		cfg.MaxChanSize = MaxBronFundingAmountWumbo
 	})
 
 	// Reset the Peer to the newly created one.
@@ -3629,7 +3629,7 @@ func testUpfrontFailure(t *testing.T, pkscript []byte, expectErr bool) {
 	updateChan := make(chan *lnrpc.OpenStatusUpdate)
 
 	fundingAmt := bronutil.Amount(500000)
-	pushAmt := lnwire.NewMSatFromSatoshis(bronutil.Amount(0))
+	pushAmt := lnwire.NewMSatFromBroneess(bronutil.Amount(0))
 
 	initReq := &InitFundingMsg{
 		Peer:            alice,

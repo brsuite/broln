@@ -5,16 +5,16 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/tlv"
+	"github.com/brsuite/brond/bronec"
 )
 
-var testPK, _ = btcec.ParsePubKey([]byte{0x02,
+var testPK, _ = bronec.ParsePubKey([]byte{0x02,
 	0x3d, 0xa0, 0x92, 0xf6, 0x98, 0x0e, 0x58, 0xd2,
 	0xc0, 0x37, 0x17, 0x31, 0x80, 0xe9, 0xa4, 0x65,
 	0x47, 0x60, 0x26, 0xee, 0x50, 0xf9, 0x66, 0x95,
 	0x96, 0x3e, 0x8e, 0xfe, 0x43, 0x6f, 0x54, 0xeb,
-}, btcec.S256())
+}, bronec.S256())
 
 type primitive struct {
 	u8    byte
@@ -24,7 +24,7 @@ type primitive struct {
 	b32   [32]byte
 	b33   [33]byte
 	b64   [64]byte
-	pk    *btcec.PublicKey
+	pk    *bronec.PublicKey
 	bytes []byte
 }
 

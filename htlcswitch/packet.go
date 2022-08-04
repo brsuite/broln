@@ -36,12 +36,12 @@ type htlcPacket struct {
 	// settle/fail in response to the sourceRef.
 	destRef *channeldb.SettleFailRef
 
-	// incomingAmount is the value in milli-satoshis that arrived on an
+	// incomingAmount is the value in milli-broneess that arrived on an
 	// incoming link.
-	incomingAmount lnwire.MilliSatoshi
+	incomingAmount lnwire.MilliBronees
 
 	// amount is the value of the HTLC that is being created or modified.
-	amount lnwire.MilliSatoshi
+	amount lnwire.MilliBronees
 
 	// htlc lnwire message type of which depends on switch request type.
 	htlc lnwire.Message

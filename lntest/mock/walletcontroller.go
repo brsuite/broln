@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/brond/wire"
@@ -27,7 +27,7 @@ var (
 // WalletController is a mock implementation of the WalletController
 // interface. It let's us mock the interaction with the brocoin network.
 type WalletController struct {
-	RootKey               *btcec.PrivateKey
+	RootKey               *bronec.PrivateKey
 	PublishedTransactions chan *wire.MsgTx
 	index                 uint32
 	Utxos                 []*lnwallet.Utxo
@@ -45,7 +45,7 @@ func (w *WalletController) FetchInputInfo(
 
 	utxo := &lnwallet.Utxo{
 		AddressType:   lnwallet.WitnessPubKey,
-		Value:         10 * bronutil.SatoshiPerBrocoin,
+		Value:         10 * bronutil.BroneesPerBrocoin,
 		PkScript:      []byte("dummy"),
 		Confirmations: 1,
 		OutPoint:      *prevOut,
@@ -107,7 +107,7 @@ func (w *WalletController) ImportAccount(string, *hdkeychain.ExtendedKey,
 }
 
 // ImportPublicKey currently returns a dummy value.
-func (w *WalletController) ImportPublicKey(*btcec.PublicKey,
+func (w *WalletController) ImportPublicKey(*bronec.PublicKey,
 	waddrmgr.AddressType) error {
 
 	return nil
@@ -140,7 +140,7 @@ func (w *WalletController) ListUnspentWitness(int32, int32,
 	// Otherwise create one to return.
 	utxo := &lnwallet.Utxo{
 		AddressType: lnwallet.WitnessPubKey,
-		Value:       bronutil.Amount(10 * bronutil.SatoshiPerBrocoin),
+		Value:       bronutil.Amount(10 * bronutil.BroneesPerBrocoin),
 		PkScript:    CoinPkScript,
 		OutPoint: wire.OutPoint{
 			Hash:  chainhash.Hash{},

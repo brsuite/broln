@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/netann"
 	"github.com/brsuite/broln/routing"
+	"github.com/brsuite/brond/bronec"
 )
 
 type mockSigner struct {
@@ -18,7 +18,7 @@ type mockSigner struct {
 }
 
 func (m *mockSigner) SignMessage(_ keychain.KeyLocator,
-	_ []byte, _ bool) (*btcec.Signature, error) {
+	_ []byte, _ bool) (*bronec.Signature, error) {
 
 	if m.err != nil {
 		return nil, m.err
@@ -30,7 +30,7 @@ func (m *mockSigner) SignMessage(_ keychain.KeyLocator,
 var _ lnwallet.MessageSigner = (*mockSigner)(nil)
 
 var (
-	privKey, _    = btcec.NewPrivateKey(btcec.S256())
+	privKey, _    = bronec.NewPrivateKey(bronec.S256())
 	privKeySigner = keychain.NewPrivKeyMessageSigner(privKey, testKeyLoc)
 
 	pubKey = privKey.PubKey()

@@ -8,10 +8,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/bronutil"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/brsuite/broln/lnwire"
 )
 
 // Config couples all the items that an autopilot agent needs to function.
@@ -21,7 +21,7 @@ type Config struct {
 	// Self is the identity public key of the Lightning Network node that
 	// is being driven by the agent. This is used to ensure that we don't
 	// accidentally attempt to open a channel with ourselves.
-	Self *btcec.PublicKey
+	Self *bronec.PublicKey
 
 	// Heuristic is an attachment heuristic which will govern to whom we
 	// open channels to, and also what those channels look like in terms of
@@ -39,11 +39,11 @@ type Config struct {
 	// ConnectToPeer attempts to connect to the peer using one of its
 	// advertised addresses. The boolean returned signals whether the peer
 	// was already connected.
-	ConnectToPeer func(*btcec.PublicKey, []net.Addr) (bool, error)
+	ConnectToPeer func(*bronec.PublicKey, []net.Addr) (bool, error)
 
 	// DisconnectPeer attempts to disconnect the peer with the given public
 	// key.
-	DisconnectPeer func(*btcec.PublicKey) error
+	DisconnectPeer func(*bronec.PublicKey) error
 
 	// WalletBalance is a function closure that should return the current
 	// available balance of the backing wallet.
@@ -93,7 +93,7 @@ func (c channelState) ConnectedNodes() map[NodeID]struct{} {
 }
 
 // Agent implements a closed-loop control system which seeks to autonomously
-// optimize the allocation of satoshis within channels throughput the network's
+// optimize the allocation of broneess within channels throughput the network's
 // channel graph. An agent is configurable by swapping out different
 // AttachmentHeuristic strategies. The agent uses external signals such as the
 // wallet balance changing, or new channels being opened/closed for the local
@@ -145,7 +145,7 @@ type Agent struct {
 	// will be sent.
 	heuristicUpdates chan *heuristicUpdate
 
-	// totalBalance is the total number of satoshis the backing wallet is
+	// totalBalance is the total number of broneess the backing wallet is
 	// known to control at any given instance. This value will be updated
 	// when the agent receives external balance update signals.
 	totalBalance bronutil.Amount
@@ -731,7 +731,7 @@ func (a *Agent) executeDirective(directive AttachmentDirective) {
 	// We'll start out by attempting to connect to the peer in order to
 	// begin the funding workflow.
 	nodeID := directive.NodeID
-	pub, err := btcec.ParsePubKey(nodeID[:], btcec.S256())
+	pub, err := bronec.ParsePubKey(nodeID[:], bronec.S256())
 	if err != nil {
 		log.Errorf("Unable to parse pubkey %x: %v", nodeID, err)
 		return

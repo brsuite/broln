@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/lnwallet"
+	"github.com/brsuite/bronutil"
 )
 
 // htlcOutgoingContestResolver is a ContractResolver that's able to resolve an
@@ -157,7 +157,7 @@ func (h *htlcOutgoingContestResolver) Resolve() (ContractResolver, error) {
 func (h *htlcOutgoingContestResolver) report() *ContractReport {
 	// No locking needed as these values are read-only.
 
-	finalAmt := h.htlc.Amt.ToSatoshis()
+	finalAmt := h.htlc.Amt.ToBroneess()
 	if h.htlcResolution.SignedTimeoutTx != nil {
 		finalAmt = bronutil.Amount(
 			h.htlcResolution.SignedTimeoutTx.TxOut[0].Value,

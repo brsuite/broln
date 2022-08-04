@@ -55,20 +55,20 @@ type CachedEdgePolicy struct {
 	TimeLockDelta uint16
 
 	// MinHTLC is the smallest value HTLC this node will forward, expressed
-	// in millisatoshi.
-	MinHTLC lnwire.MilliSatoshi
+	// in millibronees.
+	MinHTLC lnwire.MilliBronees
 
 	// MaxHTLC is the largest value HTLC this node will forward, expressed
-	// in millisatoshi.
-	MaxHTLC lnwire.MilliSatoshi
+	// in millibronees.
+	MaxHTLC lnwire.MilliBronees
 
 	// FeeBaseMSat is the base HTLC fee that will be charged for forwarding
 	// ANY HTLC, expressed in mSAT's.
-	FeeBaseMSat lnwire.MilliSatoshi
+	FeeBaseMSat lnwire.MilliBronees
 
 	// FeeProportionalMillionths is the rate that the node will charge for
-	// HTLCs for each millionth of a satoshi forwarded.
-	FeeProportionalMillionths lnwire.MilliSatoshi
+	// HTLCs for each millionth of a bronees forwarded.
+	FeeProportionalMillionths lnwire.MilliBronees
 
 	// ToNodePubKey is a function that returns the to node of a policy.
 	// Since we only ever store the inbound policy, this is always the node
@@ -84,11 +84,11 @@ type CachedEdgePolicy struct {
 	ToNodeFeatures *lnwire.FeatureVector
 }
 
-// ComputeFee computes the fee to forward an HTLC of `amt` milli-satoshis over
+// ComputeFee computes the fee to forward an HTLC of `amt` milli-broneess over
 // the passed active payment channel. This value is currently computed as
 // specified in BOLT07, but will likely change in the near future.
 func (c *CachedEdgePolicy) ComputeFee(
-	amt lnwire.MilliSatoshi) lnwire.MilliSatoshi {
+	amt lnwire.MilliBronees) lnwire.MilliBronees {
 
 	return c.FeeBaseMSat + (amt*c.FeeProportionalMillionths)/feeRateParts
 }
@@ -96,7 +96,7 @@ func (c *CachedEdgePolicy) ComputeFee(
 // ComputeFeeFromIncoming computes the fee to forward an HTLC given the incoming
 // amount.
 func (c *CachedEdgePolicy) ComputeFeeFromIncoming(
-	incomingAmt lnwire.MilliSatoshi) lnwire.MilliSatoshi {
+	incomingAmt lnwire.MilliBronees) lnwire.MilliBronees {
 
 	return incomingAmt - divideCeil(
 		feeRateParts*(incomingAmt-c.FeeBaseMSat),
@@ -131,7 +131,7 @@ type DirectedChannel struct {
 	// channel.
 	OtherNode route.Vertex
 
-	// Capacity is the announced capacity of this channel in satoshis.
+	// Capacity is the announced capacity of this channel in broneess.
 	Capacity bronutil.Amount
 
 	// OutPolicySet is a boolean that indicates whether the node has an

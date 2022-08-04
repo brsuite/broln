@@ -9,12 +9,12 @@ import (
 	"sort"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/wire"
 	lnwire "github.com/brsuite/broln/channeldb/migration/lnwire21"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/tlv"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/wire"
 )
 
 var (
@@ -190,7 +190,7 @@ type PaymentCreationInfo struct {
 	PaymentHash lntypes.Hash
 
 	// Value is the amount we are paying.
-	Value lnwire.MilliSatoshi
+	Value lnwire.MilliBronees
 
 	// CreatingDate is the time when this payment was initiated.
 	CreationDate time.Time
@@ -209,7 +209,7 @@ type PaymentAttemptInfo struct {
 	PaymentID uint64
 
 	// SessionKey is the ephemeral key used for this payment attempt.
-	SessionKey *btcec.PrivateKey
+	SessionKey *bronec.PrivateKey
 
 	// Route is the route attempted to send the HTLC.
 	Route Route
@@ -417,7 +417,7 @@ func deserializePaymentCreationInfo(r io.Reader) (*PaymentCreationInfo, error) {
 	if _, err := io.ReadFull(r, scratch[:]); err != nil {
 		return nil, err
 	}
-	c.Value = lnwire.MilliSatoshi(byteOrder.Uint64(scratch[:]))
+	c.Value = lnwire.MilliBronees(byteOrder.Uint64(scratch[:]))
 
 	if _, err := io.ReadFull(r, scratch[:]); err != nil {
 		return nil, err

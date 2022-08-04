@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/lnrpc"
 	"github.com/brsuite/broln/lntest"
 	"github.com/brsuite/broln/macaroons"
+	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/macaroon.v2"
@@ -28,7 +28,7 @@ func testRPCMiddlewareInterceptor(net *lntest.NetworkHarness, t *harnessTest) {
 	// Let's set up a channel between Alice and Bob, just to get some useful
 	// data to inspect when doing RPC calls to Alice later.
 	net.EnsureConnected(t.t, net.Alice, net.Bob)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, net.Alice)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, net.Alice)
 	_ = openChannelAndAssert(
 		t, net, net.Alice, net.Bob, lntest.OpenChannelParams{
 			Amt: 1_234_567,

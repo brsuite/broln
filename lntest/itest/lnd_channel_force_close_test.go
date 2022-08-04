@@ -6,10 +6,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/brsuite/brond/blockchain"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/go-errors/errors"
 	"github.com/brsuite/broln"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/lnrpc"
@@ -19,6 +15,10 @@ import (
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/routing"
+	"github.com/brsuite/brond/blockchain"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/go-errors/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -71,7 +71,7 @@ func testCommitmentTransactionDeadline(net *lntest.NetworkHarness,
 	// deadline to perform fee estimation.
 	net.SetFeeEstimate(feeRateDefault)
 
-	// setupNode creates a new node and sends 1 btc to the node.
+	// setupNode creates a new node and sends 1 bron to the node.
 	setupNode := func(name string) *lntest.HarnessNode {
 		// Create the node.
 		args := []string{"--hodl.exit-settle"}
@@ -79,12 +79,12 @@ func testCommitmentTransactionDeadline(net *lntest.NetworkHarness,
 		node := net.NewNode(t.t, name, args)
 
 		// Send some coins to the node.
-		net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, node)
+		net.SendCoins(t.t, bronutil.BroneesPerBrocoin, node)
 
 		// For neutrino backend, we need one additional UTXO to create
 		// the sweeping tx for the remote anchor.
 		if net.BackendCfg.Name() == lntest.NeutrinoBackendName {
-			net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, node)
+			net.SendCoins(t.t, bronutil.BroneesPerBrocoin, node)
 		}
 
 		return node
@@ -270,11 +270,11 @@ func testChannelForceClosure(net *lntest.NetworkHarness, t *harnessTest) {
 
 			// Each time, we'll send Alice  new set of coins in
 			// order to fund the channel.
-			net.SendCoins(t, bronutil.SatoshiPerBrocoin, alice)
+			net.SendCoins(t, bronutil.BroneesPerBrocoin, alice)
 
 			// Also give Carol some coins to allow her to sweep her
 			// anchor.
-			net.SendCoins(t, bronutil.SatoshiPerBrocoin, carol)
+			net.SendCoins(t, bronutil.BroneesPerBrocoin, carol)
 
 			channelForceClosureTest(
 				net, ht, alice, carol, channelType,
@@ -310,7 +310,7 @@ func channelForceClosureTest(net *lntest.NetworkHarness, t *harnessTest,
 	net.ConnectNodes(t.t, alice, carol)
 
 	// We need one additional UTXO for sweeping the remote anchor.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, alice)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, alice)
 
 	// Before we start, obtain Carol's current wallet balance, we'll check
 	// to ensure that at the end of the force closure by Alice, Carol

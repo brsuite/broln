@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/watchtower/blob"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
 )
 
 // WriteElement is a one-stop shop to write the big endian representation of
@@ -102,7 +102,7 @@ func WriteElement(w io.Writer, element interface{}) error {
 			return err
 		}
 
-	case *btcec.PublicKey:
+	case *bronec.PublicKey:
 		if e == nil {
 			return fmt.Errorf("cannot write nil pubkey")
 		}
@@ -222,13 +222,13 @@ func ReadElement(r io.Reader, element interface{}) error {
 
 		*e = f
 
-	case **btcec.PublicKey:
-		var b [btcec.PubKeyBytesLenCompressed]byte
+	case **bronec.PublicKey:
+		var b [bronec.PubKeyBytesLenCompressed]byte
 		if _, err := io.ReadFull(r, b[:]); err != nil {
 			return err
 		}
 
-		pubKey, err := btcec.ParsePubKey(b[:], btcec.S256())
+		pubKey, err := bronec.ParsePubKey(b[:], bronec.S256())
 		if err != nil {
 			return err
 		}

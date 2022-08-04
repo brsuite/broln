@@ -6,7 +6,7 @@ import (
 	"net"
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 )
 
 type mockChannelRestorer struct {
@@ -31,7 +31,7 @@ type mockPeerConnector struct {
 	callCount int
 }
 
-func (m *mockPeerConnector) ConnectPeer(node *btcec.PublicKey,
+func (m *mockPeerConnector) ConnectPeer(node *bronec.PublicKey,
 	addrs []net.Addr) error {
 
 	if m.fail {

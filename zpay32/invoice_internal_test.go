@@ -7,22 +7,22 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg"
 	"github.com/brsuite/bronutil"
 	"github.com/brsuite/bronutil/bech32"
-	"github.com/brsuite/broln/lnwire"
 )
 
 // TestDecodeAmount ensures that the amount string in the hrp of the Invoice
-// properly gets decoded into millisatoshis.
+// properly gets decoded into millibroneess.
 func TestDecodeAmount(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
 		amount string
 		valid  bool
-		result lnwire.MilliSatoshi
+		result lnwire.MilliBronees
 	}{
 		{
 			amount: "",
@@ -49,79 +49,79 @@ func TestDecodeAmount(t *testing.T) {
 			valid:  false,
 		},
 		{
-			amount: "1p",  // pBTC
+			amount: "1p",  // pBRON
 			valid:  false, // too small
 		},
 		{
-			amount: "1109p", // pBTC
+			amount: "1109p", // pBRON
 			valid:  false,   // not divisible by 10
 		},
 		{
-			amount: "-10p", // pBTC
+			amount: "-10p", // pBRON
 			valid:  false,  // negative amount
 		},
 		{
-			amount: "10p", // pBTC
+			amount: "10p", // pBRON
 			valid:  true,
 			result: 1, // mSat
 		},
 		{
-			amount: "1000p", // pBTC
+			amount: "1000p", // pBRON
 			valid:  true,
 			result: 100, // mSat
 		},
 		{
-			amount: "1n", // nBTC
+			amount: "1n", // nBRON
 			valid:  true,
 			result: 100, // mSat
 		},
 		{
-			amount: "9000n", // nBTC
+			amount: "9000n", // nBRON
 			valid:  true,
 			result: 900000, // mSat
 		},
 		{
-			amount: "9u", // uBTC
+			amount: "9u", // uBRON
 			valid:  true,
 			result: 900000, // mSat
 		},
 		{
-			amount: "2000u", // uBTC
+			amount: "2000u", // uBRON
 			valid:  true,
 			result: 200000000, // mSat
 		},
 		{
-			amount: "2m", // mBTC
+			amount: "2m", // mBRON
 			valid:  true,
 			result: 200000000, // mSat
 		},
 		{
-			amount: "2000m", // mBTC
+			amount: "2000m", // mBRON
 			valid:  true,
 			result: 200000000000, // mSat
 		},
 		{
-			amount: "2", // BTC
+			amount: "2", // BRON
 			valid:  true,
 			result: 200000000000, // mSat
 		},
 		{
-			amount: "2000", // BTC
+			amount: "2000", // BRON
 			valid:  true,
 			result: 200000000000000, // mSat
 		},
 		{
-			amount: "2009", // BTC
+			amount: "2009", // BRON
 			valid:  true,
 			result: 200900000000000, // mSat
 		},
 		{
-			amount: "1234", // BTC
+			amount: "1234", // BRON
 			valid:  true,
 			result: 123400000000000, // mSat
 		},
 		{
-			amount: "21000000", // BTC
+			amount: "21000000", // BRON
 			valid:  true,
 			result: 2100000000000000000, // mSat
 		},
@@ -140,65 +140,65 @@ func TestDecodeAmount(t *testing.T) {
 	}
 }
 
-// TestEncodeAmount checks that the given amount in millisatoshis gets encoded
+// TestEncodeAmount checks that the given amount in millibroneess gets encoded
 // into the shortest possible amount string.
 func TestEncodeAmount(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		msat   lnwire.MilliSatoshi
+		msat   lnwire.MilliBronees
 		valid  bool
 		result string
 	}{
 		{
 			msat:   1, // mSat
 			valid:  true,
-			result: "10p", // pBTC
+			result: "10p", // pBRON
 		},
 		{
 			msat:   120, // mSat
 			valid:  true,
-			result: "1200p", // pBTC
+			result: "1200p", // pBRON
 		},
 		{
 			msat:   100, // mSat
 			valid:  true,
-			result: "1n", // nBTC
+			result: "1n", // nBRON
 		},
 		{
 			msat:   900000, // mSat
 			valid:  true,
-			result: "9u", // uBTC
+			result: "9u", // uBRON
 		},
 		{
 			msat:   200000000, // mSat
 			valid:  true,
-			result: "2m", // mBTC
+			result: "2m", // mBRON
 		},
 		{
 			msat:   200000000000, // mSat
 			valid:  true,
-			result: "2", // BTC
+			result: "2", // BRON
 		},
 		{
 			msat:   200000000000000, // mSat
 			valid:  true,
-			result: "2000", // BTC
+			result: "2000", // BRON
 		},
 		{
 			msat:   200900000000000, // mSat
 			valid:  true,
-			result: "2009", // BTC
+			result: "2009", // BRON
 		},
 		{
 			msat:   123400000000000, // mSat
 			valid:  true,
-			result: "1234", // BTC
+			result: "1234", // BRON
 		},
 		{
 			msat:   2100000000000000000, // mSat
 			valid:  true,
-			result: "21000000", // BTC
+			result: "21000000", // BRON
 		},
 	}
 
@@ -419,7 +419,7 @@ func TestParseDestination(t *testing.T) {
 	tests := []struct {
 		data   []byte
 		valid  bool
-		result *btcec.PublicKey
+		result *bronec.PublicKey
 	}{
 		{
 			data:   []byte{},

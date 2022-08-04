@@ -3,7 +3,7 @@ package autopilot
 import (
 	"testing"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/bronutil"
 	"github.com/stretchr/testify/require"
 )
@@ -37,9 +37,9 @@ var normalizedTestGraphCentrality = []float64{
 
 // buildTestGraph builds a test graph from a passed graph desriptor.
 func buildTestGraph(t *testing.T,
-	graph testGraph, desc testGraphDesc) map[int]*btcec.PublicKey {
+	graph testGraph, desc testGraphDesc) map[int]*bronec.PublicKey {
 
-	nodes := make(map[int]*btcec.PublicKey)
+	nodes := make(map[int]*bronec.PublicKey)
 
 	for i := 0; i < desc.nodes; i++ {
 		key, err := graph.addRandNode()
@@ -48,7 +48,7 @@ func buildTestGraph(t *testing.T,
 		nodes[i] = key
 	}
 
-	const chanCapacity = bronutil.SatoshiPerBrocoin
+	const chanCapacity = bronutil.BroneesPerBrocoin
 	for u, neighbors := range desc.edges {
 		for _, v := range neighbors {
 			_, _, err := graph.addRandChannel(

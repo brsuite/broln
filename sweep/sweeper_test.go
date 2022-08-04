@@ -8,18 +8,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/build"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/keychain"
 	"github.com/brsuite/broln/lntest/mock"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwallet/chainfee"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
 )
 
@@ -50,7 +50,7 @@ var (
 	spendableInputs []*input.BaseInput
 	testInputCount  int
 
-	testPubKey, _ = btcec.ParsePubKey([]byte{
+	testPubKey, _ = bronec.ParsePubKey([]byte{
 		0x04, 0x11, 0xdb, 0x93, 0xe1, 0xdc, 0xdb, 0x8a,
 		0x01, 0x6b, 0x49, 0x84, 0x0f, 0x8c, 0x53, 0xbc, 0x1e,
 		0xb6, 0x8a, 0x38, 0x2e, 0x97, 0xb1, 0x48, 0x2e, 0xca,
@@ -59,7 +59,7 @@ var (
 		0xf8, 0x2e, 0x16, 0x0b, 0xfa, 0x9b, 0x8b, 0x64, 0xf9,
 		0xd4, 0xc0, 0x3f, 0x99, 0x9b, 0x86, 0x43, 0xf6, 0x56,
 		0xb4, 0x12, 0xa3,
-	}, btcec.S256())
+	}, bronec.S256())
 )
 
 func createTestInput(value int64, witnessType input.WitnessType) input.BaseInput {
@@ -1209,7 +1209,7 @@ func TestBumpFeeRBF(t *testing.T) {
 	// We'll then attempt to sweep an input, which we'll use to bump its fee
 	// later on.
 	input := createTestInput(
-		bronutil.SatoshiPerBrocoin, input.CommitmentTimeLock,
+		bronutil.BroneesPerBrocoin, input.CommitmentTimeLock,
 	)
 	sweepResult, err := ctx.sweeper.SweepInput(
 		&input, Params{Fee: lowFeePref},
@@ -1791,7 +1791,7 @@ func TestRequiredTxOuts(t *testing.T) {
 	var inputs []*input.BaseInput
 	for i := 0; i < 20; i++ {
 		input := createTestInput(
-			int64(bronutil.SatoshiPerBrocoin+i*500),
+			int64(bronutil.BroneesPerBrocoin+i*500),
 			input.CommitmentTimeLock,
 		)
 

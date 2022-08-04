@@ -9,11 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/brsuite/brond/chaincfg/chainhash"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
-	"github.com/brsuite/bronwallet/wallet"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/chainreg"
 	"github.com/brsuite/broln/funding"
 	"github.com/brsuite/broln/input"
@@ -25,6 +20,11 @@ import (
 	"github.com/brsuite/broln/lntest/wait"
 	"github.com/brsuite/broln/lnwallet"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/chaincfg/chainhash"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
+	"github.com/brsuite/bronwallet/wallet"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
 )
 
@@ -52,9 +52,9 @@ func testDisconnectingTargetPeer(net *lntest.NetworkHarness, t *harnessTest) {
 	assertConnected(t, alice, bob)
 
 	// Give Alice some coins so she can fund a channel.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, alice)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, alice)
 
-	chanAmt := funding.MaxBtcFundingAmount
+	chanAmt := funding.MaxBronFundingAmount
 	pushAmt := bronutil.Amount(0)
 
 	// Create a new channel that requires 1 confs before it's considered
@@ -173,7 +173,7 @@ func testDisconnectingTargetPeer(net *lntest.NetworkHarness, t *harnessTest) {
 func testSphinxReplayPersistence(net *lntest.NetworkHarness, t *harnessTest) {
 	ctxb := context.Background()
 
-	// Open a channel with 100k satoshis between Carol and Dave with Carol being
+	// Open a channel with 100k broneess between Carol and Dave with Carol being
 	// the sole funder of the channel.
 	chanAmt := bronutil.Amount(100000)
 
@@ -192,7 +192,7 @@ func testSphinxReplayPersistence(net *lntest.NetworkHarness, t *harnessTest) {
 	defer shutdownAndAssert(net, t, carol)
 
 	net.ConnectNodes(t.t, carol, dave)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	chanPoint := openChannelAndAssert(
 		t, net, carol, dave,
@@ -210,7 +210,7 @@ func testSphinxReplayPersistence(net *lntest.NetworkHarness, t *harnessTest) {
 	defer shutdownAndAssert(net, t, fred)
 
 	net.ConnectNodes(t.t, fred, carol)
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, fred)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, fred)
 
 	chanPointFC := openChannelAndAssert(
 		t, net, fred, carol,
@@ -220,7 +220,7 @@ func testSphinxReplayPersistence(net *lntest.NetworkHarness, t *harnessTest) {
 	)
 
 	// Now that the channel is open, create an invoice for Dave which
-	// expects a payment of 1000 satoshis from Carol paid via a particular
+	// expects a payment of 1000 broneess from Carol paid via a particular
 	// preimage.
 	const paymentAmt = 1000
 	preimage := bytes.Repeat([]byte("A"), 32)
@@ -366,9 +366,9 @@ func testListChannels(net *lntest.NetworkHarness, t *harnessTest) {
 	net.ConnectNodes(t.t, alice, bob)
 
 	// Give Alice some coins so she can fund a channel.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, alice)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, alice)
 
-	// Open a channel with 100k satoshis between Alice and Bob with Alice
+	// Open a channel with 100k broneess between Alice and Bob with Alice
 	// being the sole funder of the channel. The minial HTLC amount is set to
 	// 4200 msats.
 	const customizedMinHtlc = 4200
@@ -481,7 +481,7 @@ func testListChannels(net *lntest.NetworkHarness, t *harnessTest) {
 // exists and works properly.
 func testMaxPendingChannels(net *lntest.NetworkHarness, t *harnessTest) {
 	maxPendingChannels := lncfg.DefaultMaxPendingChannels + 1
-	amount := funding.MaxBtcFundingAmount
+	amount := funding.MaxBronFundingAmount
 
 	// Create a new node (Carol) with greater number of max pending
 	// channels.
@@ -813,7 +813,7 @@ func testGarbageCollectLinkNodes(net *lntest.NetworkHarness, t *harnessTest) {
 func testDataLossProtection(net *lntest.NetworkHarness, t *harnessTest) {
 	ctxb := context.Background()
 	const (
-		chanAmt     = funding.MaxBtcFundingAmount
+		chanAmt     = funding.MaxBronFundingAmount
 		paymentAmt  = 10000
 		numInvoices = 6
 	)
@@ -834,7 +834,7 @@ func testDataLossProtection(net *lntest.NetworkHarness, t *harnessTest) {
 
 	// Before we make a channel, we'll load up Carol with some coins sent
 	// directly from the miner.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	// timeTravel is a method that will make Carol open a channel to the
 	// passed node, settle a series of payments, then reset the node back
@@ -848,7 +848,7 @@ func testDataLossProtection(net *lntest.NetworkHarness, t *harnessTest) {
 		// able to open channel, so we connect them.
 		net.EnsureConnected(t.t, carol, node)
 
-		// We'll first open up a channel between them with a 0.5 BTC
+		// We'll first open up a channel between them with a 0.5 BRON
 		// value.
 		chanPoint := openChannelAndAssert(
 			t, net, carol, node,
@@ -888,8 +888,8 @@ func testDataLossProtection(net *lntest.NetworkHarness, t *harnessTest) {
 		}
 
 		// Next query for the node's channel state, as we sent 3
-		// payments of 10k satoshis each, it should now see his balance
-		// as being 30k satoshis.
+		// payments of 10k broneess each, it should now see his balance
+		// as being 30k broneess.
 		var nodeChan *lnrpc.Channel
 		var predErr error
 		err = wait.Predicate(func() bool {
@@ -1126,10 +1126,10 @@ func testRejectHTLC(net *lntest.NetworkHarness, t *harnessTest) {
 	net.ConnectNodes(t.t, carol, net.Bob)
 
 	// Send coins to Carol.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, carol)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, carol)
 
 	// Send coins to Alice.
-	net.SendCoins(t.t, bronutil.SatoshiPerBitcent, net.Alice)
+	net.SendCoins(t.t, bronutil.BroneesPerBitcent, net.Alice)
 
 	// Open a channel between Alice and Carol.
 	chanPointAlice := openChannelAndAssert(
@@ -1162,7 +1162,7 @@ func testRejectHTLC(net *lntest.NetworkHarness, t *harnessTest) {
 		return preimage
 	}
 
-	// Create an invoice from Carol of 100 satoshis.
+	// Create an invoice from Carol of 100 broneess.
 	// We expect Alice to be able to pay this invoice.
 	preimage := genPreImage()
 
@@ -1187,7 +1187,7 @@ func testRejectHTLC(net *lntest.NetworkHarness, t *harnessTest) {
 		t.Fatalf("unable to send payments from alice to carol: %v", err)
 	}
 
-	// Create an invoice from Bob of 100 satoshis.
+	// Create an invoice from Bob of 100 broneess.
 	// We expect Carol to be able to pay this invoice.
 	preimage = genPreImage()
 
@@ -1212,7 +1212,7 @@ func testRejectHTLC(net *lntest.NetworkHarness, t *harnessTest) {
 		t.Fatalf("unable to send payments from carol to bob: %v", err)
 	}
 
-	// Create an invoice from Bob of 100 satoshis.
+	// Create an invoice from Bob of 100 broneess.
 	// Alice attempts to pay Bob but this should fail, since we are
 	// using Carol as a hop and her node will reject onward HTLCs.
 	preimage = genPreImage()
@@ -1252,7 +1252,7 @@ func testRejectHTLC(net *lntest.NetworkHarness, t *harnessTest) {
 func testNodeSignVerify(net *lntest.NetworkHarness, t *harnessTest) {
 	ctxb := context.Background()
 
-	chanAmt := funding.MaxBtcFundingAmount
+	chanAmt := funding.MaxBronFundingAmount
 	pushAmt := bronutil.Amount(100000)
 
 	// Create a channel between alice and bob.
@@ -1332,7 +1332,7 @@ func testAbandonChannel(net *lntest.NetworkHarness, t *harnessTest) {
 
 	// First establish a channel between Alice and Bob.
 	channelParam := lntest.OpenChannelParams{
-		Amt:     funding.MaxBtcFundingAmount,
+		Amt:     funding.MaxBronFundingAmount,
 		PushAmt: bronutil.Amount(100000),
 	}
 
@@ -1472,11 +1472,11 @@ func testSweepAllCoins(net *lntest.NetworkHarness, t *harnessTest) {
 	ainz := net.NewNode(t.t, "Ainz", nil)
 	defer shutdownAndAssert(net, t, ainz)
 
-	// Next, we'll give Ainz exactly 2 utxos of 1 BTC each, with one of
+	// Next, we'll give Ainz exactly 2 utxos of 1 BRON each, with one of
 	// them being p2wkh and the other being a n2wpkh address.
-	net.SendCoins(t.t, bronutil.SatoshiPerBrocoin, ainz)
+	net.SendCoins(t.t, bronutil.BroneesPerBrocoin, ainz)
 
-	net.SendCoinsNP2WKH(t.t, bronutil.SatoshiPerBrocoin, ainz)
+	net.SendCoinsNP2WKH(t.t, bronutil.BroneesPerBrocoin, ainz)
 
 	// Ensure that we can't send coins to our own Pubkey.
 	ctxt, _ := context.WithTimeout(ctxb, defaultTimeout)

@@ -6,16 +6,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/chaincfg"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/watchtower/blob"
 	"github.com/brsuite/broln/watchtower/wtdb"
 	"github.com/brsuite/broln/watchtower/wtmock"
 	"github.com/brsuite/broln/watchtower/wtserver"
 	"github.com/brsuite/broln/watchtower/wtwire"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/chaincfg"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/bronutil"
 )
 
 var (
@@ -32,10 +32,10 @@ var (
 )
 
 // randPubKey generates a new secp keypair, and returns the public key.
-func randPubKey(t *testing.T) *btcec.PublicKey {
+func randPubKey(t *testing.T) *bronec.PublicKey {
 	t.Helper()
 
-	sk, err := btcec.NewPrivateKey(btcec.S256())
+	sk, err := bronec.NewPrivateKey(bronec.S256())
 	if err != nil {
 		t.Fatalf("unable to generate pubkey: %v", err)
 	}

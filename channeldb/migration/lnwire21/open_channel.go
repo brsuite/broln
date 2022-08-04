@@ -3,7 +3,7 @@ package lnwire
 import (
 	"io"
 
-	"github.com/brsuite/brond/btcec"
+	"github.com/brsuite/brond/bronec"
 	"github.com/brsuite/brond/chaincfg/chainhash"
 	"github.com/brsuite/bronutil"
 )
@@ -33,7 +33,7 @@ type OpenChannel struct {
 	// created by the initiated single funder workflow.
 	PendingChannelID [32]byte
 
-	// FundingAmount is the amount of satoshis that the initiator of the
+	// FundingAmount is the amount of broneess that the initiator of the
 	// channel wishes to use as the total capacity of the channel. The
 	// initial balance of the funding will be this value minus the push
 	// amount (if set).
@@ -42,7 +42,7 @@ type OpenChannel struct {
 	// PushAmount is the value that the initiating party wishes to "push"
 	// to the responding as part of the first commitment state. If the
 	// responder accepts, then this will be their initial balance.
-	PushAmount MilliSatoshi
+	PushAmount MilliBronees
 
 	// DustLimit is the specific dust limit the sender of this message
 	// would like enforced on their version of the commitment transaction.
@@ -53,9 +53,9 @@ type OpenChannel struct {
 	// MaxValueInFlight represents the maximum amount of coins that can be
 	// pending within the channel at any given time. If the amount of funds
 	// in limbo exceeds this amount, then the channel will be failed.
-	MaxValueInFlight MilliSatoshi
+	MaxValueInFlight MilliBronees
 
-	// ChannelReserve is the amount of BTC that the receiving party MUST
+	// ChannelReserve is the amount of BRON that the receiving party MUST
 	// maintain a balance above at all times. This is a safety mechanism to
 	// ensure that both sides always have skin in the game during the
 	// channel's lifetime.
@@ -63,7 +63,7 @@ type OpenChannel struct {
 
 	// HtlcMinimum is the smallest HTLC that the sender of this message
 	// will accept.
-	HtlcMinimum MilliSatoshi
+	HtlcMinimum MilliBronees
 
 	// FeePerKiloWeight is the initial fee rate that the initiator suggests
 	// for both commitment transaction. This value is expressed in sat per
@@ -84,38 +84,38 @@ type OpenChannel struct {
 	// FundingKey is the key that should be used on behalf of the sender
 	// within the 2-of-2 multi-sig output that it contained within the
 	// funding transaction.
-	FundingKey *btcec.PublicKey
+	FundingKey *bronec.PublicKey
 
 	// RevocationPoint is the base revocation point for the sending party.
 	// Any commitment transaction belonging to the receiver of this message
 	// should use this key and their per-commitment point to derive the
 	// revocation key for the commitment transaction.
-	RevocationPoint *btcec.PublicKey
+	RevocationPoint *bronec.PublicKey
 
 	// PaymentPoint is the base payment point for the sending party. This
 	// key should be combined with the per commitment point for a
 	// particular commitment state in order to create the key that should
 	// be used in any output that pays directly to the sending party, and
 	// also within the HTLC covenant transactions.
-	PaymentPoint *btcec.PublicKey
+	PaymentPoint *bronec.PublicKey
 
 	// DelayedPaymentPoint is the delay point for the sending party. This
 	// key should be combined with the per commitment point to derive the
 	// keys that are used in outputs of the sender's commitment transaction
 	// where they claim funds.
-	DelayedPaymentPoint *btcec.PublicKey
+	DelayedPaymentPoint *bronec.PublicKey
 
 	// HtlcPoint is the base point used to derive the set of keys for this
 	// party that will be used within the HTLC public key scripts. This
 	// value is combined with the receiver's revocation base point in order
 	// to derive the keys that are used within HTLC scripts.
-	HtlcPoint *btcec.PublicKey
+	HtlcPoint *bronec.PublicKey
 
 	// FirstCommitmentPoint is the first commitment point for the sending
 	// party. This value should be combined with the receiver's revocation
 	// base point in order to derive the revocation keys that are placed
 	// within the commitment transaction of the sender.
-	FirstCommitmentPoint *btcec.PublicKey
+	FirstCommitmentPoint *bronec.PublicKey
 
 	// ChannelFlags is a bit-field which allows the initiator of the
 	// channel to specify further behavior surrounding the channel.

@@ -5,10 +5,10 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/watchtower/blob"
 	"github.com/brsuite/broln/watchtower/wtdb"
+	"github.com/brsuite/brond/bronec"
 )
 
 type towerPK [33]byte
@@ -95,7 +95,7 @@ func (m *ClientDB) CreateTower(lnAddr *lnwire.NetAddress) (*wtdb.Tower, error) {
 // any sessions at all, it'll be completely removed from the database.
 //
 // NOTE: An error is not returned if the tower doesn't exist.
-func (m *ClientDB) RemoveTower(pubKey *btcec.PublicKey, addr net.Addr) error {
+func (m *ClientDB) RemoveTower(pubKey *bronec.PublicKey, addr net.Addr) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -140,7 +140,7 @@ func (m *ClientDB) RemoveTower(pubKey *btcec.PublicKey, addr net.Addr) error {
 }
 
 // LoadTower retrieves a tower by its public key.
-func (m *ClientDB) LoadTower(pubKey *btcec.PublicKey) (*wtdb.Tower, error) {
+func (m *ClientDB) LoadTower(pubKey *bronec.PublicKey) (*wtdb.Tower, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.loadTower(pubKey)
@@ -149,7 +149,7 @@ func (m *ClientDB) LoadTower(pubKey *btcec.PublicKey) (*wtdb.Tower, error) {
 // loadTower retrieves a tower by its public key.
 //
 // NOTE: This method requires the database's lock to be acquired.
-func (m *ClientDB) loadTower(pubKey *btcec.PublicKey) (*wtdb.Tower, error) {
+func (m *ClientDB) loadTower(pubKey *bronec.PublicKey) (*wtdb.Tower, error) {
 	var towerPK towerPK
 	copy(towerPK[:], pubKey.SerializeCompressed())
 

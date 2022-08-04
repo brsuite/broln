@@ -1,10 +1,10 @@
 package routing
 
 import (
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/bronutil"
 )
 
 // unifiedPolicies holds all unified policies for connections towards a node.
@@ -98,11 +98,11 @@ type unifiedPolicyEdge struct {
 
 // amtInRange checks whether an amount falls within the valid range for a
 // channel.
-func (u *unifiedPolicyEdge) amtInRange(amt lnwire.MilliSatoshi) bool {
+func (u *unifiedPolicyEdge) amtInRange(amt lnwire.MilliBronees) bool {
 	// If the capacity is available (non-light clients), skip channels that
 	// are too small.
 	if u.capacity > 0 &&
-		amt > lnwire.NewMSatFromSatoshis(u.capacity) {
+		amt > lnwire.NewMSatFromBroneess(u.capacity) {
 
 		return false
 	}
@@ -132,7 +132,7 @@ type unifiedPolicy struct {
 // getPolicy returns the optimal policy to use for this connection given a
 // specific amount to send. It differentiates between local and network
 // channels.
-func (u *unifiedPolicy) getPolicy(amt lnwire.MilliSatoshi,
+func (u *unifiedPolicy) getPolicy(amt lnwire.MilliBronees,
 	bandwidthHints bandwidthHints) *channeldb.CachedEdgePolicy {
 
 	if u.localChan {
@@ -144,12 +144,12 @@ func (u *unifiedPolicy) getPolicy(amt lnwire.MilliSatoshi,
 
 // getPolicyLocal returns the optimal policy to use for this local connection
 // given a specific amount to send.
-func (u *unifiedPolicy) getPolicyLocal(amt lnwire.MilliSatoshi,
+func (u *unifiedPolicy) getPolicyLocal(amt lnwire.MilliBronees,
 	bandwidthHints bandwidthHints) *channeldb.CachedEdgePolicy {
 
 	var (
 		bestPolicy   *channeldb.CachedEdgePolicy
-		maxBandwidth lnwire.MilliSatoshi
+		maxBandwidth lnwire.MilliBronees
 	)
 
 	for _, edge := range u.edges {
@@ -173,7 +173,7 @@ func (u *unifiedPolicy) getPolicyLocal(amt lnwire.MilliSatoshi,
 			edge.policy.ChannelID, amt,
 		)
 		if !ok {
-			bandwidth = lnwire.MaxMilliSatoshi
+			bandwidth = lnwire.MaxMilliBronees
 		}
 
 		// Skip channels that can't carry the payment.
@@ -202,11 +202,11 @@ func (u *unifiedPolicy) getPolicyLocal(amt lnwire.MilliSatoshi,
 // a specific amount to send. The goal is to return a policy that maximizes the
 // probability of a successful forward in a non-strict forwarding context.
 func (u *unifiedPolicy) getPolicyNetwork(
-	amt lnwire.MilliSatoshi) *channeldb.CachedEdgePolicy {
+	amt lnwire.MilliBronees) *channeldb.CachedEdgePolicy {
 
 	var (
 		bestPolicy  *channeldb.CachedEdgePolicy
-		maxFee      lnwire.MilliSatoshi
+		maxFee      lnwire.MilliBronees
 		maxTimelock uint16
 	)
 
@@ -262,8 +262,8 @@ func (u *unifiedPolicy) getPolicyNetwork(
 }
 
 // minAmt returns the minimum amount that can be forwarded on this connection.
-func (u *unifiedPolicy) minAmt() lnwire.MilliSatoshi {
-	min := lnwire.MaxMilliSatoshi
+func (u *unifiedPolicy) minAmt() lnwire.MilliBronees {
+	min := lnwire.MaxMilliBronees
 	for _, edge := range u.edges {
 		if edge.policy.MinHTLC < min {
 			min = edge.policy.MinHTLC

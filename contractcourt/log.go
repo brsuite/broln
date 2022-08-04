@@ -1,21 +1,21 @@
 package contractcourt
 
 import (
-	"github.com/btcsuite/btclog"
 	"github.com/brsuite/broln/build"
+	"github.com/brsuite/bronlog"
 )
 
 var (
 	// log is a logger that is initialized with no output filters.  This
 	// means the package will not perform any logging by default until the caller
 	// requests it.
-	log btclog.Logger
+	log bronlog.Logger
 
 	// brarLog is the logger used by the breach arb.
-	brarLog btclog.Logger
+	brarLog bronlog.Logger
 
 	// utxnLog is the logger used by the utxo nursary.
-	utxnLog btclog.Logger
+	utxnLog bronlog.Logger
 )
 
 // The default amount of logging is none.
@@ -28,27 +28,27 @@ func init() {
 // DisableLog disables all library log output.  Logging output is disabled
 // by default until UseLogger is called.
 func DisableLog() {
-	UseLogger(btclog.Disabled)
+	UseLogger(bronlog.Disabled)
 }
 
 // UseLogger uses a specified Logger to output package logging info.
 // This should be used in preference to SetLogWriter if the caller is also
-// using btclog.
-func UseLogger(logger btclog.Logger) {
+// using bronlog.
+func UseLogger(logger bronlog.Logger) {
 	log = logger
 }
 
 // UseBreachLogger uses a specified Logger to output package logging info.
 // This should be used in preference to SetLogWriter if the caller is also
-// using btclog.
-func UseBreachLogger(logger btclog.Logger) {
+// using bronlog.
+func UseBreachLogger(logger bronlog.Logger) {
 	brarLog = logger
 }
 
 // UseNurseryLogger uses a specified Logger to output package logging info.
 // This should be used in preference to SetLogWriter if the caller is also
-// using btclog.
-func UseNurseryLogger(logger btclog.Logger) {
+// using bronlog.
+func UseNurseryLogger(logger bronlog.Logger) {
 	utxnLog = logger
 }
 

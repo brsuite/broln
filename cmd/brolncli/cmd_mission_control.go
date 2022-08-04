@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/lnrpc/routerrpc"
 	"github.com/brsuite/broln/lnwire"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/bronutil"
 	"github.com/urfave/cli"
 )
 
@@ -191,7 +191,7 @@ func queryProb(ctx *cli.Context) error {
 		return fmt.Errorf("invalid amt: %v", err)
 	}
 
-	amtMsat := lnwire.NewMSatFromSatoshis(
+	amtMsat := lnwire.NewMSatFromBroneess(
 		bronutil.Amount(amtSat),
 	)
 

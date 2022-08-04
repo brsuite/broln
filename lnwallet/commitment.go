@@ -3,15 +3,15 @@ package lnwallet
 import (
 	"fmt"
 
-	"github.com/brsuite/brond/blockchain"
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/brond/txscript"
-	"github.com/brsuite/brond/wire"
-	"github.com/brsuite/bronutil"
 	"github.com/brsuite/broln/channeldb"
 	"github.com/brsuite/broln/input"
 	"github.com/brsuite/broln/lnwallet/chainfee"
 	"github.com/brsuite/broln/lnwire"
+	"github.com/brsuite/brond/blockchain"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/brond/txscript"
+	"github.com/brsuite/brond/wire"
+	"github.com/brsuite/bronutil"
 )
 
 // anchorSize is the constant anchor output size.
@@ -31,7 +31,7 @@ const DefaultAnchorsCommitMaxFeeRateSatPerVByte = 10
 type CommitmentKeyRing struct {
 	// CommitPoint is the "per commitment point" used to derive the tweak
 	// for each base point.
-	CommitPoint *btcec.PublicKey
+	CommitPoint *bronec.PublicKey
 
 	// LocalCommitKeyTweak is the tweak used to derive the local public key
 	// from the local payment base point or the local private key from the
@@ -59,14 +59,14 @@ type CommitmentKeyRing struct {
 	//
 	// NOTE: This will always refer to "our" local HTLC key, regardless of
 	// whether this is our commit or not.
-	LocalHtlcKey *btcec.PublicKey
+	LocalHtlcKey *bronec.PublicKey
 
 	// RemoteHtlcKey is the key that will be used in clauses within the
 	// HTLC script that send money to the remote party.
 	//
 	// NOTE: This will always refer to "their" remote HTLC key, regardless
 	// of whether this is our commit or not.
-	RemoteHtlcKey *btcec.PublicKey
+	RemoteHtlcKey *bronec.PublicKey
 
 	// ToLocalKey is the commitment transaction owner's key which is
 	// included in HTLC success and timeout transaction scripts. This is
@@ -75,7 +75,7 @@ type CommitmentKeyRing struct {
 	//
 	// NOTE: Who's key this is depends on the current perspective. If this
 	// is our commitment this will be our key.
-	ToLocalKey *btcec.PublicKey
+	ToLocalKey *bronec.PublicKey
 
 	// ToRemoteKey is the non-owner's payment key in the commitment tx.
 	// This is the key used to generate the to_remote output within the
@@ -83,7 +83,7 @@ type CommitmentKeyRing struct {
 	//
 	// NOTE: Who's key this is depends on the current perspective. If this
 	// is our commitment this will be their key.
-	ToRemoteKey *btcec.PublicKey
+	ToRemoteKey *bronec.PublicKey
 
 	// RevocationKey is the key that can be used by the other party to
 	// redeem outputs from a revoked commitment transaction if it were to
@@ -92,14 +92,14 @@ type CommitmentKeyRing struct {
 	// NOTE: Who can sign for this key depends on the current perspective.
 	// If this is our commitment, it means the remote node can sign for
 	// this key in case of a breach.
-	RevocationKey *btcec.PublicKey
+	RevocationKey *bronec.PublicKey
 }
 
 // DeriveCommitmentKeys generates a new commitment key set using the base points
 // and commitment point. The keys are derived differently depending on the type
 // of channel, and whether the commitment transaction is ours or the remote
 // peer's.
-func DeriveCommitmentKeys(commitPoint *btcec.PublicKey,
+func DeriveCommitmentKeys(commitPoint *bronec.PublicKey,
 	isOurCommit bool, chanType channeldb.ChannelType,
 	localChanCfg, remoteChanCfg *channeldb.ChannelConfig) *CommitmentKeyRing {
 
@@ -137,9 +137,9 @@ func DeriveCommitmentKeys(commitPoint *btcec.PublicKey,
 	// the revocation key, we take the opposite party's revocation base
 	// point and combine that with the current commitment point.
 	var (
-		toLocalBasePoint    *btcec.PublicKey
-		toRemoteBasePoint   *btcec.PublicKey
-		revocationBasePoint *btcec.PublicKey
+		toLocalBasePoint    *bronec.PublicKey
+		toRemoteBasePoint   *bronec.PublicKey
+		revocationBasePoint *bronec.PublicKey
 	)
 	if isOurCommit {
 		toLocalBasePoint = localChanCfg.DelayBasePoint.PubKey
@@ -197,7 +197,7 @@ type ScriptInfo struct {
 // party learns of the preimage to the revocation hash, then they can claim all
 // the settled funds in the channel, plus the unsettled funds.
 func CommitScriptToSelf(chanType channeldb.ChannelType, initiator bool,
-	selfKey, revokeKey *btcec.PublicKey, csvDelay, leaseExpiry uint32) (
+	selfKey, revokeKey *bronec.PublicKey, csvDelay, leaseExpiry uint32) (
 	*ScriptInfo, error) {
 
 	var (
@@ -238,7 +238,7 @@ func CommitScriptToSelf(chanType channeldb.ChannelType, initiator bool,
 // script for. The second return value is the CSV delay of the output script,
 // what must be satisfied in order to spend the output.
 func CommitScriptToRemote(chanType channeldb.ChannelType, initiator bool,
-	key *btcec.PublicKey, leaseExpiry uint32) (*ScriptInfo, uint32, error) {
+	key *bronec.PublicKey, leaseExpiry uint32) (*ScriptInfo, uint32, error) {
 
 	switch {
 	// If we are not the initiator of a leased channel, then the remote
@@ -343,7 +343,7 @@ func HtlcSecondLevelInputSequence(chanType channeldb.ChannelType) uint32 {
 // argument should correspond to the owner of the commitment tranasction which
 // we are generating the to_local script for.
 func SecondLevelHtlcScript(chanType channeldb.ChannelType, initiator bool,
-	revocationKey, delayKey *btcec.PublicKey,
+	revocationKey, delayKey *bronec.PublicKey,
 	csvDelay, leaseExpiry uint32) (*ScriptInfo, error) {
 
 	var (
@@ -388,7 +388,7 @@ func CommitWeight(chanType channeldb.ChannelType) int64 {
 	return input.CommitWeight
 }
 
-// HtlcTimeoutFee returns the fee in satoshis required for an HTLC timeout
+// HtlcTimeoutFee returns the fee in broneess required for an HTLC timeout
 // transaction based on the current fee rate.
 func HtlcTimeoutFee(chanType channeldb.ChannelType,
 	feePerKw chainfee.SatPerKWeight) bronutil.Amount {
@@ -406,7 +406,7 @@ func HtlcTimeoutFee(chanType channeldb.ChannelType,
 	return feePerKw.FeeForWeight(input.HtlcTimeoutWeight)
 }
 
-// HtlcSuccessFee returns the fee in satoshis required for an HTLC success
+// HtlcSuccessFee returns the fee in broneess required for an HTLC success
 // transaction based on the current fee rate.
 func HtlcSuccessFee(chanType channeldb.ChannelType,
 	feePerKw chainfee.SatPerKWeight) bronutil.Amount {
@@ -430,7 +430,7 @@ func CommitScriptAnchors(localChanCfg,
 	*ScriptInfo, error) {
 
 	// Helper to create anchor ScriptInfo from key.
-	anchorScript := func(key *btcec.PublicKey) (*ScriptInfo, error) {
+	anchorScript := func(key *bronec.PublicKey) (*ScriptInfo, error) {
 		script, err := input.CommitScriptAnchor(key)
 		if err != nil {
 			return nil, err
@@ -520,13 +520,13 @@ type unsignedCommitmentTx struct {
 	// commitment fees and anchor outputs. This can be different than the
 	// balances before creating the commitment transaction as one party must
 	// pay the commitment fee.
-	ourBalance lnwire.MilliSatoshi
+	ourBalance lnwire.MilliBronees
 
 	// theirBalance is their balance of this commitment *after* subtracting
 	// commitment fees and anchor outputs. This can be different than the
 	// balances before creating the commitment transaction as one party must
 	// pay the commitment fee.
-	theirBalance lnwire.MilliSatoshi
+	theirBalance lnwire.MilliBronees
 
 	// cltvs is a sorted list of CLTV deltas for each HTLC on the commitment
 	// transaction. Any non-htlc outputs will have a CLTV delay of zero.
@@ -538,7 +538,7 @@ type unsignedCommitmentTx struct {
 // passed in balances should be balances *before* subtracting any commitment
 // fees, but after anchor outputs.
 func (cb *CommitmentBuilder) createUnsignedCommitmentTx(ourBalance,
-	theirBalance lnwire.MilliSatoshi, isOurs bool,
+	theirBalance lnwire.MilliBronees, isOurs bool,
 	feePerKw chainfee.SatPerKWeight, height uint64,
 	filteredHTLCView *htlcView,
 	keyRing *CommitmentKeyRing) (*unsignedCommitmentTx, error) {
@@ -552,7 +552,7 @@ func (cb *CommitmentBuilder) createUnsignedCommitmentTx(ourBalance,
 	for _, htlc := range filteredHTLCView.ourUpdates {
 		if HtlcIsDust(
 			cb.chanState.ChanType, false, isOurs, feePerKw,
-			htlc.Amount.ToSatoshis(), dustLimit,
+			htlc.Amount.ToBroneess(), dustLimit,
 		) {
 			continue
 		}
@@ -562,7 +562,7 @@ func (cb *CommitmentBuilder) createUnsignedCommitmentTx(ourBalance,
 	for _, htlc := range filteredHTLCView.theirUpdates {
 		if HtlcIsDust(
 			cb.chanState.ChanType, true, isOurs, feePerKw,
-			htlc.Amount.ToSatoshis(), dustLimit,
+			htlc.Amount.ToBroneess(), dustLimit,
 		) {
 			continue
 		}
@@ -580,20 +580,20 @@ func (cb *CommitmentBuilder) createUnsignedCommitmentTx(ourBalance,
 	// With the weight known, we can now calculate the commitment fee,
 	// ensuring that we account for any dust outputs trimmed above.
 	commitFee := feePerKw.FeeForWeight(totalCommitWeight)
-	commitFeeMSat := lnwire.NewMSatFromSatoshis(commitFee)
+	commitFeeMSat := lnwire.NewMSatFromBroneess(commitFee)
 
 	// Currently, within the protocol, the initiator always pays the fees.
 	// So we'll subtract the fee amount from the balance of the current
 	// initiator. If the initiator is unable to pay the fee fully, then
 	// their entire output is consumed.
 	switch {
-	case cb.chanState.IsInitiator && commitFee > ourBalance.ToSatoshis():
+	case cb.chanState.IsInitiator && commitFee > ourBalance.ToBroneess():
 		ourBalance = 0
 
 	case cb.chanState.IsInitiator:
 		ourBalance -= commitFeeMSat
 
-	case !cb.chanState.IsInitiator && commitFee > theirBalance.ToSatoshis():
+	case !cb.chanState.IsInitiator && commitFee > theirBalance.ToBroneess():
 		theirBalance = 0
 
 	case !cb.chanState.IsInitiator:
@@ -617,14 +617,14 @@ func (cb *CommitmentBuilder) createUnsignedCommitmentTx(ourBalance,
 		commitTx, err = CreateCommitTx(
 			cb.chanState.ChanType, fundingTxIn(cb.chanState), keyRing,
 			&cb.chanState.LocalChanCfg, &cb.chanState.RemoteChanCfg,
-			ourBalance.ToSatoshis(), theirBalance.ToSatoshis(),
+			ourBalance.ToBroneess(), theirBalance.ToBroneess(),
 			numHTLCs, cb.chanState.IsInitiator, leaseExpiry,
 		)
 	} else {
 		commitTx, err = CreateCommitTx(
 			cb.chanState.ChanType, fundingTxIn(cb.chanState), keyRing,
 			&cb.chanState.RemoteChanCfg, &cb.chanState.LocalChanCfg,
-			theirBalance.ToSatoshis(), ourBalance.ToSatoshis(),
+			theirBalance.ToBroneess(), ourBalance.ToBroneess(),
 			numHTLCs, !cb.chanState.IsInitiator, leaseExpiry,
 		)
 	}
@@ -645,7 +645,7 @@ func (cb *CommitmentBuilder) createUnsignedCommitmentTx(ourBalance,
 	for _, htlc := range filteredHTLCView.ourUpdates {
 		if HtlcIsDust(
 			cb.chanState.ChanType, false, isOurs, feePerKw,
-			htlc.Amount.ToSatoshis(), dustLimit,
+			htlc.Amount.ToBroneess(), dustLimit,
 		) {
 			continue
 		}
@@ -662,7 +662,7 @@ func (cb *CommitmentBuilder) createUnsignedCommitmentTx(ourBalance,
 	for _, htlc := range filteredHTLCView.theirUpdates {
 		if HtlcIsDust(
 			cb.chanState.ChanType, true, isOurs, feePerKw,
-			htlc.Amount.ToSatoshis(), dustLimit,
+			htlc.Amount.ToBroneess(), dustLimit,
 		) {
 			continue
 		}
@@ -814,8 +814,8 @@ func CoopCloseBalance(chanType channeldb.ChannelType, isInitiator bool,
 	bronutil.Amount, bronutil.Amount, error) {
 
 	// Get both parties' balances from the latest commitment.
-	ourBalance := localCommit.LocalBalance.ToSatoshis()
-	theirBalance := localCommit.RemoteBalance.ToSatoshis()
+	ourBalance := localCommit.LocalBalance.ToBroneess()
+	theirBalance := localCommit.RemoteBalance.ToBroneess()
 
 	// We'll make sure we account for the complete balance by adding the
 	// current dangling commitment fee to the balance of the initiator.
@@ -942,7 +942,7 @@ func addHTLC(commitTx *wire.MsgTx, ourCommit bool,
 	}
 
 	// Add the new HTLC outputs to the respective commitment transactions.
-	amountPending := int64(paymentDesc.Amount.ToSatoshis())
+	amountPending := int64(paymentDesc.Amount.ToBroneess())
 	commitTx.AddTxOut(wire.NewTxOut(amountPending, p2wsh))
 
 	// Store the pkScript of this particular PaymentDescriptor so we can

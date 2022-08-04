@@ -4,11 +4,11 @@ import (
 	"net"
 	"sync/atomic"
 
-	"github.com/brsuite/brond/btcec"
 	"github.com/brsuite/broln/brontide"
 	"github.com/brsuite/broln/tor"
 	"github.com/brsuite/broln/watchtower/lookout"
 	"github.com/brsuite/broln/watchtower/wtserver"
+	"github.com/brsuite/brond/bronec"
 )
 
 // Standalone encapsulates the server-side functionality required by watchtower
@@ -189,7 +189,7 @@ func (w *Standalone) createNewHiddenService() error {
 // encrypt traffic with clients.
 //
 // NOTE: Part of the watchtowerrpc.WatchtowerBackend interface.
-func (w *Standalone) PubKey() *btcec.PublicKey {
+func (w *Standalone) PubKey() *bronec.PublicKey {
 	return w.cfg.NodeKeyECDH.PubKey()
 }
 

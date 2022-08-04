@@ -8,18 +8,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brsuite/brond/btcec"
-	"github.com/brsuite/bronwallet/walletdb"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/brsuite/broln/kvdb"
 	"github.com/brsuite/broln/lntypes"
 	"github.com/brsuite/broln/record"
 	"github.com/brsuite/broln/routing/route"
+	"github.com/brsuite/brond/bronec"
+	"github.com/brsuite/bronwallet/walletdb"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/require"
 )
 
 var (
-	priv, _ = btcec.NewPrivateKey(btcec.S256())
+	priv, _ = bronec.NewPrivateKey(bronec.S256())
 	pub     = priv.PubKey()
 
 	testHop1 = &route.Hop{

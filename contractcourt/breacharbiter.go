@@ -1058,7 +1058,7 @@ func makeBreachedOutput(outpoint *wire.OutPoint,
 	}
 }
 
-// Amount returns the number of satoshis contained in the breached output.
+// Amount returns the number of broneess contained in the breached output.
 func (bo *breachedOutput) Amount() bronutil.Amount {
 	return bo.amt
 }
